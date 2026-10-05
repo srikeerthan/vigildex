@@ -1,0 +1,9 @@
+Vigildex
+Copyright 2026 The Vigildex authors
+
+This product includes software developed by the Vigildex authors,
+licensed under the Apache License, Version 2.0.
+
+Third-party material (add entries as it is vendored):
+- Secret-detection rules derived from gitleaks (https://github.com/gitleaks/gitleaks), MIT License.
+- Model price data from LiteLLM model_prices_and_context_window.json (https://github.com/BerriAI/litellm), MIT License.
