@@ -12,11 +12,15 @@ git commit -s -m "Add Codex hooks.json parser"
 
 ## Before you open a PR
 
+CI runs exactly these on macOS and Ubuntu (the tools come from
+`cargo install --locked cargo-deny cargo-audit cargo-insta`):
+
 ```sh
 cargo fmt --all
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 cargo deny check
+cargo audit
 ```
 
 ## Adding or updating an agent adapter
@@ -40,7 +44,9 @@ cargo deny check
 - Network calls from the engine or CLI.
 - Reading credential values, Keychain items or browser cookies.
 - Undocumented vendor endpoints.
-- GPL- or AGPL-licensed dependencies.
+- GPL- or AGPL-licensed dependencies. MPL-2.0 is allowed for the UniFFI crates only
+  (see `deny.toml`); any other licence outside MIT, Apache-2.0 and BSD needs a reviewed
+  change to `deny.toml`.
 
 ## Licence
 

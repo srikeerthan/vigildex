@@ -161,7 +161,8 @@ Install and uninstall are **plans**, not writes: core returns `StatuslinePlan { 
 ## CLI
 
 ```
-vigildex scan        [--home DIR] [--json]          # inventory + findings + sessions summary
+vigildex [--home DIR] <command>                      # --home (or VIGILDEX_HOME) on every command
+vigildex scan        [--json]                        # inventory + findings + sessions summary
 vigildex inventory   [--agent A] [--type T] [--json]
 vigildex findings    [--severity S] [--fail-on S] [--json]
 vigildex changes     [--since 7d] [--json]
@@ -175,9 +176,12 @@ vigildex schema      <command>                       # prints the JSON schema
 
 Exit codes: `0` ok; `1` findings at or above `--fail-on`; `2` usage or IO error. `--json` output includes `schema_version`.
 
+`--home DIR` is a global flag and `VIGILDEX_HOME` is its environment form; the flag wins. Core resolves both (`HomeEnv::resolve`), so the FFI gets the same behaviour. An override that is empty, missing or not a directory is an error, never a fall-through to the real home. See `fixtures/README.md`.
+
 ## FFI surface (what the Mac app needs)
 
 ```
+engine_version() -> String                                // crate version, for the About panel and a build-match check
 Engine::new(config: EngineConfig) -> Engine              // data dir, home override, watched project roots
 engine.scan() -> ScanSummary                              // counts per section, last_scan_at
 engine.inventory(filter) -> Vec<ItemView>

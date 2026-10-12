@@ -1,0 +1,21 @@
+[package]
+name = "vigildex-statusline"
+description = "Vigildex status-line helper for Claude Code plan limits (Phase 1b)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lints]
+workspace = true
+
+# Deliberately no dependencies yet. The helper runs on every Claude Code
+# status-line refresh, so it must stay tiny and start fast (target: under
+# 30 ms of overhead). Phase 1b adds `serde_json` and a shared `limits` module.
+[dependencies]

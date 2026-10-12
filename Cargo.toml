@@ -1,0 +1,53 @@
+[workspace]
+# Resolver 3 is MSRV-aware: `cargo update` and `cargo add` prefer versions whose
+# `rust-version` fits the toolchain pinned in rust-toolchain.toml.
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+# Keep in step with `channel` in rust-toolchain.toml.
+rust-version = "1.99"
+license = "Apache-2.0"
+authors = ["The Vigildex authors"]
+repository = "https://github.com/srikeerthan/vigildex"
+homepage = "https://github.com/srikeerthan/vigildex"
+readme = "README.md"
+keywords = ["ai", "agents", "security", "mcp", "audit"]
+categories = ["command-line-utilities", "development-tools"]
+
+[workspace.dependencies]
+# Workspace crates. The version is required so the crates stay publishable and
+# so cargo-deny does not treat the path dependency as a wildcard.
+vigildex-core = { path = "crates/vigildex-core", version = "0.1.0" }
+
+# Third-party crates. Licences must pass `cargo deny check` (see deny.toml).
+anyhow = "1.0.104"
+clap = { version = "4.6.7", features = ["derive"] }
+insta = { version = "1.49.0", features = ["json"] }
+schemars = "1.2.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+thiserror = "2.0.21"
+# The default feature (`cargo-metadata`) is bindgen-only; the M7 bindgen tool
+# enables it on its own dependency. The library does not need it.
+uniffi = { version = "0.32.2", default-features = false }
+
+[workspace.lints.rust]
+# Hard rule: no `unsafe` outside generated FFI code. `forbid` cannot be
+# switched off with `#[allow]`. UniFFI's generated scaffolding still compiles,
+# because rustc does not apply this lint to code expanded from another crate's
+# macros; hand-written `unsafe` is rejected in every crate, vigildex-ffi included.
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+# Hard rule 7: a malformed file is a warning, never a panic. These lints make
+# panicking shortcuts a CI failure (`-D warnings`) outside tests.
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+todo = "warn"
+unimplemented = "warn"
+dbg_macro = "warn"

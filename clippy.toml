@@ -1,0 +1,10 @@
+# Tests may unwrap, expect and panic; library and binary code may not
+# (see [workspace.lints.clippy] in Cargo.toml).
+#
+# These options cover `#[test]` functions and `#[cfg(test)]` modules only.
+# Helper functions in an integration-test file (`tests/*.rs`) are outside
+# both, so such a file starts with its own `#![allow(clippy::expect_used, ...)]`.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-dbg-in-tests = true

@@ -1,0 +1,157 @@
+# Continuous integration for the Vigildex engine.
+#
+# Every check runs on both macOS and Ubuntu. The commands are the same ones
+# CLAUDE.md and CONTRIBUTING.md ask you to run locally, so a green local run
+# predicts a green CI run.
+#
+# Third-party actions are pinned to full commit SHAs (the version is in the
+# comment). Dependabot (.github/dependabot.yml) proposes bumps and keeps the
+# comment in step; if you bump by hand, change the SHA and the comment together.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly, so new advisories are caught between pushes. Only the deny and
+    # audit jobs run on this trigger; the others are gated with `if:` because
+    # the toolchain and Cargo.lock are pinned, so they would learn nothing.
+    # GitHub disables a schedule in a public repo after 60 days without
+    # repository activity (it emails the owner first; re-enable it under
+    # Actions -> CI -> "Enable workflow", or push a commit). Before a release
+    # after a long quiet spell, run `cargo deny check && cargo audit` locally.
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  # Retry flaky downloads instead of failing the run.
+  CARGO_NET_RETRY: "3"
+  RUSTUP_MAX_RETRIES: "3"
+
+jobs:
+  fmt:
+    name: fmt (${{ matrix.os }})
+    if: github.event_name != 'schedule'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        # The idiom rustup's 1.28.0 changelog recommends: works on rustup
+        # versions that auto-install and on those that don't.
+        run: rustup show active-toolchain || rustup toolchain install
+      - run: cargo fmt --all --check
+
+  clippy:
+    name: clippy (${{ matrix.os }})
+    if: github.event_name != 'schedule'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        # The idiom rustup's 1.28.0 changelog recommends: works on rustup
+        # versions that auto-install and on those that don't.
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+  test:
+    name: test (${{ matrix.os }})
+    if: github.event_name != 'schedule'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        # The idiom rustup's 1.28.0 changelog recommends: works on rustup
+        # versions that auto-install and on those that don't.
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - run: cargo build --workspace --locked
+      - run: cargo test --workspace --locked
+      - name: Smoke test the CLI (milestone M0 exit criterion)
+        run: |
+          cargo run --locked -p vigildex-cli -- --version
+          cargo run --locked -p vigildex-cli -- scan --home fixtures/homes/basic --json
+
+  deny:
+    name: deny (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        # The idiom rustup's 1.28.0 changelog recommends: works on rustup
+        # versions that auto-install and on those that don't.
+        run: rustup show active-toolchain || rustup toolchain install
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@183e4297cca2404691e9380e1307288dced5c82a # v2.87.25
+        with:
+          # The version comes from the manifest bundled at the pinned action
+          # commit (cargo-deny 0.20.2 at v2.87.25), so a Dependabot bump of
+          # the action also moves the tool, and CI on that PR shows whether
+          # deny.toml still parses. `fallback: none` keeps github.token out of
+          # the step and fails loudly instead of switching to cargo-binstall.
+          tool: cargo-deny
+          fallback: none
+      - run: cargo deny check
+
+  audit:
+    name: audit (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        # The idiom rustup's 1.28.0 changelog recommends: works on rustup
+        # versions that auto-install and on those that don't.
+        run: rustup show active-toolchain || rustup toolchain install
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@183e4297cca2404691e9380e1307288dced5c82a # v2.87.25
+        with:
+          # See the cargo-deny step: cargo-audit 0.22.2 at v2.87.25.
+          tool: cargo-audit
+          fallback: none
+      - run: cargo audit

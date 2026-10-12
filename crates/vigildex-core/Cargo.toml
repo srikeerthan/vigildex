@@ -1,0 +1,25 @@
+[package]
+name = "vigildex-core"
+description = "Vigildex engine core: model, adapters, analyzers, diff, store and pricing"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+schemars.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+serde_json.workspace = true

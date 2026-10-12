@@ -1,0 +1,99 @@
+# cargo-deny configuration: licences, advisories, bans and sources.
+#
+#   cargo deny check            # CI runs this on macOS and Ubuntu
+#
+# Reference: https://embarkstudios.github.io/cargo-deny/checks/cfg.html
+# Written for cargo-deny 0.20.
+
+[graph]
+# No `targets` list: check the dependency graph for every target, so a
+# Linux-only or macOS-only dependency cannot slip past a check run elsewhere.
+all-features = true
+
+[advisories]
+# Vulnerabilities, unmaintained and unsound crates and yanked versions are
+# all errors by default. Ignore an advisory only with a reason, and open an
+# issue to track removing the ignore.
+ignore = [
+    # { id = "RUSTSEC-0000-0000", reason = "why, and the tracking issue" },
+]
+
+[licenses]
+# Policy (CLAUDE.md): MIT, Apache-2.0, BSD or similarly permissive. Never GPL
+# or AGPL. Anything not listed here fails the check, so adding a licence is a
+# reviewed change.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+]
+# BSD and the others above are policy, not yet all in use; don't warn about that.
+unused-allowed-license = "allow"
+# Reject guesses: the licence text must match its SPDX identifier closely.
+confidence-threshold = 0.93
+exceptions = [
+    # UniFFI is the chosen FFI layer (docs/HANDOFF.md § Decisions already made)
+    # and is MPL-2.0 only. MPL-2.0 is file-level copyleft: it requires sharing
+    # changes to UniFFI's own files, not to Vigildex or to the app that embeds
+    # it. It is allowed for the UniFFI crates alone; no other crate may use it.
+    { crate = "uniffi", allow = ["MPL-2.0"] },
+    { crate = "uniffi_core", allow = ["MPL-2.0"] },
+    { crate = "uniffi_macros", allow = ["MPL-2.0"] },
+    { crate = "uniffi_internal_macros", allow = ["MPL-2.0"] },
+    { crate = "uniffi_meta", allow = ["MPL-2.0"] },
+    { crate = "uniffi_pipeline", allow = ["MPL-2.0"] },
+    # M7 (`scripts/build-xcframework.sh`) enables uniffi's `cli` feature for
+    # binding generation, which adds `uniffi_bindgen` and `uniffi_udl`: add
+    # them here in that change. Listing them now would only warn (not in graph).
+]
+# Known decisions ahead, from a licence pre-check of the planned dependencies
+# in docs/ARCHITECTURE.md (2026-10-06): `notify` is CC0-1.0 and `dirs` pulls
+# `option-ext` (MPL-2.0). Both arrive with the store and watcher in M4.
+
+[licenses.private]
+# The workspace crates are Apache-2.0 and are checked like everything else.
+ignore = false
+
+[bans]
+multiple-versions = "warn"
+# Every dependency names a version, including the workspace path dependencies.
+wildcards = "deny"
+highlight = "all"
+# Hard rule 3 (CLAUDE.md): the engine makes no network calls. Keeping HTTP and
+# TLS clients out of the dependency graph makes that mechanical. If a build-time
+# or dev-only tool ever needs one, add it to `wrappers` on the entry rather
+# than deleting the entry.
+deny = [
+    { crate = "reqwest", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "ureq", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "hyper", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "isahc", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "curl", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "curl-sys", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "attohttpc", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "minreq", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "surf", reason = "no network: the engine never makes HTTP requests" },
+    { crate = "tungstenite", reason = "no network: the engine opens no sockets" },
+    { crate = "native-tls", reason = "no network: nothing to encrypt in transit" },
+    { crate = "rustls", reason = "no network: nothing to encrypt in transit" },
+    { crate = "openssl", reason = "no network: nothing to encrypt in transit" },
+    { crate = "openssl-sys", reason = "no network: nothing to encrypt in transit" },
+]
+
+# Duplicate crate versions to tolerate, each with a reason. Review when the
+# crate that pulls the old version updates.
+skip = [
+    { crate = "syn@2", reason = "uniffi 0.32 still uses syn 2; serde, clap, thiserror and schemars are on syn 3" },
+]
+
+[sources]
+# Only crates.io. A git or alternative-registry dependency is a reviewed change.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

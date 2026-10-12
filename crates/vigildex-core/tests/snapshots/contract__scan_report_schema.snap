@@ -1,0 +1,71 @@
+---
+source: crates/vigildex-core/tests/contract.rs
+expression: schema
+---
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScanReport",
+  "description": "Output of `vigildex scan --json`.",
+  "type": "object",
+  "properties": {
+    "engine_version": {
+      "description": "Version of the engine that produced the report.",
+      "type": "string"
+    },
+    "home": {
+      "description": "The home directory that was scanned and how it was chosen.",
+      "$ref": "#/$defs/HomeView"
+    },
+    "schema_version": {
+      "description": "Version of this JSON contract; see [`SCHEMA_VERSION`].",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "engine_version",
+    "home"
+  ],
+  "$defs": {
+    "HomeSource": {
+      "description": "How the home directory was chosen.",
+      "oneOf": [
+        {
+          "description": "Passed explicitly: the CLI `--home` flag or the FFI configuration.",
+          "type": "string",
+          "const": "override"
+        },
+        {
+          "description": "Taken from the `VIGILDEX_HOME` environment variable.",
+          "type": "string",
+          "const": "env"
+        },
+        {
+          "description": "The current user's own home directory.",
+          "type": "string",
+          "const": "user"
+        }
+      ]
+    },
+    "HomeView": {
+      "description": "A resolved home directory as it appears in reports: plain data with no\nvalidation, so a report can be read on a machine where the directory\ndoes not exist. See [`HomeEnv`] for the validated form.",
+      "type": "object",
+      "properties": {
+        "root": {
+          "description": "Absolute path of the home directory.",
+          "type": "string"
+        },
+        "source": {
+          "description": "How `root` was chosen.",
+          "$ref": "#/$defs/HomeSource"
+        }
+      },
+      "required": [
+        "root",
+        "source"
+      ]
+    }
+  }
+}

@@ -1,0 +1,7 @@
+---
+source: crates/vigildex-cli/tests/cli.rs
+expression: redact(&stdout(&output))
+---
+vigildex [VERSION]
+Home: [REPO]/fixtures/homes/basic (from --home)
+Nothing scanned: this build has no agent adapters yet.

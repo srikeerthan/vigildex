@@ -1,0 +1,25 @@
+[package]
+name = "vigildex-ffi"
+description = "UniFFI bindings that embed the Vigildex engine in the macOS app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+# `staticlib` goes into the XCFramework; `lib` lets tests and other crates
+# link it as ordinary Rust.
+crate-type = ["lib", "staticlib"]
+
+[lints]
+workspace = true
+
+[dependencies]
+uniffi.workspace = true
+vigildex-core.workspace = true

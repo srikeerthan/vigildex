@@ -1,0 +1,6 @@
+# Pinned toolchain. This is also the MSRV: keep `rust-version` in the root
+# Cargo.toml in step with `channel` when you bump it.
+[toolchain]
+channel = "1.99.0"
+profile = "minimal"
+components = ["clippy", "rustfmt"]
