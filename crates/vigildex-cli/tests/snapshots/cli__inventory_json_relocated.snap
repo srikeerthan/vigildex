@@ -1,0 +1,226 @@
+---
+source: crates/vigildex-cli/tests/cli.rs
+expression: redact(&text)
+---
+{
+  "schema_version": 2,
+  "engine_version": "[VERSION]",
+  "home": {
+    "root": "[REPO]/fixtures/homes/relocated",
+    "source": "override"
+  },
+  "inventory": {
+    "scanned": [
+      "claude_code",
+      "codex",
+      "shared"
+    ],
+    "project_roots": [],
+    "relocations": {
+      "CLAUDE_CONFIG_DIR": "[REPO]/fixtures/homes/relocated/.claude-work",
+      "CODEX_HOME": "[REPO]/fixtures/homes/relocated/.codex-work"
+    },
+    "items": [
+      {
+        "type": "mcp_server",
+        "name": "work-docs",
+        "launch": {
+          "kind": "remote",
+          "url": "https://docs.example/mcp",
+          "transport": "http",
+          "auth": {
+            "kind": "none"
+          }
+        },
+        "env_keys": [],
+        "header_keys": [],
+        "env_header_keys": [],
+        "enabled": null,
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "app_state",
+          "path": "[REPO]/fixtures/homes/relocated/.claude-work/.claude.json"
+        }
+      },
+      {
+        "type": "setting",
+        "key_path": "hasAvailableSubscription",
+        "value": {
+          "kind": "bool",
+          "value": true
+        },
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "app_state",
+          "path": "[REPO]/fixtures/homes/relocated/.claude-work/.claude.json"
+        }
+      },
+      {
+        "type": "setting",
+        "key_path": "oauthAccount",
+        "value": {
+          "kind": "keys",
+          "keys": [
+            "accountUuid",
+            "billingType",
+            "emailAddress",
+            "organizationType",
+            "organizationUuid"
+          ]
+        },
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "app_state",
+          "path": "[REPO]/fixtures/homes/relocated/.claude-work/.claude.json"
+        }
+      },
+      {
+        "type": "setting",
+        "key_path": "permissions.defaultMode",
+        "value": {
+          "kind": "text",
+          "value": "plan"
+        },
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "settings",
+          "path": "[REPO]/fixtures/homes/relocated/.claude-work/settings.json"
+        }
+      },
+      {
+        "type": "credential",
+        "path": "[REPO]/fixtures/homes/relocated/.claude-work/.credentials.json",
+        "exists": false,
+        "mode": null,
+        "readable_by_others": null,
+        "keys": [],
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "credential",
+          "path": "[REPO]/fixtures/homes/relocated/.claude-work/.credentials.json"
+        }
+      },
+      {
+        "type": "mcp_server",
+        "name": "work-fetch",
+        "launch": {
+          "kind": "package",
+          "runner": "uvx",
+          "spec": "mcp-server-fetch==2026.1.0",
+          "pin": "exact",
+          "args": [
+            "mcp-server-fetch==2026.1.0"
+          ]
+        },
+        "env_keys": [],
+        "header_keys": [],
+        "env_header_keys": [],
+        "enabled": null,
+        "source": {
+          "agent": "codex",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "settings",
+          "path": "[REPO]/fixtures/homes/relocated/.codex-work/config.toml"
+        }
+      },
+      {
+        "type": "setting",
+        "key_path": "approval_policy",
+        "value": {
+          "kind": "text",
+          "value": "on-request"
+        },
+        "source": {
+          "agent": "codex",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "settings",
+          "path": "[REPO]/fixtures/homes/relocated/.codex-work/config.toml"
+        }
+      },
+      {
+        "type": "credential",
+        "path": "[REPO]/fixtures/homes/relocated/.codex-work/auth.json",
+        "exists": false,
+        "mode": null,
+        "readable_by_others": null,
+        "keys": [],
+        "source": {
+          "agent": "codex",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "credential",
+          "path": "[REPO]/fixtures/homes/relocated/.codex-work/auth.json"
+        }
+      }
+    ],
+    "artifacts": [
+      {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "app_state",
+        "path": "[REPO]/fixtures/homes/relocated/.claude-work/.claude.json",
+        "bytes": 433,
+        "sha256": "78e799335c5aeee96e88a0aea24833cba68194c9d9506b0d686eaed200e6ae78"
+      },
+      {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[REPO]/fixtures/homes/relocated/.claude-work/settings.json",
+        "bytes": 53,
+        "sha256": "e635061b874deca5f93edc086223fc05b31ed144e78c5f62626e2e7dd5480949"
+      },
+      {
+        "agent": "codex",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[REPO]/fixtures/homes/relocated/.codex-work/config.toml",
+        "bytes": 111,
+        "sha256": "ec27386b43f066a9480b1b7e7f0728e5366e832cf6daee1735b431e1d627e7c6"
+      }
+    ],
+    "warnings": [
+      {
+        "agent": "claude_code",
+        "path": "[REPO]/fixtures/homes/relocated/.claude/settings.json",
+        "message": "ignored by Claude Code: CLAUDE_CONFIG_DIR moves its files to [REPO]/fixtures/homes/relocated/.claude-work"
+      },
+      {
+        "agent": "claude_code",
+        "path": "[REPO]/fixtures/homes/relocated/.claude.json",
+        "message": "ignored by Claude Code: CLAUDE_CONFIG_DIR moves its files to [REPO]/fixtures/homes/relocated/.claude-work"
+      },
+      {
+        "agent": "codex",
+        "path": "[REPO]/fixtures/homes/relocated/.codex/config.toml",
+        "message": "ignored by Codex: CODEX_HOME moves its files to [REPO]/fixtures/homes/relocated/.codex-work"
+      }
+    ]
+  }
+}

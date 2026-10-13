@@ -1,0 +1,17 @@
+{
+  "hasAvailableSubscription": true,
+  "oauthAccount": {
+    "accountUuid": "00000000-0000-4000-8000-000000000000",
+    "emailAddress": "you@example.com",
+    "organizationUuid": "00000000-0000-4000-8000-000000000000",
+    "billingType": "stripe_subscription",
+    "organizationType": "claude_pro"
+  },
+  "mcpServers": {
+    "work-docs": {
+      "type": "http",
+      "url": "https://docs.example/mcp"
+    }
+  },
+  "projects": {}
+}

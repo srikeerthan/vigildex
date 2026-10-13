@@ -482,7 +482,16 @@ expression: redact(&text)
         "type": "setting",
         "key_path": "oauthAccount",
         "value": {
-          "kind": "present"
+          "kind": "keys",
+          "keys": [
+            "accountUuid",
+            "billingType",
+            "displayName",
+            "emailAddress",
+            "organizationRateLimitTier",
+            "organizationType",
+            "organizationUuid"
+          ]
         },
         "source": {
           "agent": "claude_code",
