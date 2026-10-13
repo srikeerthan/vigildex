@@ -42,7 +42,7 @@ cargo run -p vigildex-cli -- scan --home fixtures/homes/basic --json
 - No `unsafe` outside generated FFI code.
 - Every adapter ships redacted fixtures in `fixtures/<agent>/<date-or-version>/` plus `insta` snapshot tests. Never commit real secrets, real paths with user names, or transcript text.
 - Public types derive `serde` and `schemars::JsonSchema`. CLI `--json` output is a versioned contract (`schema_version`), and changing it needs a version bump and a note in `CHANGELOG.md`.
-- Every finding has a stable rule ID (`SEC-`, `BILL-`, `RISK-`, `CHG-`); see `docs/RULES.md`.
+- Every finding has a stable rule ID (`SEC-`, `BILL-`, `RISK-`, `CHG-`, `PRE-`); see `docs/RULES.md`.
 - Dependencies must be MIT, Apache-2.0, BSD or similarly permissive. No GPL or AGPL (`cargo-deny` enforces this). One exception: the UniFFI crates are MPL-2.0 (file-level copyleft, so obligations attach only to modified UniFFI files, not to Vigildex or the app); `deny.toml` allows MPL-2.0 for those crates alone.
 - Commits: imperative mood, with a DCO sign-off (`git commit -s`). Small PRs, one adapter or rule family at a time.
 - Tests use a fake home directory (`--home` flag / `VIGILDEX_HOME` env var). Never read the developer's real `$HOME` in tests.

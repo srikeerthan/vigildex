@@ -1,0 +1,77 @@
+{
+  "hasAvailableSubscription": true,
+  "oauthAccount": {
+    "accountUuid": "00000000-0000-4000-8000-000000000000",
+    "emailAddress": "you@example.com",
+    "organizationUuid": "00000000-0000-4000-8000-000000000000",
+    "billingType": "stripe_subscription",
+    "organizationType": "claude_max"
+  },
+  "customApiKeyResponses": {
+    "approved": [
+      "sk-ant-api03-\u2026FAKE"
+    ],
+    "rejected": []
+  },
+  "userID": "0000000000000000000000000000000000000000000000000000000000000000",
+  "machineID": "0000000000000000000000000000000000000000000000000000000000000000",
+  "mcpServers": {
+    "lint-helper": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@acme/lint-helper@latest"
+      ],
+      "env": {
+        "LINT_HELPER_TOKEN": "lh_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    },
+    "sys-admin": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--privileged",
+        "--network",
+        "host",
+        "-v",
+        "/:/host",
+        "ghcr.io/acme/mcp-sys:latest"
+      ]
+    },
+    "pinned-ok": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@acme/pinned-tool@2.1.0"
+      ]
+    }
+  },
+  "projects": {
+    "/Users/you/proj/acme-api": {
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true
+    },
+    "/Users/you/proj/dotfiles-sync": {
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "enableAllProjectMcpServers": true,
+      "hasTrustDialogAccepted": true,
+      "hasTrustDialogHooksAccepted": true
+    }
+  }
+}

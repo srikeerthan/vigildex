@@ -11,6 +11,7 @@ fixtures/
     basic/                   the smallest home: one settings file per agent
     mockup-demo/             the app mockup's data: two projects, plugins, hooks, skills, a stray key
     relocated/               CLAUDE_CONFIG_DIR and CODEX_HOME set in .zshenv, with stale files at the defaults
+    messy/                   every rule the mockup does not show, each beside a look-alike that must not fire
   <agent>/<date-or-version>/ raw sample files for one agent's parser tests
     claude/  codex/  cursor/  copilot/
   shared/<date-or-version>/  cross-agent sources: `~/.agents/skills`, shell profiles, `.env` files
@@ -57,19 +58,70 @@ records looks like too.
 
 ### What `mockup-demo` contains
 
-The data behind the app mockups, arranged so that later milestones can
-reproduce the mockup's findings from it:
+The data behind the app mockups (`vigildex-mac/docs/SCREENS.md`). Applying
+`docs/RULES.md` with its finding policy to this home yields exactly the nine
+findings on the Findings screen, and nothing else:
 
-| Where | What | Later rule |
+| Screen row | Rule | Where |
 |---|---|---|
-| `.zshrc` | `ANTHROPIC_API_KEY` exported beside a Max subscription login in `.claude.json` | SEC-004, BILL-001 |
-| `.claude.json` | `lint-helper` (`npx … @latest`, floating) and `context7` at user scope; `playwright` and trust markers per project; the home itself as a project | RISK-001, CHG-003 |
-| `.claude/settings.json` | `env` with a base URL and an API key, an HTTP hook, a formatter hook, `enabledPlugins`, a status line | SEC-003, BILL-006, RISK-003 |
-| `.claude/plugins/` | Four installed plugins, one of them (`superpowers`) with a missing cache folder; `acme-deploy` bundles hooks, a bare-map `.mcp.json`, a skill, `bin/` and a monitor | RISK-011 |
-| `.claude/skills/`, `commands/`, `agents/` | A skill with `allowed-tools: Bash` and frontmatter hooks, a legacy command, a subagent with an inline MCP server | RISK-007 |
-| `.codex/config.toml` | `approval_policy = "never"` with `danger-full-access`, a plaintext credential store, a local provider, three MCP servers, an inline hook with trust state, two trusted projects, a disabled skill | RISK-004, RISK-005, BILL-007 |
-| `proj/acme-api/` | `.mcp.json` with a password in a `postgres` URL and a headers helper, project settings with `apiKeyHelper` and hooks, rules, a skill, `.codex/` config and hooks, a shared skill, `.env` | SEC-002, BILL-003, SEC-005 |
-| `proj/dotfiles-sync/` | A `curl … \| sh` hook, `bypassPermissions`, an MCP server from a hidden folder, `AGENTS.md` without `CLAUDE.md` | RISK-002, RISK-004, RISK-008 |
+| API key bills headless runs | BILL-001 | `.zshrc` line 42, beside `hasAvailableSubscription: true` and a billing `oauthAccount` in `.claude.json` |
+| Custom API gateway | BILL-006 | `.claude/settings.json` › `env.ANTHROPIC_BASE_URL` |
+| Signed in with an API key | BILL-007 | `.codex/auth.json` with a string `OPENAI_API_KEY` and no `tokens` |
+| GitHub token in plain text | SEC-004 | `.zshrc` line 43 |
+| Database password in args | SEC-002 | `proj/acme-api/.mcp.json` › postgres |
+| Hook pipes curl to sh | RISK-002 | `proj/dotfiles-sync/.claude/settings.json` SessionStart |
+| Auto-approves every tool | RISK-004 | `.codex/config.toml` › `approval_policy = "never"` with `danger-full-access` |
+| MCP server on @latest | RISK-001 | lint-helper in `.claude.json` (and `.cursor/mcp.json` from M5 on: one finding, two agents) |
+| Credentials in a plain file | RISK-005 | `.codex/config.toml` › `cli_auth_credentials_store = "file"` |
+
+Everything else in the home is inventory without a finding, or a look-alike
+that must not fire: a `${LINT_HELPER_TOKEN}` reference, a pinned playwright
+server, a disabled floating `fetch` server, a localhost provider that no
+`model_provider` selects, an HTTP hook to a loopback URL, skills with
+restricted tools, and the `acme-deploy` plugin with `bin/` and a monitor
+(inventory tags). `proj/demo-repo` holds the pre-flight sheet's sample files
+and is recorded by no agent, so only `preflight` (M6) reads it. Sessions and
+usage data for the Sessions and Usage screens arrive with M3.
+
+### What `messy` contains
+
+Every rule the mockup does not show, each with a look-alike that must not
+fire, for M2's coverage tests:
+
+- `.zshrc`: `ANTHROPIC_AUTH_TOKEN` (BILL-002), `CLAUDE_CODE_OAUTH_TOKEN`
+  (BILL-004), `CLAUDE_CODE_USE_BEDROCK` (BILL-005), `OPENAI_API_KEY`
+  (SEC-004), `COPILOT_GITHUB_TOKEN` (BILL-009); a commented-out key and two
+  `$(…)` values that must not fire.
+- `.claude.json`: lint-helper with a plaintext token (SEC-001) on `@latest`
+  (RISK-001), a `--privileged --network host` Docker server (RISK-009), a
+  pinned server that must not fire, `enableAllProjectMcpServers` on
+  `dotfiles-sync` (RISK-006).
+- `.claude/settings.json`: `bypassPermissions` at user scope (RISK-004), an
+  `env` block with `OPENAI_API_KEY` (SEC-003) and a non-vendor base URL
+  (BILL-006), `apiKeyHelper` (BILL-003), `enableAllProjectMcpServers`
+  (RISK-006), a remote HTTP hook with a token in its query (RISK-003), `wget |
+  bash` and `eval "$(curl …)"` hooks (RISK-002), a loopback HTTP hook that
+  must not fire; `settings.local.json` with a `base64 -d | sh` hook.
+- Skills `yolo` (unrestricted `Bash`, RISK-007) and `tidy` (restricted, must
+  not fire); the `acme-deploy` plugin with a plaintext header (SEC-001),
+  `bin/` and a monitor (inventory tags).
+- `.codex/config.toml`: `approval_policy = "never"` without
+  `danger-full-access` (must not fire RISK-004), `cli_auth_credentials_store =
+  "keyring"` (must not fire RISK-005), a selected custom provider and
+  `openai_base_url` on a non-vendor host (BILL-006, BILL-007), a localhost
+  provider (must not fire), a token in `shell_environment_policy.set`
+  (SEC-003), lint-helper with a plaintext token, a plaintext `Authorization`
+  header (SEC-001), floating `fetch` (RISK-001) and a pinned server; a
+  `curl | sh` hook in `hooks.json`; a ChatGPT-mode `auth.json` (must not fire
+  BILL-007).
+- `proj/acme-api`: the postgres password in `.mcp.json` (SEC-002), a
+  plaintext bearer header beside a `${GITHUB_TOKEN}` reference (SEC-001 and
+  its look-alike), `apiKeyHelper` and `DATABASE_URL` in project settings
+  (BILL-003, SEC-003), secrets in `.env` (SEC-005, BILL-006), a project
+  `.codex/config.toml` with `openai_base_url` (BILL-006 High in pre-flight).
+- `proj/dotfiles-sync`: a hidden-folder server and a `/tmp` server (RISK-008),
+  project-scope `bypassPermissions` (inert since Claude Code 2.1.257; a
+  finding here must say so), the `curl | sh` hook.
 
 The two credential stand-ins (`.claude/.credentials.json`, `.codex/auth.json`)
 carry the real key names with placeholder or empty values. Git does not keep
@@ -121,8 +173,8 @@ Review `git diff` before committing; the script never stages anything.
 | `copilot/2026-10-13/` | One Copilot CLI 1.0.96 `events.jsonl` (no turns), VS Code user settings reduced to the Copilot and chat keys | `assistant.usage` is still unverified. |
 | `shared/2026-10-13/` | `.zshrc` reduced to its key-bearing `export` lines | Values are fakes of the same shape. |
 
-`homes/mockup-demo`, `homes/basic` and `homes/relocated` are hand-written
-(13 Oct 2026) from the formats confirmed in `docs/DATA_SOURCES.md`; they are
+`homes/mockup-demo`, `homes/basic`, `homes/relocated` and `homes/messy` are
+hand-written (13 Oct 2026) from the formats confirmed in `docs/DATA_SOURCES.md`; they are
 not copies of a real machine. `relocated` exercises the behaviour confirmed on
 Claude Code 2.1.296 and codex-cli 0.162.1: with `CLAUDE_CONFIG_DIR` or
 `CODEX_HOME` set, the agent reads only the relocated directory, so the

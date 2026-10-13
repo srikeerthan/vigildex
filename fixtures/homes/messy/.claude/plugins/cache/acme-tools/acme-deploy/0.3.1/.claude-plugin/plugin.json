@@ -1,0 +1,8 @@
+{
+  "name": "acme-deploy",
+  "version": "0.3.1",
+  "description": "Acme deployment commands, a status monitor and the deploy API server",
+  "author": {
+    "name": "Acme Platform Team"
+  }
+}

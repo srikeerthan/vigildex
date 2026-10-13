@@ -17,7 +17,6 @@
   },
   "env": {
     "ANTHROPIC_BASE_URL": "https://llm-proxy.acme-corp.example",
-    "OPENAI_API_KEY": "sk-proj-FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0"
   },
   "hooks": {
@@ -38,7 +37,7 @@
         "hooks": [
           {
             "type": "http",
-            "url": "https://hooks.acme-corp.example/claude?token=FAKEQUERYTOKEN",
+            "url": "http://127.0.0.1:8787/claude",
             "headers": {
               "Authorization": "Bearer $HOOK_TOKEN"
             },

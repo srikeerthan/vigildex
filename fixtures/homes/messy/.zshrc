@@ -1,0 +1,18 @@
+# messy fixture: every billing and secret trap in one profile. All values are fakes.
+export PATH="$HOME/.local/bin:$PATH"
+
+# BILL-002: outranks the API key and the subscription
+export ANTHROPIC_AUTH_TOKEN="sk-ant-api03-FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE7Qa"
+# BILL-004: a one-year OAuth token in plaintext
+export CLAUDE_CODE_OAUTH_TOKEN="sk-ant-oat01-FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE2Zx"
+# BILL-005: cloud provider switch left on
+export CLAUDE_CODE_USE_BEDROCK=1
+# SEC-004: a vendor key with no billing rule of its own here
+export OPENAI_API_KEY="sk-proj-FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE"
+# BILL-009: overrides the Copilot login
+export COPILOT_GITHUB_TOKEN=ghu_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE9b1c
+# Must not fire: commented out
+# export ANTHROPIC_API_KEY="sk-ant-api03-FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE7Qa"
+# Must not fire: resolved at use time, no value in the file
+export GITHUB_TOKEN="$(op read 'op://Private/GitHub/token')"
+export GEMINI_API_KEY=$(security find-generic-password -s gemini -w)

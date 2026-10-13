@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "lint-helper": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@acme/lint-helper@latest"
+      ],
+      "env": {
+        "LINT_HELPER_TOKEN": "${env:LINT_HELPER_TOKEN}"
+      }
+    }
+  }
+}

@@ -5,6 +5,9 @@
       "args": [
         "--stdio"
       ]
+    },
+    "tmp-tool": {
+      "command": "/tmp/mcp-tool/run.sh"
     }
   }
 }

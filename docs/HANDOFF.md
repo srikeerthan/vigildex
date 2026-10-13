@@ -69,7 +69,7 @@ Rough estimates for one developer. Each milestone ends with the CLI showing the 
 |---|---|---|
 | M0 | Workspace, CI (fmt, clippy, test, deny, audit on macOS and Linux), fixtures layout, `--home` override | `vigildex --version` builds in CI |
 | M1 | Claude Code and Codex adapters → inventory | `vigildex inventory --json` lists MCP servers, hooks, skills, plugins, instructions and security settings from fixtures |
-| M2 | Findings: secrets, billing, risk | `vigildex findings` reproduces the mockup's 9 findings from a fixture home |
+| M2 | Findings: secrets, billing, risk | `vigildex findings` reproduces the mockup's 9 findings (`SCREENS.md` § 6, mapped in `docs/RULES.md` § List titles) from `fixtures/homes/mockup-demo`, and `fixtures/homes/messy` covers every other rule and its look-alikes |
 | M3 | Sessions and usage with the token breakdown and pricing | `vigildex usage --week` matches hand-computed totals on fixtures |
 | M4 | Baseline, watcher, key-level diff, attribution, alert events | Editing a fixture config prints one `CHG-` event with a writer label |
 | M5 | Cursor and Copilot adapters | Inventory and findings cover all four agents |
@@ -99,6 +99,7 @@ Run each agent for a day, then confirm the following. Save **redacted** samples 
 
 ## Open questions (product)
 
+- From the screens review of 13 Oct 2026 (`SCREENS.md` against the fixture and the rules): the What Can Run inspector example shows lint-helper running `node ~/.cache/.lh/index.js` (a hidden folder, RISK-008 High) while the Findings screen lists no such finding; in the fixture lint-helper runs `npx -y @acme/lint-helper@latest`, so the inspector example should show a floating-version server. The "41 items · 4 agents" counts need Cursor and Copilot (M5) and should be re-derived from the fixture then. The Cursor session row has no local data source. Copilot "38 premium" needs a premium-request feed (Copilot status line, 1b). The header tooltip "Nothing leaves this Mac" should allow for the app's signed update check (`PRIVACY.md`). `acknowledgeFinding` is marked "later" although "9 open" means "not acknowledged".
 - Do hooks still run in YOLO/bypass modes in Cursor and Copilot? (Phase 3 enforcement depends on it.)
 - Can a repository's `"disableAllHooks": true` switch off a user's hooks in Claude Code?
 - Apply for Apple's Endpoint Security entitlement early. There's no stated timeline, and one report says about 2 months.

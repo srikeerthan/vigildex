@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "plugins": {
+    "acme-deploy@acme-tools": [
+      {
+        "scope": "user",
+        "installPath": "/Users/you/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1",
+        "version": "0.3.1",
+        "installedAt": "2026-10-09T08:02:11.000Z",
+        "lastUpdated": "2026-10-09T08:02:11.000Z"
+      }
+    ]
+  }
+}

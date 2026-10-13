@@ -8,11 +8,11 @@ Scanned: Claude Code, Codex, Shared
 Projects: 2
 
 Agent                     MCP    Hooks   Skills  Plugins   Instr. Settings    Creds
-Claude Code                10        9        6        4        6       34        1
-Codex                       4        4        1        0        3       15        1
+Claude Code                 9        9        6        4        6       31        1
+Codex                       3        4        1        0        3       14        1
 Shared                      0        0        2        0        0        0        0
 
-Files read: 38
+Files read: 37
 Warnings: 0
 
 Run `vigildex inventory` for the items.

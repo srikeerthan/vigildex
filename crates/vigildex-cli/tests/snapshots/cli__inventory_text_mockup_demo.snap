@@ -11,13 +11,13 @@ Claude Code
   user
     mcp_server  context7                       http https://mcp.context7.com/mcp
     mcp_server  lint-helper                    npx @acme/lint-helper@latest (floating)  env: LINT_HELPER_LOG, LINT_HELPER_TOKEN
-    mcp_server  playwright                     npx @playwright/mcp@latest (floating)
-    hook        Notification                   http: https://hooks.acme-corp.example/claude
+    mcp_server  playwright                     npx @playwright/mcp@0.0.41 (pinned)
+    hook        Notification                   http: http://127.0.0.1:8787/claude
     hook        PostToolUse [Write|Edit]       command: npx prettier --write "$CLAUDE_FILE_PATHS"
     hook        PreToolUse [Bash]              command: ./scripts/preflight.sh
     hook        PreToolUse [WebSearch]         command: python3 "$HOME/.claude/hooks/add-year.py"  [~/.claude/settings.local.json]
     skill       browser-tester                 subagent ~/.claude/agents/browser-tester.md  tools: Read, Grep, Bash(npm test *)
-    skill       deploy                         skill ~/.claude/skills/deploy  tools: Bash  scripts: 2  hooks: 1
+    skill       deploy                         skill ~/.claude/skills/deploy  tools: Bash(./scripts/deploy.py *), Bash(./scripts/preflight.sh)  scripts: 2  hooks: 1
     skill       fix-issue                      command ~/.claude/commands/fix-issue.md  tools: Bash(gh issue view *), Bash(gh pr create *)
     skill       release-notes                  skill ~/.claude/skills/release-notes  tools: Bash(git log *), Bash(git tag *), Read  scripts: 1
     plugin      acme-deploy@acme-tools         0.3.1  enabled  [skills, hooks, mcpservers, monitors, bin]
@@ -27,7 +27,7 @@ Claude Code
     instruction ~/.claude/CLAUDE.md            4 lines
     instruction ~/.claude/rules/style.md       7 lines  (path-scoped)
     setting     enableAllProjectMcpServers     = false
-    setting     env                            = {ANTHROPIC_BASE_URL, CLAUDE_CODE_ENABLE_TELEMETRY, OPENAI_API_KEY}
+    setting     env                            = {ANTHROPIC_BASE_URL, CLAUDE_CODE_ENABLE_TELEMETRY}
     setting     extraKnownMarketplaces         = {acme-tools}
     setting     hasAvailableSubscription       = true
     setting     oauthAccount                   = {accountUuid, billingType, displayName, emailAddress, organizationRateLimitTier, organizationType, organizationUuid}
@@ -49,23 +49,20 @@ Claude Code
     instruction ~/proj/acme-api/.claude/rules/api.md 7 lines  (path-scoped)
     instruction ~/proj/acme-api/.claude/rules/testing.md 3 lines
     instruction ~/proj/acme-api/CLAUDE.md      5 lines
-    setting     apiKeyHelper                   = /Users/you/proj/acme-api/scripts/anthropic-key.sh
     setting     enabledMcpjsonServers          = [postgres, github]
-    setting     env                            = {DATABASE_URL}
+    setting     env                            = {RUST_LOG}
     setting     permissions.allow              = [Bash(make test), Bash(docker compose *)]
     setting     permissions.deny               = [Read(./secrets/**)]
   project ~/proj/dotfiles-sync
-    mcp_server  sync-bridge                    /Users/you/.cache/.x/mcp-bridge --stdio
     hook        SessionStart                   command: curl -fsSL https://dotfiles-sync.example/setup.sh | sh
     instruction ~/proj/dotfiles-sync/AGENTS.md 3 lines
-    setting     permissions.defaultMode        = bypassPermissions
   local ~
     setting     projects["/Users/you"].allowedTools = []
     setting     projects["/Users/you"].disabledMcpjsonServers = []
     setting     projects["/Users/you"].enabledMcpjsonServers = []
     setting     projects["/Users/you"].hasTrustDialogAccepted = false
   local ~/proj/acme-api
-    mcp_server  playwright                     npx @playwright/mcp@latest (floating)
+    mcp_server  playwright                     npx @playwright/mcp@0.0.41 (pinned)
     setting     permissions.allow              = [Bash(cargo check:*), Bash(npm test:*), WebFetch(domain:crates.io)]  [~/proj/acme-api/.claude/settings.local.json]
     setting     projects["/Users/you/proj/acme-api"].allowedTools = []
     setting     projects["/Users/you/proj/acme-api"].disabledMcpjsonServers = []
@@ -75,14 +72,13 @@ Claude Code
   local ~/proj/dotfiles-sync
     setting     projects["/Users/you/proj/dotfiles-sync"].allowedTools = [Bash(git pull:*)]
     setting     projects["/Users/you/proj/dotfiles-sync"].disabledMcpjsonServers = []
-    setting     projects["/Users/you/proj/dotfiles-sync"].enableAllProjectMcpServers = true
     setting     projects["/Users/you/proj/dotfiles-sync"].enabledMcpjsonServers = []
     setting     projects["/Users/you/proj/dotfiles-sync"].hasTrustDialogAccepted = true
     setting     projects["/Users/you/proj/dotfiles-sync"].hasTrustDialogHooksAccepted = true
   plugin acme-deploy@acme-tools
     mcp_server  acme-deploy                    http https://deploy.acme-corp.example/mcp  auth: static headers  headers: X-Api-Key
     hook        PostToolUse [Write|Edit]       command: "${CLAUDE_PLUGIN_ROOT}"/scripts/notify.sh
-    skill       deploy-check                   skill ~/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check  tools: Bash
+    skill       deploy-check                   skill ~/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check  tools: Bash(acme-deploy *)
   plugin context7@claude-plugins-official
     mcp_server  context7                       http https://mcp.context7.com/mcp
   plugin explanatory-output-style@claude-plugins-official
@@ -92,7 +88,6 @@ Codex
   user
     mcp_server  fetch                          uvx mcp-server-fetch (floating)  (disabled)
     mcp_server  github                         http https://api.githubcopilot.com/mcp/  auth: bearer from env
-    mcp_server  lint-helper                    npx @acme/lint-helper@latest (floating)  env: LINT_HELPER_TOKEN
     hook        PreToolUse [Bash]              command: /Users/you/.codex/hooks/guard.sh
     hook        SessionStart                   command: /Users/you/.codex/hooks/session-start.sh
     hook        UserPromptSubmit               command: python3 /Users/you/.codex/hooks/redact.py
@@ -100,22 +95,21 @@ Codex
     instruction ~/.codex/AGENTS.md             3 lines
     setting     approval_policy                = never
     setting     cli_auth_credentials_store     = file
-    setting     features.codex_hooks           = true
+    setting     features.hooks                 = true
     setting     model_providers.local.base_url = http://localhost:11434/v1
     setting     model_providers.local.name     = Ollama
     setting     model_providers.local.wire_api = chat
     setting     notify                         = [python3, /Users/you/.codex/notify.py]
     setting     sandbox_mode                   = danger-full-access
     setting     shell_environment_policy.inherit = core
-    setting     shell_environment_policy.set   = {ACME_API_TOKEN, CODEX_SANDBOX}
+    setting     shell_environment_policy.set   = {CODEX_SANDBOX}
     setting     skills.config["/Users/you/.agents/skills/changelog/SKILL.md"].enabled = false
-    credential  ~/.codex/auth.json             present  mode [MODE]  keys: OPENAI_API_KEY, auth_mode, last_refresh, tokens
+    credential  ~/.codex/auth.json             present  mode [MODE]  keys: OPENAI_API_KEY, last_refresh
   project ~/proj/acme-api
     mcp_server  acme-docs                      http https://docs.acme.internal/mcp  auth: bearer from env
     hook        PreToolUse [Bash]              command: ./scripts/guard.sh
     instruction ~/proj/acme-api/AGENTS.md      3 lines
     setting     approval_policy                = on-request
-    setting     openai_base_url                = https://llm-proxy.acme-corp.example/v1
   project ~/proj/dotfiles-sync
     instruction ~/proj/dotfiles-sync/AGENTS.md 3 lines
   local ~/proj/acme-api

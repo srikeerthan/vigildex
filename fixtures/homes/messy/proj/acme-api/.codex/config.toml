@@ -1,0 +1,3 @@
+openai_base_url = "https://llm-proxy.acme-corp.example/v1"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
