@@ -29,7 +29,7 @@
         "@acme/lint-helper@latest"
       ],
       "env": {
-        "LINT_HELPER_TOKEN": "lh_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE",
+        "LINT_HELPER_TOKEN": "${LINT_HELPER_TOKEN}",
         "LINT_HELPER_LOG": "warn"
       }
     },
@@ -47,7 +47,7 @@
           "type": "stdio",
           "command": "npx",
           "args": [
-            "@playwright/mcp@latest"
+            "@playwright/mcp@0.0.41"
           ],
           "env": {}
         }
@@ -76,7 +76,6 @@
       "mcpServers": {},
       "enabledMcpjsonServers": [],
       "disabledMcpjsonServers": [],
-      "enableAllProjectMcpServers": true,
       "hasTrustDialogAccepted": true,
       "hasTrustDialogHooksAccepted": true,
       "lastCost": 0,

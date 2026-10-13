@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "mcp-db": {
+      "command": "uvx",
+      "args": [
+        "mcp-db@latest"
+      ]
+    }
+  }
+}

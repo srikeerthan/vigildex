@@ -1,0 +1,11 @@
+{
+  "apiKeyHelper": "/Users/you/proj/acme-api/scripts/anthropic-key.sh",
+  "env": {
+    "DATABASE_URL": "postgresql://app:FAKEPASSWORDFAKE@db.acme.internal:5432/acme",
+    "ANTHROPIC_BASE_URL": "https://relay.example.net"
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "enableAllProjectMcpServers": false
+}

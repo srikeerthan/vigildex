@@ -18,7 +18,7 @@ The macOS app lives in the private repo `srikeerthan/vigildex-mac` and embeds th
 2. **Never read credential values.** That covers macOS Keychain items, the contents of `~/.claude/.credentials.json`, values in `~/.codex/auth.json`, Cursor's `state.vscdb`, Copilot's `config.json` token fields, and browser cookies. Existence, file mode and owner are allowed. For JSON credential files, read key *names* only.
 3. **No network.** The engine makes no network calls: no telemetry, no update checks and no live verification of found secrets. The price table is vendored at build time.
 4. **No undocumented vendor endpoints** and no reuse of the user's tokens or cookies.
-5. **Never keep or print a full secret.** Mask at the point of detection (`sk-ant-••••7Qa`: a short prefix plus the last 3–4 characters). Findings carry a salted fingerprint, never the value.
+5. **Never keep or print a full secret.** Mask at the point of detection (`sk-ant-••••7Qa`: a short prefix plus the last three characters). Findings carry a salted fingerprint, never the value.
 6. **Transcripts.** Parse only usage and metadata fields from session logs. Never persist message content, tool output or prompts.
 7. **Vendor formats are internal and change without notice.** Every parser must tolerate unknown fields and missing keys, report "unknown" and keep going. A malformed file is a warning, never a panic.
 
@@ -42,7 +42,7 @@ cargo run -p vigildex-cli -- scan --home fixtures/homes/basic --json
 - No `unsafe` outside generated FFI code.
 - Every adapter ships redacted fixtures in `fixtures/<agent>/<date-or-version>/` plus `insta` snapshot tests. Never commit real secrets, real paths with user names, or transcript text.
 - Public types derive `serde` and `schemars::JsonSchema`. CLI `--json` output is a versioned contract (`schema_version`), and changing it needs a version bump and a note in `CHANGELOG.md`.
-- Every finding has a stable rule ID (`SEC-`, `BILL-`, `RISK-`, `CHG-`); see `docs/RULES.md`.
+- Every finding has a stable rule ID (`SEC-`, `BILL-`, `RISK-`, `CHG-`, `PRE-`); see `docs/RULES.md`.
 - Dependencies must be MIT, Apache-2.0, BSD or similarly permissive. No GPL or AGPL (`cargo-deny` enforces this). One exception: the UniFFI crates are MPL-2.0 (file-level copyleft, so obligations attach only to modified UniFFI files, not to Vigildex or the app); `deny.toml` allows MPL-2.0 for those crates alone.
 - Commits: imperative mood, with a DCO sign-off (`git commit -s`). Small PRs, one adapter or rule family at a time.
 - Tests use a fake home directory (`--home` flag / `VIGILDEX_HOME` env var). Never read the developer's real `$HOME` in tests.

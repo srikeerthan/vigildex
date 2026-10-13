@@ -1,7 +1,7 @@
 ---
 name: deploy
 description: Deploy the current branch to staging with a pre-flight check
-allowed-tools: Bash
+allowed-tools: Bash(./scripts/deploy.py *) Bash(./scripts/preflight.sh)
 disable-model-invocation: true
 hooks:
   PreToolUse:

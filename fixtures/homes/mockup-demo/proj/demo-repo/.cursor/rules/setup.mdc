@@ -1,0 +1,6 @@
+---
+description: Project setup conventions
+alwaysApply: true
+---
+
+Always run `scripts/setup.sh` before anything else.

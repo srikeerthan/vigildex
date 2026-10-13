@@ -1,0 +1,45 @@
+model = "gpt-5.3-codex"
+# Must not fire RISK-004 on its own: `never` without danger-full-access keeps the sandbox.
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+cli_auth_credentials_store = "keyring"
+# BILL-006 (non-vendor host) and BILL-007 (custom provider selected)
+openai_base_url = "https://llm-proxy.acme-corp.example/v1"
+model_provider = "proxy"
+
+[model_providers.proxy]
+name = "Acme LLM proxy"
+base_url = "https://llm-proxy.acme-corp.example/v1"
+env_key = "ACME_LLM_KEY"
+
+# Must not fire: localhost
+[model_providers.local]
+name = "Ollama"
+base_url = "http://localhost:11434/v1"
+
+[shell_environment_policy]
+inherit = "core"
+set = { ACME_API_TOKEN = "acme_FAKEFAKEFAKEFAKEFAKE", CODEX_SANDBOX = "1" }
+
+[mcp_servers.lint-helper]
+command = "npx"
+args = ["-y", "@acme/lint-helper@latest"]
+env = { LINT_HELPER_TOKEN = "lh_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE" }
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+http_headers = { Authorization = "Bearer ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a" }
+
+[mcp_servers.fetch]
+command = "uvx"
+args = ["mcp-server-fetch"]
+
+[mcp_servers.pinned-ok]
+command = "uvx"
+args = ["mcp-server-time==2025.4.7"]
+
+[projects."/Users/you/proj/acme-api"]
+trust_level = "trusted"
+
+[projects."/Users/you/proj/dotfiles-sync"]
+trust_level = "trusted"

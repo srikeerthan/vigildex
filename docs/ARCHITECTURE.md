@@ -58,8 +58,8 @@ enum Launch {
   Remote  { url: Url, auth: RemoteAuth /* none, oauth, static_header */ },
 }
 
-struct Finding  { id: Uuid, rule: RuleId, severity: Severity, title: String, location: Location,
-                  evidence: MaskedEvidence, fingerprint: String, fix: FixSteps, agent: Option<Agent> }
+struct Finding  { id: Uuid, rule: RuleId, severity: Severity, title: String, why: String, location: Location,
+                  evidence: MaskedEvidence, fingerprint: String, fix: FixSteps, agents: Vec<Agent>, items: Vec<ItemId> }
 struct Location { path: PathBuf, line: Option<u32>, key_path: Option<String> }
 
 struct Change   { id: Uuid, at: OffsetDateTime, artifact: ArtifactRef, key_path: String,
@@ -85,6 +85,14 @@ struct PlanLimit { agent: Agent, window: LimitWindow /* five_hour, weekly */, us
 - `Launch::Package` keeps the full argument list (masked) beside the runner, spec and pin; `Launch::Interpreter` names the script; `Launch::Remote` carries the transport and a `RemoteAuth` (`oauth`, static headers, `bearer_token_env_var`, headers helper).
 - Settings are selected by key-path patterns per adapter (`permissions.allow`, `model_providers.*.base_url`) and reduced to `RedactedValue`; objects become key lists, so an `env` block never leaks a value.
 - The adapter trait is two steps: `project_roots(home, dirs)` reads the roots the agent recorded, then `inventory(home, dirs, roots, collector)` parses files; a `Collector` hashes every file read, caps sizes and turns errors into warnings. `security_keys`, `hot_keys`, `sessions` and `usage_since` arrive with M3 and M4.
+
+**Additions the app screens need** (from `vigildex-mac/docs/SCREENS.md`, reviewed 13 Oct 2026), each with the milestone that adds it:
+
+- M2: a stable `ItemId` on every item and an `identity` (hash of name plus normalised launch) so the same server across agents is one row with several badges; `Finding { why: String, items: Vec<ItemId>, fix: FixSteps { summary, steps } }`; `scanned_at` on every report (schema bump).
+- M3: a per-agent "reported by" grid with a tri-state (yes, partly, no) and the source field name; Copilot `premium_requests` on the usage rows; `SessionState { Working, NeedsInput, Idle, Done, Failed, Stopped }` and a session name.
+- M4: `alerts(unacknowledged_only)`, `acknowledge_alert(id)`, `needs_a_look()` (alerts, High findings and pending pre-flights, newest first); `Change.group_id` for "other files with the same change"; a `Baseline` change kind and `baseline_at`; `ProbableWriter.cwd`; the checklist store.
+- M6: `PreflightReport { trigger: Clone | Pull, reviewed_at, items }` and `mark_preflight_reviewed(dir)`.
+- 1b: `statusline_status()` (installed, wrapped command, last observation), which decides the "Set Up…" button.
 
 ## Adapters
 
@@ -152,7 +160,7 @@ Labels: `ExpectedAgentWrite`, `AgentWasRunning`, `NoOwningAppRunning`, `PackageI
 
 ## Plan limits
 
-- **Codex:** read the `rate_limits` snapshot from the newest rollout `token_count` event (`primary` / `secondary` → used percent, window minutes, `resets_at`; `credits`; `plan_type`). No credentials touched. (`codex app-server` `account/rateLimits/read` is a documented alternative to evaluate later.)
+- **Codex:** read the `rate_limits` snapshot from the newest rollout `token_count` event (`primary` / `secondary` → `used_percent`, `window_minutes`, `resets_in_seconds`; add the row timestamp to get `resets_at`; label the window from `window_minutes`: 300 → 5-hour, 10080 → weekly, else "primary"/"secondary"). `credits` and `plan_type` stay **verify**. No credentials touched. (`codex app-server` `account/rateLimits/read` is a documented alternative to evaluate later.)
 - **Claude:** only through the Phase 1b status-line helper (below). Never `api/oauth/usage`, cookies, or PTY-scraping `/usage`.
 
 ## Status-line helper (Phase 1b)

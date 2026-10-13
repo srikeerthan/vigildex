@@ -262,7 +262,7 @@ fn inventory_filters_by_agent_and_type() {
         assert_eq!(item["source"]["agent"], "codex");
     }
     let names: Vec<&str> = items.iter().filter_map(|i| i["name"].as_str()).collect();
-    assert_eq!(names, vec!["fetch", "github", "lint-helper", "acme-docs"]);
+    assert_eq!(names, vec!["fetch", "github", "acme-docs"]);
     // The filter is a view: the scanned list still names every agent.
     assert_eq!(
         report["inventory"]["scanned"]
@@ -304,6 +304,23 @@ fn relocated_config_dirs_are_honoured_and_stale_defaults_are_warned() {
         .expect("warnings");
     assert_eq!(warnings.len(), 3, "{warnings:#?}");
     insta::assert_snapshot!("inventory_json_relocated", redact(&text));
+}
+
+#[test]
+fn inventory_json_on_the_messy_fixture_home() {
+    let output = run(vigildex()
+        .args(["inventory", "--json", "--home"])
+        .arg(fixture_home("messy")));
+    assert_exit(&output, 0);
+    assert_eq!(stderr(&output), "");
+    let text = stdout(&output);
+    assert_no_secret_values(&text);
+    // A plaintext header value and a Docker image with a floating tag are
+    // inventoried without leaking the value: names and launch only.
+    assert!(text.contains("\"X-Api-Key\""), "{text}");
+    assert!(text.contains("ghcr.io/acme/mcp-sys:latest"), "{text}");
+    assert!(!text.contains("adk_"), "{text}");
+    insta::assert_snapshot!("inventory_json_messy", redact(&text));
 }
 
 #[test]

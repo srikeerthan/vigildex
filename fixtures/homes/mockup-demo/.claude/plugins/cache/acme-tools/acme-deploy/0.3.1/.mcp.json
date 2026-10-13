@@ -3,7 +3,7 @@
     "type": "http",
     "url": "https://deploy.acme-corp.example/mcp",
     "headers": {
-      "X-Api-Key": "adk_FAKEFAKEFAKEFAKEFAKEFAKEFAKE"
+      "X-Api-Key": "${ACME_DEPLOY_KEY}"
     }
   }
 }

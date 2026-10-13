@@ -1,6 +1,4 @@
 approval_policy = "on-request"
-# Ignored by Codex in a project file, but still a surface worth seeing.
-openai_base_url = "https://llm-proxy.acme-corp.example/v1"
 
 [mcp_servers.acme-docs]
 url = "https://docs.acme.internal/mcp"

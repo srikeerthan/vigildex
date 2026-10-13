@@ -66,6 +66,21 @@ own **JSON contract** entry (CLAUDE.md § Conventions).
 
 ### Changed
 
+- `fixtures/homes/mockup-demo` now matches the app screens: applying the
+  rules catalogue to it yields exactly the nine findings on the Findings
+  screen (`fixtures/README.md` maps each row to its rule and file), the stray key sits on
+  `.zshrc` line 42, lint-helper is configured for Claude Code and Cursor, and
+  `proj/demo-repo` carries the pre-flight sheet's sample files. Everything it
+  no longer shows moved to the new `fixtures/homes/messy`, which holds the
+  other rules a home directory can trigger, each beside a look-alike that
+  must not fire.
+- `docs/RULES.md` gains the list titles from the screens, a finding policy
+  (one finding per location, no cross-file merge, one finding per server
+  across agents, disabled servers skipped, inventory tags for bundled scripts
+  and plugin monitors, the repo severity bump for pre-flight only, masks with
+  three trailing characters), `PRE-001…003` and titles for the `CHG` events.
+  `docs/ARCHITECTURE.md` lists the engine additions the screens need per
+  milestone and corrects the Codex `resets_in_seconds` note.
 - With `CLAUDE_CONFIG_DIR` set, the Claude Code adapter reads only the
   relocated `.claude.json` and settings files, as Claude Code itself does
   (confirmed on 2.1.296), and reports files left at `~/.claude.json` and
