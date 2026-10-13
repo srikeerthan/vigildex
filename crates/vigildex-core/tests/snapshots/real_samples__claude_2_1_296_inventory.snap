@@ -525,7 +525,29 @@ expression: json
       "type": "setting",
       "key_path": "oauthAccount",
       "value": {
-        "kind": "present"
+        "kind": "keys",
+        "keys": [
+          "accountCreatedAt",
+          "accountUuid",
+          "billingType",
+          "ccOnboardingFlags",
+          "claudeCodeTrialDurationDays",
+          "claudeCodeTrialEndsAt",
+          "displayName",
+          "emailAddress",
+          "fullName",
+          "hasExtraUsageEnabled",
+          "organizationName",
+          "organizationRateLimitTier",
+          "organizationRole",
+          "organizationType",
+          "organizationUuid",
+          "profileFetchedAt",
+          "seatTier",
+          "subscriptionCreatedAt",
+          "userRateLimitTier",
+          "workspaceRole"
+        ]
       },
       "source": {
         "agent": "claude_code",

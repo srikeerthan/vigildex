@@ -30,7 +30,7 @@ Claude Code
     setting     env                            = {ANTHROPIC_BASE_URL, CLAUDE_CODE_ENABLE_TELEMETRY, OPENAI_API_KEY}
     setting     extraKnownMarketplaces         = {acme-tools}
     setting     hasAvailableSubscription       = true
-    setting     oauthAccount                   = (present)
+    setting     oauthAccount                   = {accountUuid, billingType, displayName, emailAddress, organizationRateLimitTier, organizationType, organizationUuid}
     setting     permissions.additionalDirectories = [~/proj/shared-libs]
     setting     permissions.allow              = [Bash(npm run *), Bash(git status *), Bash(git diff *), WebFetch(domain:docs.acme-corp.example)]
     setting     permissions.allow              = [Bash(python3 -c ' *), Bash(npm search *), Read(//tmp/**)]  [~/.claude/settings.local.json]

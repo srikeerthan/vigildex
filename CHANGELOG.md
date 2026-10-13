@@ -64,6 +64,20 @@ own **JSON contract** entry (CLAUDE.md § Conventions).
   `fixtures/shared/`, with the verification-spike results folded into
   `docs/DATA_SOURCES.md`.
 
+### Changed
+
+- With `CLAUDE_CONFIG_DIR` set, the Claude Code adapter reads only the
+  relocated `.claude.json` and settings files, as Claude Code itself does
+  (confirmed on 2.1.296), and reports files left at `~/.claude.json` and
+  `~/.claude/` as warnings; the Codex adapter does the same for `CODEX_HOME`.
+  A `fixtures/homes/relocated` home covers both.
+- `oauthAccount` in `~/.claude.json` is recorded as its key names instead of
+  bare presence, so the billing checks can tell an identity-only entry from a
+  subscription account without reading a value.
+- `docs/DATA_SOURCES.md` closes two verify items: `~/.claude.json` follows
+  `CLAUDE_CONFIG_DIR`, and Codex hooks are enabled by default behind the
+  `[features] hooks` flag (`codex_hooks` is a legacy alias).
+
 ### JSON contract
 
 - `schema_version` 2: `scan --json` and `inventory --json` return

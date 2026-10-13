@@ -1,0 +1,5 @@
+approval_policy = "on-request"
+
+[mcp_servers.work-fetch]
+command = "uvx"
+args = ["mcp-server-fetch==2026.1.0"]

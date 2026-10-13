@@ -132,6 +132,21 @@ impl Adapter for Codex {
     fn inventory(&self, home: &HomeEnv, dirs: &AgentDirs, roots: &[PathBuf], out: &mut Collector) {
         let codex_home = &dirs.codex_home;
         Self::config_file(home, Scope::User, &codex_home.join("config.toml"), out);
+        if codex_home != &home.root().join(".codex") {
+            for name in ["config.toml", "hooks.json"] {
+                let path = home.root().join(".codex").join(name);
+                if path.is_file() {
+                    out.warn(
+                        AGENT,
+                        &path,
+                        format!(
+                            "ignored by Codex: CODEX_HOME moves its files to {}",
+                            codex_home.display()
+                        ),
+                    );
+                }
+            }
+        }
         common::hooks_file(AGENT, &Scope::User, &codex_home.join("hooks.json"), out);
         common::instruction(AGENT, &Scope::User, &codex_home.join("AGENTS.md"), out);
         common::skills_dir(AGENT, &Scope::User, &codex_home.join("skills"), out);

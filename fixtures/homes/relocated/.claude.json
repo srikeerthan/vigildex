@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "stale-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "stale-mcp@latest"
+      ]
+    }
+  }
+}

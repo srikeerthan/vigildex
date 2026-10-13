@@ -10,6 +10,7 @@ fixtures/
   homes/<name>/              fake home folders, used through `--home` / `VIGILDEX_HOME`
     basic/                   the smallest home: one settings file per agent
     mockup-demo/             the app mockup's data: two projects, plugins, hooks, skills, a stray key
+    relocated/               CLAUDE_CONFIG_DIR and CODEX_HOME set in .zshenv, with stale files at the defaults
   <agent>/<date-or-version>/ raw sample files for one agent's parser tests
     claude/  codex/  cursor/  copilot/
   shared/<date-or-version>/  cross-agent sources: `~/.agents/skills`, shell profiles, `.env` files
@@ -120,9 +121,12 @@ Review `git diff` before committing; the script never stages anything.
 | `copilot/2026-10-13/` | One Copilot CLI 1.0.96 `events.jsonl` (no turns), VS Code user settings reduced to the Copilot and chat keys | `assistant.usage` is still unverified. |
 | `shared/2026-10-13/` | `.zshrc` reduced to its key-bearing `export` lines | Values are fakes of the same shape. |
 
-`homes/mockup-demo` and `homes/basic` are hand-written (13 Oct 2026) from the
-formats confirmed in `docs/DATA_SOURCES.md`; they are not copies of a real
-machine.
+`homes/mockup-demo`, `homes/basic` and `homes/relocated` are hand-written
+(13 Oct 2026) from the formats confirmed in `docs/DATA_SOURCES.md`; they are
+not copies of a real machine. `relocated` exercises the behaviour confirmed on
+Claude Code 2.1.296 and codex-cli 0.162.1: with `CLAUDE_CONFIG_DIR` or
+`CODEX_HOME` set, the agent reads only the relocated directory, so the
+inventory reports the files left at the default locations as warnings.
 
 ## Placeholders
 

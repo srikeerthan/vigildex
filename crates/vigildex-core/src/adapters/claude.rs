@@ -64,10 +64,13 @@ const SETTINGS_RULES: &[KeyRule] = &[
 ];
 
 /// Keys of `~/.claude.json` at user scope. `oauthAccount` holds the account
-/// e-mail and organisation, so only its presence is recorded.
+/// e-mail and organisation, so it is reduced to its key names: a fresh
+/// install writes none of it, an account context adds `accountUuid`,
+/// `emailAddress` and `organizationUuid`, and a subscription login adds
+/// `billingType`, `organizationType` and the rate-limit tier (names only).
 const APP_STATE_RULES: &[KeyRule] = &[
     KeyRule::value("hasAvailableSubscription"),
-    KeyRule::presence("oauthAccount"),
+    KeyRule::value("oauthAccount"),
 ];
 
 /// Keys of `~/.claude.json` › `projects["<path>"]`, recorded at local scope.
@@ -82,16 +85,47 @@ const PROJECT_STATE_RULES: &[KeyRule] = &[
 ];
 
 impl ClaudeCode {
-    /// `~/.claude.json`, or `.claude.json` inside a relocated config
-    /// directory when that file exists.
+    /// Whether `CLAUDE_CONFIG_DIR` moves the agent's files away from `~/.claude`.
+    fn relocated(home: &HomeEnv, dirs: &AgentDirs) -> bool {
+        dirs.claude_config != home.root().join(".claude")
+    }
+
+    /// The app-state file. Claude Code resolves it as
+    /// `join(CLAUDE_CONFIG_DIR || $HOME, ".claude.json")` (confirmed on
+    /// 2.1.296), so with a relocated config directory `~/.claude.json` is
+    /// never read by the agent and is not read here either.
     fn app_state_path(home: &HomeEnv, dirs: &AgentDirs) -> PathBuf {
-        if dirs.claude_config != home.root().join(".claude") {
-            let relocated = dirs.claude_config.join(".claude.json");
-            if relocated.is_file() {
-                return relocated;
+        if Self::relocated(home, dirs) {
+            dirs.claude_config.join(".claude.json")
+        } else {
+            home.root().join(".claude.json")
+        }
+    }
+
+    /// Files left at the default location while `CLAUDE_CONFIG_DIR` points
+    /// elsewhere: the agent ignores them, so they are reported as warnings
+    /// rather than inventoried.
+    fn warn_ignored_defaults(home: &HomeEnv, dirs: &AgentDirs, out: &mut Collector) {
+        if !Self::relocated(home, dirs) {
+            return;
+        }
+        let default_dir = home.root().join(".claude");
+        for path in [
+            home.root().join(".claude.json"),
+            default_dir.join("settings.json"),
+            default_dir.join("settings.local.json"),
+        ] {
+            if path.is_file() {
+                out.warn(
+                    AGENT,
+                    &path,
+                    format!(
+                        "ignored by Claude Code: CLAUDE_CONFIG_DIR moves its files to {}",
+                        dirs.claude_config.display()
+                    ),
+                );
             }
         }
-        home.root().join(".claude.json")
     }
 
     fn app_state(home: &HomeEnv, path: &Path, out: &mut Collector) {
@@ -483,6 +517,7 @@ impl Adapter for ClaudeCode {
     fn inventory(&self, home: &HomeEnv, dirs: &AgentDirs, roots: &[PathBuf], out: &mut Collector) {
         let cfg = &dirs.claude_config;
         Self::app_state(home, &Self::app_state_path(home, dirs), out);
+        Self::warn_ignored_defaults(home, dirs, out);
 
         let mut enabled_plugins = BTreeMap::new();
         Self::settings_file(

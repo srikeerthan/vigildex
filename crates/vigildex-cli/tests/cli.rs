@@ -274,6 +274,39 @@ fn inventory_filters_by_agent_and_type() {
 }
 
 #[test]
+fn relocated_config_dirs_are_honoured_and_stale_defaults_are_warned() {
+    let output = run(vigildex()
+        .args(["inventory", "--json", "--home"])
+        .arg(fixture_home("relocated")));
+    assert_exit(&output, 0);
+    assert_eq!(stderr(&output), "");
+    let text = stdout(&output);
+    assert_no_secret_values(&text);
+    // Nothing from the default locations is inventoried...
+    assert!(!text.contains("stale-server"), "{text}");
+    assert!(!text.contains("bypassPermissions"), "{text}");
+    assert!(!text.contains("\"never\""), "{text}");
+    // ...while the relocated files are.
+    assert!(text.contains("work-docs"), "{text}");
+    assert!(text.contains("work-fetch"), "{text}");
+    let report: serde_json::Value = serde_json::from_str(&text).expect("stdout is JSON");
+    let relocations = &report["inventory"]["relocations"];
+    assert!(relocations["CLAUDE_CONFIG_DIR"]
+        .as_str()
+        .unwrap()
+        .ends_with("/.claude-work"));
+    assert!(relocations["CODEX_HOME"]
+        .as_str()
+        .unwrap()
+        .ends_with("/.codex-work"));
+    let warnings = report["inventory"]["warnings"]
+        .as_array()
+        .expect("warnings");
+    assert_eq!(warnings.len(), 3, "{warnings:#?}");
+    insta::assert_snapshot!("inventory_json_relocated", redact(&text));
+}
+
+#[test]
 fn inventory_text_on_the_basic_fixture_home() {
     let output = run(vigildex()
         .args(["inventory", "--home"])

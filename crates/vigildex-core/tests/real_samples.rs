@@ -84,10 +84,16 @@ fn claude_code_2_1_296_samples() {
     insta::assert_snapshot!("claude_2_1_296_inventory", json);
 
     // The account e-mail, identifiers and per-project prompt history in
-    // claude.json must never reach a report.
+    // claude.json must never reach a report. `oauthAccount` contributes its
+    // key names only, so the e-mail address and the UUID values are the
+    // things to look for.
     assert!(!json.contains("you@example.com"), "{json}");
-    assert!(!json.contains("accountUuid"), "{json}");
+    assert!(
+        !json.contains("00000000-0000-4000-8000-000000000000"),
+        "{json}"
+    );
     assert!(!json.contains("machineID"), "{json}");
+    assert!(!json.contains("userID"), "{json}");
     assert!(!json.contains("customApiKeyResponses"), "{json}");
     assert!(!json.contains("\"history\""), "{json}");
 
