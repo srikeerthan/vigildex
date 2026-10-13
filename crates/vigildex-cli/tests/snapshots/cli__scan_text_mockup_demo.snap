@@ -1,0 +1,18 @@
+---
+source: crates/vigildex-cli/tests/cli.rs
+expression: redact(&text)
+---
+vigildex [VERSION]
+Home: [REPO]/fixtures/homes/mockup-demo (from --home)
+Scanned: Claude Code, Codex, Shared
+Projects: 2
+
+Agent                     MCP    Hooks   Skills  Plugins   Instr. Settings    Creds
+Claude Code                10        9        6        4        6       34        1
+Codex                       4        4        1        0        3       15        1
+Shared                      0        0        2        0        0        0        0
+
+Files read: 38
+Warnings: 0
+
+Run `vigildex inventory` for the items.

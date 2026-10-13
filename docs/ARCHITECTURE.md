@@ -78,6 +78,14 @@ struct PlanLimit { agent: Agent, window: LimitWindow /* five_hour, weekly */, us
 
 `RedactedValue` holds a value only when it's safe to show: a command, URL host, or boolean or enum setting. Anything a secret rule matches becomes masked evidence plus a fingerprint.
 
+**As implemented in M1** (`crates/vigildex-core/src/model.rs`), with the differences from the sketch above:
+
+- `Agent::Shared` names cross-agent sources (`~/.agents/skills`), so a shared skill is one item rather than one per agent.
+- `Item::Credential` carries credential-file metadata (exists, mode, key names with JSON value types); `Item::Skill` covers skills, legacy commands and subagents through a `kind` field and lists bundled scripts; `Item::Plugin` lists the component types found in the install folder.
+- `Launch::Package` keeps the full argument list (masked) beside the runner, spec and pin; `Launch::Interpreter` names the script; `Launch::Remote` carries the transport and a `RemoteAuth` (`oauth`, static headers, `bearer_token_env_var`, headers helper).
+- Settings are selected by key-path patterns per adapter (`permissions.allow`, `model_providers.*.base_url`) and reduced to `RedactedValue`; objects become key lists, so an `env` block never leaks a value.
+- The adapter trait is two steps: `project_roots(home, dirs)` reads the roots the agent recorded, then `inventory(home, dirs, roots, collector)` parses files; a `Collector` hashes every file read, caps sizes and turns errors into warnings. `security_keys`, `hot_keys`, `sessions` and `usage_since` arrive with M3 and M4.
+
 ## Adapters
 
 ```rust

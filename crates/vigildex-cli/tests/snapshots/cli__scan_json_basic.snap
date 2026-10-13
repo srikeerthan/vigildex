@@ -3,10 +3,110 @@ source: crates/vigildex-cli/tests/cli.rs
 expression: redact(&stdout(&output))
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "engine_version": "[VERSION]",
   "home": {
     "root": "[REPO]/fixtures/homes/basic",
     "source": "override"
+  },
+  "inventory": {
+    "scanned": [
+      "claude_code",
+      "codex",
+      "shared"
+    ],
+    "project_roots": [],
+    "relocations": {},
+    "items": [
+      {
+        "type": "setting",
+        "key_path": "permissions.allow",
+        "value": {
+          "kind": "list",
+          "values": [
+            "Bash(git status *)"
+          ]
+        },
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "settings",
+          "path": "[REPO]/fixtures/homes/basic/.claude/settings.json"
+        }
+      },
+      {
+        "type": "credential",
+        "path": "[REPO]/fixtures/homes/basic/.claude/.credentials.json",
+        "exists": false,
+        "mode": null,
+        "readable_by_others": null,
+        "keys": [],
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "credential",
+          "path": "[REPO]/fixtures/homes/basic/.claude/.credentials.json"
+        }
+      },
+      {
+        "type": "setting",
+        "key_path": "approval_policy",
+        "value": {
+          "kind": "text",
+          "value": "on-request"
+        },
+        "source": {
+          "agent": "codex",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "settings",
+          "path": "[REPO]/fixtures/homes/basic/.codex/config.toml"
+        }
+      },
+      {
+        "type": "credential",
+        "path": "[REPO]/fixtures/homes/basic/.codex/auth.json",
+        "exists": false,
+        "mode": null,
+        "readable_by_others": null,
+        "keys": [],
+        "source": {
+          "agent": "codex",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "credential",
+          "path": "[REPO]/fixtures/homes/basic/.codex/auth.json"
+        }
+      }
+    ],
+    "artifacts": [
+      {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[REPO]/fixtures/homes/basic/.claude/settings.json",
+        "bytes": 95,
+        "sha256": "ca6c79271560b19599c6b3375818fb9500e5cb122f4658e75be709342e4a9146"
+      },
+      {
+        "agent": "codex",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[REPO]/fixtures/homes/basic/.codex/config.toml",
+        "bytes": 47,
+        "sha256": "df257578ffea1dc4b79a877fdc06b3a2f827b8c531052886db9f9a5d04be3542"
+      }
+    ],
+    "warnings": []
   }
 }

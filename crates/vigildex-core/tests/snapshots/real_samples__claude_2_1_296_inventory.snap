@@ -1,0 +1,1198 @@
+---
+source: crates/vigildex-core/tests/real_samples.rs
+expression: json
+---
+{
+  "scanned": [
+    "claude_code",
+    "codex",
+    "shared"
+  ],
+  "project_roots": [],
+  "relocations": {},
+  "items": [
+    {
+      "type": "hook",
+      "event": "PreToolUse",
+      "matcher": "WebSearch",
+      "handler": {
+        "kind": "command",
+        "command": "python3 -c \"import json, sys, re; from datetime import datetime; input_data = json.load(sys.stdin); tool_input = input_data.get('tool_input', {}); query = tool_input.get('query', ''); current_year = str(datetime.now().year); has_year = re.search(r'\\\\b20\\\\d{2}\\\\b', query); has_temporal = any(word in query.lower() for word in ['latest', 'recent', 'current', 'new', 'now', 'today']); should_add_year = not has_year and not has_temporal; modified_query = f'{query} {current_year}' if should_add_year else query; output = {'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'modifiedToolInput': {'query': modified_query}}}; print(json.dumps(output)); sys.exit(0)\"",
+        "args": [],
+        "timeout_secs": 5,
+        "async": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[HOME]/.claude/settings.local.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "claude-code-setup@claude-plugins-official",
+      "name": "claude-code-setup",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/claude-code-setup/1.0.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "claude-md-management@claude-plugins-official",
+      "name": "claude-md-management",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/claude-md-management/1.0.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "code-review@claude-plugins-official",
+      "name": "code-review",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "f359d43b4060",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/code-review/f359d43b4060",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "code-simplifier@claude-plugins-official",
+      "name": "code-simplifier",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/code-simplifier/1.0.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "commit-commands@claude-plugins-official",
+      "name": "commit-commands",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "f359d43b4060",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/commit-commands/f359d43b4060",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "context7@claude-plugins-official",
+      "name": "context7",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "f359d43b4060",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/context7/f359d43b4060",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "explanatory-output-style@claude-plugins-official",
+      "name": "explanatory-output-style",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "[HOME]/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0",
+      "installed": true,
+      "enabled": true,
+      "components": [
+        "hooks"
+      ],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "feature-dev@claude-plugins-official",
+      "name": "feature-dev",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "f359d43b4060",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/feature-dev/f359d43b4060",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "frontend-design@claude-plugins-official",
+      "name": "frontend-design",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "f359d43b4060",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/frontend-design/f359d43b4060",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "kotlin-lsp@claude-plugins-official",
+      "name": "kotlin-lsp",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/kotlin-lsp/1.0.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "pr-review-toolkit@claude-plugins-official",
+      "name": "pr-review-toolkit",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "f359d43b4060",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/pr-review-toolkit/f359d43b4060",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "product-tracking-skills@claude-plugins-official",
+      "name": "product-tracking-skills",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.1.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/product-tracking-skills/1.1.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "pyright-lsp@claude-plugins-official",
+      "name": "pyright-lsp",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/pyright-lsp/1.0.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "ralph-loop@claude-plugins-official",
+      "name": "ralph-loop",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/ralph-loop/1.0.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "security-guidance@claude-plugins-official",
+      "name": "security-guidance",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "2.0.13",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/security-guidance/2.0.13",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "skill-creator@claude-plugins-official",
+      "name": "skill-creator",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "f359d43b4060",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/skill-creator/f359d43b4060",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "superpowers@claude-plugins-official",
+      "name": "superpowers",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "6.4.1",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/superpowers/6.4.1",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "swift-lsp@claude-plugins-official",
+      "name": "swift-lsp",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/swift-lsp/1.0.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "typescript-lsp@claude-plugins-official",
+      "name": "typescript-lsp",
+      "marketplace": "claude-plugins-official",
+      "marketplace_source": "github:anthropics/claude-plugins-official",
+      "version": "1.0.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/claude-plugins-official/typescript-lsp/1.0.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "plugin",
+      "id": "warp@marketplace-1",
+      "name": "warp",
+      "marketplace": "marketplace-1",
+      "marketplace_source": "github:you/example",
+      "version": "2.2.0",
+      "install_scope": "user",
+      "install_path": "/Users/you/.claude/plugins/cache/marketplace-1/warp/2.2.0",
+      "installed": false,
+      "enabled": true,
+      "components": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "plugin",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "autoMode",
+      "value": {
+        "kind": "keys",
+        "keys": [
+          "environment"
+        ]
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[HOME]/.claude/settings.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "disableBundledSkills",
+      "value": {
+        "kind": "bool",
+        "value": true
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[HOME]/.claude/settings.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "extraKnownMarketplaces",
+      "value": {
+        "kind": "keys",
+        "keys": [
+          "marketplace-1"
+        ]
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[HOME]/.claude/settings.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "hasAvailableSubscription",
+      "value": {
+        "kind": "bool",
+        "value": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "oauthAccount",
+      "value": {
+        "kind": "present"
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "permissions.allow",
+      "value": {
+        "kind": "list",
+        "values": [
+          "Bash(go build:*)",
+          "Bash(npm show *)",
+          "Bash(python3 -c ' *)",
+          "Bash(npm search *)",
+          "WebFetch(domain:npmjs.com)",
+          "WebFetch(domain:example.com)",
+          "WebFetch(domain:raw.githubusercontent.com)",
+          "Bash(curl -s \"https://api.npmjs.org/downloads/point/last-week/videojs-hls-quality-selector\")",
+          "Bash(curl -s \"https://api.npmjs.org/downloads/point/last-week/@silvermine/videojs-quality-selector\")",
+          "Bash(curl -s \"https://api.npmjs.org/downloads/point/last-week/videojs-contrib-quality-levels\")",
+          "Bash(npm pack *)",
+          "Bash(mkdir -p /tmp/vjs-inspect)",
+          "Read(//tmp/**)",
+          "Bash(tar xzf *)",
+          "Read(//private/tmp/vjs-inspect/package/**)"
+        ]
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[HOME]/.claude/settings.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "skillOverrides",
+      "value": {
+        "kind": "keys",
+        "keys": [
+          "frontend-design",
+          "mobile-design",
+          "seo-optimizer",
+          "swift-concurrency-expert",
+          "ui-ux-pro-max"
+        ]
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "settings",
+        "path": "[HOME]/.claude/settings.json"
+      }
+    },
+    {
+      "type": "credential",
+      "path": "[HOME]/.claude/.credentials.json",
+      "exists": false,
+      "mode": null,
+      "readable_by_others": null,
+      "keys": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "credential",
+        "path": "[HOME]/.claude/.credentials.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/16\"].allowedTools",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/16"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/16\"].disabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/16"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/16\"].enabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/16"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/16\"].hasClaudeMdExternalIncludesApproved",
+      "value": {
+        "kind": "bool",
+        "value": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/16"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/16\"].hasTrustDialogAccepted",
+      "value": {
+        "kind": "bool",
+        "value": true
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/16"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/17\"].allowedTools",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/17"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/17\"].disabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/17"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/17\"].enabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/17"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/17\"].hasClaudeMdExternalIncludesApproved",
+      "value": {
+        "kind": "bool",
+        "value": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/17"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/17\"].hasTrustDialogAccepted",
+      "value": {
+        "kind": "bool",
+        "value": true
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/17"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/18\"].allowedTools",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/18"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/18\"].disabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/18"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/18\"].enabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/18"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/18\"].hasClaudeMdExternalIncludesApproved",
+      "value": {
+        "kind": "bool",
+        "value": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/18"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/18\"].hasTrustDialogAccepted",
+      "value": {
+        "kind": "bool",
+        "value": true
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/18"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "mcp_server",
+      "name": "context7",
+      "launch": {
+        "kind": "remote",
+        "url": "https://mcp.context7.com/mcp",
+        "transport": "http",
+        "auth": {
+          "kind": "none"
+        }
+      },
+      "env_keys": [],
+      "header_keys": [],
+      "env_header_keys": [],
+      "enabled": null,
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/6"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "mcp_server",
+      "name": "playwright",
+      "launch": {
+        "kind": "package",
+        "runner": "npx",
+        "spec": "@playwright/mcp@latest",
+        "pin": "floating",
+        "args": [
+          "@playwright/mcp@latest"
+        ]
+      },
+      "env_keys": [],
+      "header_keys": [],
+      "env_header_keys": [],
+      "enabled": null,
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/6"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/6\"].allowedTools",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/6"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/6\"].disabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/6"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/6\"].enabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/6"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/6\"].hasClaudeMdExternalIncludesApproved",
+      "value": {
+        "kind": "bool",
+        "value": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/6"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you/proj/6\"].hasTrustDialogAccepted",
+      "value": {
+        "kind": "bool",
+        "value": true
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "/Users/you/proj/6"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you\"].allowedTools",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "[HOME]"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you\"].disabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "[HOME]"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you\"].enabledMcpjsonServers",
+      "value": {
+        "kind": "list",
+        "values": []
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "[HOME]"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you\"].hasClaudeMdExternalIncludesApproved",
+      "value": {
+        "kind": "bool",
+        "value": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "[HOME]"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "setting",
+      "key_path": "projects[\"/Users/you\"].hasTrustDialogAccepted",
+      "value": {
+        "kind": "bool",
+        "value": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "local",
+          "root": "[HOME]"
+        },
+        "kind": "app_state",
+        "path": "[HOME]/.claude.json"
+      }
+    },
+    {
+      "type": "hook",
+      "event": "SessionStart",
+      "matcher": null,
+      "handler": {
+        "kind": "command",
+        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks-handlers/session-start.sh\"",
+        "args": [],
+        "timeout_secs": null,
+        "async": false
+      },
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "plugin",
+          "id": "explanatory-output-style@claude-plugins-official"
+        },
+        "kind": "hooks",
+        "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/hooks/hooks.json"
+      }
+    },
+    {
+      "type": "credential",
+      "path": "[HOME]/.codex/auth.json",
+      "exists": false,
+      "mode": null,
+      "readable_by_others": null,
+      "keys": [],
+      "source": {
+        "agent": "codex",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "credential",
+        "path": "[HOME]/.codex/auth.json"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "agent": "claude_code",
+      "scope": {
+        "kind": "plugin",
+        "id": "explanatory-output-style@claude-plugins-official"
+      },
+      "kind": "plugin",
+      "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/.claude-plugin/plugin.json",
+      "bytes": 284,
+      "sha256": "165fbcbc473b8dc3a1f1127cef8049c531c6183034ce8d88fdb866ff41532929"
+    },
+    {
+      "agent": "claude_code",
+      "scope": {
+        "kind": "plugin",
+        "id": "explanatory-output-style@claude-plugins-official"
+      },
+      "kind": "hooks",
+      "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/hooks/hooks.json",
+      "bytes": 323,
+      "sha256": "f941cedcbac07688675fb8d0fad741e9ba13900d73416409861001efe3fedba9"
+    },
+    {
+      "agent": "claude_code",
+      "scope": {
+        "kind": "user"
+      },
+      "kind": "plugin",
+      "path": "[HOME]/.claude/plugins/installed_plugins.json",
+      "bytes": 7436,
+      "sha256": "2487bd5350b833319b7b1db22cef1e48d992bdc15f3ba7b58575ccc20bcd5cc6"
+    },
+    {
+      "agent": "claude_code",
+      "scope": {
+        "kind": "user"
+      },
+      "kind": "plugin",
+      "path": "[HOME]/.claude/plugins/known_marketplaces.json",
+      "bytes": 504,
+      "sha256": "b966e657cbf5f0c133258399aa4c2656a60a5726a84524950049a46767773e84"
+    },
+    {
+      "agent": "claude_code",
+      "scope": {
+        "kind": "user"
+      },
+      "kind": "settings",
+      "path": "[HOME]/.claude/settings.json",
+      "bytes": 2851,
+      "sha256": "94d9966169739333401a4323946ddafb1b6c4c7a310424cb218e4efa4f0175ed"
+    },
+    {
+      "agent": "claude_code",
+      "scope": {
+        "kind": "user"
+      },
+      "kind": "settings",
+      "path": "[HOME]/.claude/settings.local.json",
+      "bytes": 902,
+      "sha256": "3b2896fa0d98a2f9f545013dc03c687c022cc620c53f8f5f8daabe438ee128cd"
+    },
+    {
+      "agent": "claude_code",
+      "scope": {
+        "kind": "user"
+      },
+      "kind": "app_state",
+      "path": "[HOME]/.claude.json",
+      "bytes": 5783,
+      "sha256": "a30ba874d2a794b699d5045c7dcf220b4b7a5094a88fc877e3994a128e6f325b"
+    }
+  ],
+  "warnings": []
+}

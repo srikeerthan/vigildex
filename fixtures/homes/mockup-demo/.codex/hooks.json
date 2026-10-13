@@ -1,0 +1,28 @@
+{
+  "description": "Session hooks",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/you/.codex/hooks/session-start.sh",
+            "statusMessage": "Loading context",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /Users/you/.codex/hooks/redact.py",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}

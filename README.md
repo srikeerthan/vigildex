@@ -19,6 +19,7 @@ It never sends anything off your machine, never reads credential values and neve
 ```sh
 brew install srikeerthan/tap/vigildex     # not yet published
 vigildex scan
+vigildex inventory --agent claude-code --type mcp-server
 vigildex findings --fail-on high
 vigildex usage --week --by type
 vigildex preflight ~/code/some-new-repo

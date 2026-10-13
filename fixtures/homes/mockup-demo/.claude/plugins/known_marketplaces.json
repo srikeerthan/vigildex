@@ -1,0 +1,18 @@
+{
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "/Users/you/.claude/plugins/marketplaces/claude-plugins-official",
+    "lastUpdated": "2026-10-12T20:20:41.233Z"
+  },
+  "acme-tools": {
+    "source": {
+      "source": "github",
+      "repo": "acme-corp/claude-plugins"
+    },
+    "installLocation": "/Users/you/.claude/plugins/marketplaces/acme-tools",
+    "lastUpdated": "2026-10-09T08:02:10.000Z"
+  }
+}

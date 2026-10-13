@@ -1,0 +1,17 @@
+---
+source: crates/vigildex-cli/tests/cli.rs
+expression: redact(&stdout(&output))
+---
+vigildex [VERSION]
+Home: [REPO]/fixtures/homes/basic (from --home)
+Scanned: Claude Code, Codex, Shared
+
+Claude Code
+  user
+    setting     permissions.allow              = [Bash(git status *)]
+    credential  ~/.claude/.credentials.json    not present
+
+Codex
+  user
+    setting     approval_policy                = on-request
+    credential  ~/.codex/auth.json             not present

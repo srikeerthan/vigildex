@@ -1,0 +1,62 @@
+---
+source: crates/vigildex-core/tests/real_samples.rs
+expression: json
+---
+{
+  "scanned": [
+    "claude_code",
+    "codex",
+    "shared"
+  ],
+  "project_roots": [],
+  "relocations": {},
+  "items": [
+    {
+      "type": "credential",
+      "path": "[HOME]/.claude/.credentials.json",
+      "exists": false,
+      "mode": null,
+      "readable_by_others": null,
+      "keys": [],
+      "source": {
+        "agent": "claude_code",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "credential",
+        "path": "[HOME]/.claude/.credentials.json"
+      }
+    },
+    {
+      "type": "credential",
+      "path": "[HOME]/.codex/auth.json",
+      "exists": true,
+      "mode": "0644",
+      "readable_by_others": true,
+      "keys": [
+        {
+          "name": "OPENAI_API_KEY",
+          "value_type": "null"
+        },
+        {
+          "name": "last_refresh",
+          "value_type": "string"
+        },
+        {
+          "name": "tokens",
+          "value_type": "object"
+        }
+      ],
+      "source": {
+        "agent": "codex",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "credential",
+        "path": "[HOME]/.codex/auth.json"
+      }
+    }
+  ],
+  "artifacts": [],
+  "warnings": []
+}

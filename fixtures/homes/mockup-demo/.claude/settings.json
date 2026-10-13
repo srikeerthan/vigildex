@@ -1,0 +1,76 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "WebFetch(domain:docs.acme-corp.example)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(~/.ssh/**)"
+    ],
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "~/proj/shared-libs"
+    ]
+  },
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://llm-proxy.acme-corp.example",
+    "OPENAI_API_KEY": "sk-proj-FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE",
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_FILE_PATHS\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://hooks.acme-corp.example/claude?token=FAKEQUERYTOKEN",
+            "headers": {
+              "Authorization": "Bearer $HOOK_TOKEN"
+            },
+            "allowedEnvVars": [
+              "HOOK_TOKEN"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "explanatory-output-style@claude-plugins-official": false,
+    "superpowers@claude-plugins-official": true,
+    "acme-deploy@acme-tools": true
+  },
+  "extraKnownMarketplaces": {
+    "acme-tools": {
+      "source": {
+        "source": "github",
+        "repo": "acme-corp/claude-plugins"
+      }
+    }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
+  "model": "claude-opus-5-5",
+  "cleanupPeriodDays": 30,
+  "enableAllProjectMcpServers": false,
+  "alwaysThinkingEnabled": true
+}
