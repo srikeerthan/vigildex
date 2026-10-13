@@ -50,14 +50,15 @@ The titles shown in lists come from the app screens (`vigildex-mac/docs/SCREENS.
 
 These rules decide how many findings a set of matches becomes. They were fixed on 13 Oct 2026 from the nine findings the app screens show for `fixtures/homes/mockup-demo`.
 
-1. **One finding per location.** When several rules match the same file and key (or the same line of a profile), the highest-severity rule wins and the other IDs are recorded as tags on that finding: BILL-001 over SEC-004 for an exported `ANTHROPIC_API_KEY`, SEC-004 over BILL-009 for an exported `GITHUB_TOKEN`.
+1. **One finding per location.** When several rules match the same file and key (or the same line of a profile), the highest-severity rule wins and the other IDs are recorded as tags on that finding; on equal severity the rule that names the key (BILL, RISK) beats the generic secret rule (SEC). So BILL-001 over SEC-004 for an exported `ANTHROPIC_API_KEY`, BILL-004 over SEC-004 for `CLAUDE_CODE_OAUTH_TOKEN`, SEC-004 over BILL-009 for an exported `GITHUB_TOKEN`, and RISK-009 over RISK-001 for a privileged Docker server on a floating tag.
 2. **No cross-file merge.** The same secret in two files is two findings, each with the rule of its own location.
 3. **One finding per server across agents.** The same MCP server (same name and launch) configured for several agents is one finding that carries every agent.
-4. **Disabled servers.** A server with `enabled = false` is inventoried but skipped by RISK-001, RISK-008 and RISK-009.
-5. **Inventory tags, not findings.** A skill that merely bundles scripts, and a plugin with `monitors` or `bin/` (RISK-011), are shown as "Why flagged" tags on the inventory row; RISK-007 fires only on an unrestricted `Bash` in `allowed-tools`.
+4. **Disabled things.** A server with `enabled = false`, and every component of a plugin that `enabledPlugins` turns off, is inventoried but skipped by every rule.
+5. **Inventory tags, not findings.** A skill that merely bundles scripts, a plugin with `monitors` or `bin/` (RISK-011), and a hook that runs a package runner (`npx prettier …`) are shown as "Why flagged" tags on the inventory row; RISK-007 fires only on an unrestricted `Bash` in `allowed-tools`, and RISK-002 only on its listed patterns.
 6. **Repo severity bump.** The one-step bump for repository files applies to pre-flight reports only; the Findings list keeps catalogue severities.
 7. **Permission bits.** SEC-006 reads the mode of the real file. Git stores no `0600`, so fixture tests copy the home to a temporary directory and set the stand-ins' modes explicitly.
-8. **Masks.** Evidence keeps a short prefix and the last three characters: `sk-ant-••••7Qa`, `ghp_••••f9a`.
+8. **Masks.** Evidence keeps a short prefix and the last three characters: `sk-ant-••••7Qa`, `ghp_••••f9a`. A rule must capture the whole token, so the mask ends with the token's real last characters.
+9. **Fixture fakes.** Secret rules match on vendor prefix and length class (`ghp_` plus 36 characters, `sk-ant-api03-` plus at least 80), never on entropy alone, so the `FAKE` values in `fixtures/` trigger them.
 
 ---
 
@@ -77,7 +78,7 @@ Engine: gitleaks/Betterleaks-format TOML rules in `rules/secrets/*.toml` (MIT, w
 
 **Recognised references (never flag):** `${VAR}`, `${VAR:-default}`, `${env:NAME}`, `${input:id}`, `${file:/path}`, `op://…`, `bearer_token_env_var`, `headersHelper`, values pointing at the Keychain.
 
-| ID | Title | Severity | Example | Fix (summary) |
+| ID | Check | Severity | Example | Fix (summary) |
 |---|---|---|---|---|
 | SEC-001 | Token stored in an MCP config | High | `~/.cursor/mcp.json › github › env › GITHUB_PERSONAL_ACCESS_TOKEN = ghp_••••f9a` | Replace with an env reference (`${env:…}` in Cursor, `${VAR}` in Claude), then rotate the token |
 | SEC-002 | Password in MCP server args/URL | Medium | `acme-api/.mcp.json › postgres › args › postgresql://app:••••@db…` | Use `${DATABASE_URL}` |
@@ -118,11 +119,11 @@ Local only. Never read values; presence and key names are enough.
 | RISK-001 | MCP server runs a floating version (`npx pkg`, `@latest`, a range, a Docker tag without digest) | Low |
 | RISK-002 | Hook or script downloads and runs code (`curl … \| sh`, `wget`, `base64 -d \| sh`, `eval`) | Medium |
 | RISK-003 | HTTP hook posts to a non-loopback URL | Medium |
-| RISK-004 | Bypass or auto-approve mode on: Claude `defaultMode: bypassPermissions`; Codex `approval_policy = "never"` with `danger-full-access`; VS Code `chat.tools.global.autoApprove: true`; Cursor CLI broad `Shell(*)` allow | Medium |
+| RISK-004 | Bypass or auto-approve mode on: Claude `defaultMode: bypassPermissions` in user or managed settings (a project or local value is inert since Claude Code 2.1.257 and is inventoried, not reported); Codex `approval_policy = "never"` with `danger-full-access`; VS Code `chat.tools.global.autoApprove: true`; Cursor CLI broad `Shell(*)` allow | Medium |
 | RISK-005 | Credentials kept in a plaintext file (Codex `cli_auth_credentials_store = "file"`, Copilot `config.json` token fallback, Copilot `mcp-secrets/` in use) | Low |
 | RISK-006 | `enableAllProjectMcpServers: true` | Medium |
-| RISK-007 | Skill bundles scripts or has unrestricted `allowed-tools: Bash` | Low |
-| RISK-008 | MCP server or hook runs from a hidden or temp folder (`~/.cache/.x/…`, `/tmp/…`) | High |
+| RISK-007 | Skill has unrestricted `allowed-tools: Bash` (bundled scripts are an inventory tag, finding policy 5) | Low |
+| RISK-008 | MCP server or hook runs from a hidden or temp folder (`~/.cache/.x/…`, `/tmp/…`). Paths inside the owning agent's own directory (`~/.claude`, `~/.codex`, `~/.cursor`, `~/.copilot`, their relocated forms) and the plugin cache (`${CLAUDE_PLUGIN_ROOT}`) are not hidden folders | High |
 | RISK-009 | Docker MCP server with `--privileged`, host-root mounts or `--network host` | Medium |
 | RISK-010 | Agent binary on `PATH` shadowed or outside its usual install location | High |
 | RISK-011 | Plugin `monitors` (persistent background commands) or `bin/` added to `PATH` | Low |
@@ -144,7 +145,7 @@ Every security-key diff becomes a change in the timeline. **Only these send a no
 | CHG-007 | Fake or shadowed agent binary appears on `PATH` | `Agent binary changed on PATH` | High |
 | CHG-008 | Managed policy file appears or changes | `Managed policy changed` | Medium |
 
-The notification body names the item and its agents (`lint-helper · Claude Code, Cursor`); the list row shows the title with the item name as its grey detail.
+The notification title is the list title and its body names the item and its agents (`New MCP server` / `lint-helper · Claude Code, Cursor`); the list row shows the title with the item name as its grey detail. (`SCREENS.md` § 2 still says "New MCP server added"; the app should use the list title.)
 
 Timeline-only (no notification): instruction file edits, rule files, setting toggles that aren't security keys, `AGENTS.md` updates, baseline creation.
 

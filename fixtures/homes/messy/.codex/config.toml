@@ -28,7 +28,7 @@ env = { LINT_HELPER_TOKEN = "lh_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE" }
 
 [mcp_servers.github]
 url = "https://api.githubcopilot.com/mcp/"
-http_headers = { Authorization = "Bearer ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a" }
+http_headers = { Authorization = "Bearer ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a" }
 
 [mcp_servers.fetch]
 command = "uvx"

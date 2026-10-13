@@ -1,0 +1,7 @@
+---
+description: Style notes
+globs: ["src/**/*.rs"]
+alwaysApply: false
+---
+
+Must not fire: scoped to globs.

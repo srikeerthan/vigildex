@@ -56,6 +56,16 @@
         "-y",
         "@acme/pinned-tool@2.1.0"
       ]
+    },
+    "sys-tools": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "ghcr.io/acme/mcp-tools@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      ]
     }
   },
   "projects": {

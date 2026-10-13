@@ -134,6 +134,34 @@ expression: redact(&text)
         }
       },
       {
+        "type": "mcp_server",
+        "name": "sys-tools",
+        "launch": {
+          "kind": "package",
+          "runner": "docker",
+          "spec": "ghcr.io/acme/mcp-tools@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "pin": "exact",
+          "args": [
+            "run",
+            "-i",
+            "--rm",
+            "ghcr.io/acme/mcp-tools@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          ]
+        },
+        "env_keys": [],
+        "header_keys": [],
+        "env_header_keys": [],
+        "enabled": null,
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "app_state",
+          "path": "[REPO]/fixtures/homes/messy/.claude.json"
+        }
+      },
+      {
         "type": "hook",
         "event": "Notification",
         "matcher": null,
@@ -515,6 +543,62 @@ expression: redact(&text)
       },
       {
         "type": "mcp_server",
+        "name": "postgres-nopw",
+        "launch": {
+          "kind": "package",
+          "runner": "npx",
+          "spec": "@modelcontextprotocol/server-postgres@0.6.2",
+          "pin": "exact",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-postgres@0.6.2",
+            "postgresql://app@db.acme.internal:5432/acme"
+          ]
+        },
+        "env_keys": [],
+        "header_keys": [],
+        "env_header_keys": [],
+        "enabled": null,
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "project",
+            "root": "[REPO]/fixtures/homes/messy/proj/acme-api"
+          },
+          "kind": "mcp_config",
+          "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.mcp.json"
+        }
+      },
+      {
+        "type": "mcp_server",
+        "name": "postgres-ref",
+        "launch": {
+          "kind": "package",
+          "runner": "npx",
+          "spec": "@modelcontextprotocol/server-postgres@0.6.2",
+          "pin": "exact",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-postgres@0.6.2",
+            "${DATABASE_URL}"
+          ]
+        },
+        "env_keys": [],
+        "header_keys": [],
+        "env_header_keys": [],
+        "enabled": null,
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "project",
+            "root": "[REPO]/fixtures/homes/messy/proj/acme-api"
+          },
+          "kind": "mcp_config",
+          "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.mcp.json"
+        }
+      },
+      {
+        "type": "mcp_server",
         "name": "safe-ref",
         "launch": {
           "kind": "remote",
@@ -561,6 +645,23 @@ expression: redact(&text)
         "value": {
           "kind": "text",
           "value": "/Users/you/proj/acme-api/scripts/anthropic-key.sh"
+        },
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "project",
+            "root": "[REPO]/fixtures/homes/messy/proj/acme-api"
+          },
+          "kind": "settings",
+          "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.claude/settings.json"
+        }
+      },
+      {
+        "type": "setting",
+        "key_path": "enableAllProjectMcpServers",
+        "value": {
+          "kind": "bool",
+          "value": false
         },
         "source": {
           "agent": "claude_code",
@@ -1481,8 +1582,8 @@ expression: redact(&text)
         },
         "kind": "app_state",
         "path": "[REPO]/fixtures/homes/messy/.claude.json",
-        "bytes": 1848,
-        "sha256": "c7e5f6c456ecf4264e1e79d81625076354ec8227d1b775f78bd730119dc683f9"
+        "bytes": 2098,
+        "sha256": "da47f7a67c55d4bbe29eb8317134ac0dee4437111e8935a0f4d2e98143c36f57"
       },
       {
         "agent": "codex",
@@ -1491,8 +1592,8 @@ expression: redact(&text)
         },
         "kind": "settings",
         "path": "[REPO]/fixtures/homes/messy/.codex/config.toml",
-        "bytes": 1301,
-        "sha256": "67ba1f03a3729b32548f1f9ff31a64ea2952046a32c80c98cb0f22f0f0f69e97"
+        "bytes": 1297,
+        "sha256": "04ffcebcb1cab2e711ad394c222c3c0d62dc11db58ab4209fd1d67f92381e1d1"
       },
       {
         "agent": "codex",
@@ -1512,8 +1613,8 @@ expression: redact(&text)
         },
         "kind": "settings",
         "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.claude/settings.json",
-        "bytes": 291,
-        "sha256": "53697cec9047dbe54a70af722b25b031a12f2a4dc4c2669878d3c903369c5026"
+        "bytes": 330,
+        "sha256": "b4c4e8e5ba01588355eff659f58b177d5a3150fb178a30c18cdb7ab32d009470"
       },
       {
         "agent": "codex",
@@ -1534,8 +1635,8 @@ expression: redact(&text)
         },
         "kind": "mcp_config",
         "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.mcp.json",
-        "bytes": 638,
-        "sha256": "e2ffcb17fe8e6ccc3455f4e6a2ebaf28f81f537230959d6c26198d59dac79c1d"
+        "bytes": 1053,
+        "sha256": "6474c6da566c6aca3f25bd10a2a2d416d88fa1d1902e4d8af5f7a8affcb93a05"
       },
       {
         "agent": "claude_code",

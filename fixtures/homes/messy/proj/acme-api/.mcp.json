@@ -13,7 +13,7 @@
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
-        "Authorization": "Bearer ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a"
+        "Authorization": "Bearer ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a"
       }
     },
     "safe-ref": {
@@ -22,6 +22,24 @@
       "headers": {
         "Authorization": "Bearer ${GITHUB_TOKEN}"
       }
+    },
+    "postgres-ref": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres@0.6.2",
+        "${DATABASE_URL}"
+      ]
+    },
+    "postgres-nopw": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres@0.6.2",
+        "postgresql://app@db.acme.internal:5432/acme"
+      ]
     }
   }
 }

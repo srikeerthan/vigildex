@@ -18,7 +18,7 @@ The macOS app lives in the private repo `srikeerthan/vigildex-mac` and embeds th
 2. **Never read credential values.** That covers macOS Keychain items, the contents of `~/.claude/.credentials.json`, values in `~/.codex/auth.json`, Cursor's `state.vscdb`, Copilot's `config.json` token fields, and browser cookies. Existence, file mode and owner are allowed. For JSON credential files, read key *names* only.
 3. **No network.** The engine makes no network calls: no telemetry, no update checks and no live verification of found secrets. The price table is vendored at build time.
 4. **No undocumented vendor endpoints** and no reuse of the user's tokens or cookies.
-5. **Never keep or print a full secret.** Mask at the point of detection (`sk-ant-••••7Qa`: a short prefix plus the last 3–4 characters). Findings carry a salted fingerprint, never the value.
+5. **Never keep or print a full secret.** Mask at the point of detection (`sk-ant-••••7Qa`: a short prefix plus the last three characters). Findings carry a salted fingerprint, never the value.
 6. **Transcripts.** Parse only usage and metadata fields from session logs. Never persist message content, tool output or prompts.
 7. **Vendor formats are internal and change without notice.** Every parser must tolerate unknown fields and missing keys, report "unknown" and keep going. A malformed file is a warning, never a panic.
 

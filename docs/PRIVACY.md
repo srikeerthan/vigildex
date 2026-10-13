@@ -11,7 +11,7 @@ Vigildex reads some of the most sensitive files on a developer's machine. These 
 | Run agents' own read-only commands, such as `claude agents --json` | Call undocumented vendor endpoints with the user's tokens |
 | Check that credential files exist, and their permissions | Send file contents, secrets or transcripts off the machine |
 | List running processes to label who probably changed a file | Send telemetry or crash reports |
-| Show masked secrets (prefix and last 3–4 characters) | Test found keys against the provider's API |
+| Show masked secrets (prefix and last three characters) | Test found keys against the provider's API |
 | Call official APIs with the user's own key, opt-in, in later phases (e.g. OpenRouter key limits) | Write to agent configs in Phase 1, except the opt-in status-line helper |
 
 ## What is stored, and where
