@@ -29,7 +29,12 @@ insta = { version = "1.49.0", features = ["json"] }
 schemars = "1.2.2"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
+# Pure-Rust YAML loader for skill, agent and rule frontmatter (MIT OR Apache-2.0).
+saphyr = "0.2.1"
+sha2 = "0.11.1"
 thiserror = "2.0.21"
+# TOML with spans, so later milestones can cite line numbers in findings.
+toml_edit = "0.25.17"
 # The default feature (`cargo-metadata`) is bindgen-only; the M7 bindgen tool
 # enables it on its own dependency. The library does not need it.
 uniffi = { version = "0.32.2", default-features = false }

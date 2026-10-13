@@ -1,14 +1,16 @@
 //! Vigildex engine core.
 //!
 //! Vigildex is a local, read-only guard and usage view for AI coding agents.
-//! This crate will hold the model, adapters, parsers, analyzers, diff,
-//! attribution, store, pricing and watcher described in
-//! `docs/ARCHITECTURE.md`. At milestone M0 it holds only the pieces every
-//! later milestone builds on:
+//! This crate holds the model, adapters, parsers and reports described in
+//! `docs/ARCHITECTURE.md`. At milestone M1 it inventories what Claude Code
+//! and Codex can run:
 //!
 //! - [`HomeEnv`]: the home directory the engine reads, with the `--home` /
 //!   `VIGILDEX_HOME` override that keeps tests away from the real `$HOME`;
-//! - [`ScanReport`]: the versioned envelope of `vigildex scan --json`.
+//! - [`model`]: agents, scopes and the normalised [`Item`]s (MCP servers,
+//!   hooks, skills, plugins, instructions, settings, credential metadata);
+//! - [`adapters`]: one per agent, each a table of documented paths and keys;
+//! - [`inventory`] and [`scan`]: the versioned reports behind the CLI.
 //!
 //! # Hard rules
 //!
@@ -16,11 +18,27 @@
 //! credential values, no network, no full secrets, no transcript content, and
 //! parsers that warn instead of panicking.
 
+pub mod adapters;
+pub mod agent_dirs;
+pub mod collect;
 pub mod home;
+pub mod inventory;
+pub mod launch;
+pub mod model;
+pub mod parse;
+pub mod report;
 pub mod scan;
 
+pub use agent_dirs::AgentDirs;
 pub use home::{HomeEnv, HomeError, HomeSource, HomeView, HOME_ENV_VAR};
-pub use scan::{scan, ScanReport, SCHEMA_VERSION};
+pub use inventory::{inventory, inventory_report};
+pub use model::{
+    Agent, ArtifactKind, ArtifactRef, ArtifactView, Credential, CredentialKey, Hook, HookHandler,
+    Instruction, Item, Launch, McpServer, Pin, Plugin, PluginComponent, RedactedValue, RemoteAuth,
+    Runner, Scope, Setting, Skill, SkillKind, Transport, Warning,
+};
+pub use report::{Inventory, InventoryReport, ScanReport, SCHEMA_VERSION};
+pub use scan::scan;
 
 /// Version of the engine, taken from the workspace version.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

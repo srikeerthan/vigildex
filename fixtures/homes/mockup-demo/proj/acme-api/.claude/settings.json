@@ -1,0 +1,44 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make test)",
+      "Bash(docker compose *)"
+    ],
+    "deny": [
+      "Read(./secrets/**)"
+    ]
+  },
+  "apiKeyHelper": "/Users/you/proj/acme-api/scripts/anthropic-key.sh",
+  "env": {
+    "DATABASE_URL": "postgresql://app:FAKEPASSWORDFAKE@db.acme.internal:5432/acme"
+  },
+  "enabledMcpjsonServers": [
+    "postgres",
+    "github"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/scripts/guard.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "acme-docs",
+            "tool": "log_session"
+          }
+        ]
+      }
+    ]
+  }
+}

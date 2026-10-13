@@ -1,0 +1,56 @@
+model = "gpt-5.3-codex"
+model_reasoning_effort = "high"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+cli_auth_credentials_store = "file"
+notify = ["python3", "/Users/you/.codex/notify.py"]
+
+[shell_environment_policy]
+inherit = "core"
+set = { CODEX_SANDBOX = "1", ACME_API_TOKEN = "acme_FAKEFAKEFAKEFAKEFAKE" }
+
+[features]
+codex_hooks = true
+
+[model_providers.local]
+name = "Ollama"
+base_url = "http://localhost:11434/v1"
+wire_api = "chat"
+
+[mcp_servers.lint-helper]
+command = "npx"
+args = ["-y", "@acme/lint-helper@latest"]
+env = { LINT_HELPER_TOKEN = "lh_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE" }
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "GITHUB_TOKEN"
+
+[mcp_servers.fetch]
+command = "uvx"
+args = ["mcp-server-fetch"]
+enabled = false
+startup_timeout_sec = 20
+
+[hooks]
+[[hooks.PreToolUse]]
+matcher = "Bash"
+
+  [[hooks.PreToolUse.hooks]]
+  type = "command"
+  command = "/Users/you/.codex/hooks/guard.sh"
+  timeout = 10
+
+[hooks.state."/Users/you/.codex/config.toml:pre_tool_use:0:0"]
+enabled = true
+trusted_hash = "0000000000000000000000000000000000000000000000000000000000000000"
+
+[projects."/Users/you/proj/acme-api"]
+trust_level = "trusted"
+
+[projects."/Users/you/proj/dotfiles-sync"]
+trust_level = "trusted"
+
+[[skills.config]]
+path = "/Users/you/.agents/skills/changelog/SKILL.md"
+enabled = false

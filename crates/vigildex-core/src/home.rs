@@ -164,6 +164,55 @@ impl HomeEnv {
             source: self.source,
         }
     }
+
+    /// Finds a path an agent recorded in its own files.
+    ///
+    /// Agents write absolute paths (`/Users/you/proj/acme`). When such a path
+    /// exists it is used as written. When it does not, and it sits under a
+    /// home-like prefix (`/Users/<name>`, `/home/<name>`, `/root`,
+    /// `C:\Users\<name>`), the same relative path is tried under this home.
+    /// That is what lets a fixture home refer to its own folders with the
+    /// paths a real agent would have written. When neither exists, the path
+    /// is returned as written, so callers can report it as missing.
+    #[must_use]
+    pub fn locate(&self, recorded: &Path) -> PathBuf {
+        if recorded.exists() {
+            return recorded.to_path_buf();
+        }
+        if let Some(rest) = strip_home_prefix(recorded) {
+            let candidate = if rest.as_os_str().is_empty() {
+                self.root.clone()
+            } else {
+                self.root.join(rest)
+            };
+            if candidate.exists() {
+                return candidate;
+            }
+        }
+        recorded.to_path_buf()
+    }
+}
+
+/// `/Users/<name>/rest`, `/home/<name>/rest`, `/root/rest` or
+/// `C:\Users\<name>\rest` → `rest`.
+fn strip_home_prefix(path: &Path) -> Option<PathBuf> {
+    use std::path::Component;
+    let mut parts = path
+        .components()
+        .filter(|c| !matches!(c, Component::Prefix(_) | Component::RootDir));
+    let first = parts.next()?;
+    let Component::Normal(first) = first else {
+        return None;
+    };
+    match first.to_str()? {
+        "Users" | "home" => {
+            // Skip the user name.
+            parts.next()?;
+        }
+        "root" => {}
+        _ => return None,
+    }
+    Some(parts.collect())
 }
 
 /// A resolved home directory as it appears in reports: plain data with no
@@ -384,6 +433,31 @@ mod tests {
                 ..
             }
         ));
+    }
+
+    #[test]
+    fn locate_keeps_existing_paths_and_remaps_home_like_ones() {
+        let dir = existing_dir();
+        let env = HomeEnv::resolve_with(Some(&dir), None, must_not_ask_for_user_home).unwrap();
+        // Exists as written: unchanged.
+        assert_eq!(env.locate(&dir.join("src")), dir.join("src"));
+        // A recorded path under another user's home maps onto this home.
+        assert_eq!(env.locate(Path::new("/Users/you/src")), dir.join("src"));
+        assert_eq!(
+            env.locate(Path::new("/home/you/src/lib.rs")),
+            dir.join("src/lib.rs")
+        );
+        assert_eq!(env.locate(Path::new("/root/src")), dir.join("src"));
+        assert_eq!(env.locate(Path::new("/Users/you")), dir);
+        // Missing under both: returned as written.
+        assert_eq!(
+            env.locate(Path::new("/Users/you/no-such-dir")),
+            PathBuf::from("/Users/you/no-such-dir")
+        );
+        assert_eq!(
+            env.locate(Path::new("/opt/no-such-dir")),
+            PathBuf::from("/opt/no-such-dir")
+        );
     }
 
     #[test]

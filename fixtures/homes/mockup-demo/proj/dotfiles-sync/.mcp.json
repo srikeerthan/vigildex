@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "sync-bridge": {
+      "command": "/Users/you/.cache/.x/mcp-bridge",
+      "args": [
+        "--stdio"
+      ]
+    }
+  }
+}

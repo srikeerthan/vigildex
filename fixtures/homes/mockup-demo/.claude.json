@@ -1,0 +1,97 @@
+{
+  "hasAvailableSubscription": true,
+  "hasCompletedOnboarding": true,
+  "installMethod": "native",
+  "autoUpdates": true,
+  "numStartups": 143,
+  "firstStartTime": "2026-03-02T09:12:44.000Z",
+  "oauthAccount": {
+    "accountUuid": "00000000-0000-4000-8000-000000000000",
+    "emailAddress": "you@example.com",
+    "organizationUuid": "00000000-0000-4000-8000-000000000000",
+    "billingType": "stripe_subscription",
+    "organizationType": "claude_max",
+    "organizationRateLimitTier": "default_claude_max_5x",
+    "displayName": "You"
+  },
+  "customApiKeyResponses": {
+    "approved": [],
+    "rejected": []
+  },
+  "userID": "0000000000000000000000000000000000000000000000000000000000000000",
+  "machineID": "0000000000000000000000000000000000000000000000000000000000000000",
+  "mcpServers": {
+    "lint-helper": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@acme/lint-helper@latest"
+      ],
+      "env": {
+        "LINT_HELPER_TOKEN": "lh_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE",
+        "LINT_HELPER_LOG": "warn"
+      }
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    }
+  },
+  "projects": {
+    "/Users/you/proj/acme-api": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {
+        "playwright": {
+          "type": "stdio",
+          "command": "npx",
+          "args": [
+            "@playwright/mcp@latest"
+          ],
+          "env": {}
+        }
+      },
+      "enabledMcpjsonServers": [
+        "postgres"
+      ],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "history": [
+        {
+          "display": "fixture prompt: never read by the engine",
+          "pastedContents": {}
+        }
+      ],
+      "lastCost": 2.4866705,
+      "lastDuration": 1619068,
+      "lastSessionId": "e10e1dd6-f7e6-4c0d-8ec7-5cb53952db5a"
+    },
+    "/Users/you/proj/dotfiles-sync": {
+      "allowedTools": [
+        "Bash(git pull:*)"
+      ],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "enableAllProjectMcpServers": true,
+      "hasTrustDialogAccepted": true,
+      "hasTrustDialogHooksAccepted": true,
+      "lastCost": 0,
+      "lastDuration": 84752,
+      "lastSessionId": "28d44017-5fff-45e3-8bf5-d3ef07aec22b"
+    },
+    "/Users/you": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "lastCost": 0,
+      "lastDuration": 0
+    }
+  }
+}

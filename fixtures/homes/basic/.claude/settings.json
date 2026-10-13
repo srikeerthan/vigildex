@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allow": ["Bash(git status *)"]
+  },
+  "model": "claude-sonnet-5-5"
+}

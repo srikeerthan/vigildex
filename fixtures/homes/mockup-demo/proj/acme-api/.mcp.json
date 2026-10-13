@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres@0.6.2",
+        "postgresql://app:FAKEPASSWORDFAKE@db.acme.internal:5432/acme"
+      ]
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "acme-docs": {
+      "type": "sse",
+      "url": "https://docs.acme.internal/mcp/sse",
+      "headersHelper": "/Users/you/proj/acme-api/scripts/mcp-auth.sh"
+    }
+  }
+}

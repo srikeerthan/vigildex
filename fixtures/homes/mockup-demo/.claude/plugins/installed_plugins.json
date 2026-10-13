@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "plugins": {
+    "context7@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/you/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df",
+        "version": "b8e53f1c05df",
+        "installedAt": "2026-04-27T17:35:53.181Z",
+        "lastUpdated": "2026-10-11T05:19:29.584Z",
+        "gitCommitSha": "0000000000000000000000000000000000000000"
+      }
+    ],
+    "explanatory-output-style@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/you/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-04-27T17:39:53.275Z",
+        "lastUpdated": "2026-04-27T17:39:53.275Z"
+      }
+    ],
+    "superpowers@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/you/.claude/plugins/cache/claude-plugins-official/superpowers/6.4.1",
+        "version": "6.4.1",
+        "installedAt": "2026-04-27T17:32:28.919Z",
+        "lastUpdated": "2026-10-03T21:43:48.032Z",
+        "gitCommitSha": "0000000000000000000000000000000000000000"
+      }
+    ],
+    "acme-deploy@acme-tools": [
+      {
+        "scope": "user",
+        "installPath": "/Users/you/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1",
+        "version": "0.3.1",
+        "installedAt": "2026-10-09T08:02:11.000Z",
+        "lastUpdated": "2026-10-09T08:02:11.000Z",
+        "gitCommitSha": "0000000000000000000000000000000000000000"
+      }
+    ]
+  }
+}

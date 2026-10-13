@@ -5,7 +5,7 @@ expression: schema
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ScanReport",
-  "description": "Output of `vigildex scan --json`.",
+  "description": "Output of `vigildex scan --json`.\n\nAt milestone M1 a scan is an inventory. Findings (M2) and sessions (M3)\nare added as further sections.",
   "type": "object",
   "properties": {
     "engine_version": {
@@ -15,6 +15,10 @@ expression: schema
     "home": {
       "description": "The home directory that was scanned and how it was chosen.",
       "$ref": "#/$defs/HomeView"
+    },
+    "inventory": {
+      "description": "The inventory.",
+      "$ref": "#/$defs/Inventory"
     },
     "schema_version": {
       "description": "Version of this JSON contract; see [`SCHEMA_VERSION`].",
@@ -26,9 +30,221 @@ expression: schema
   "required": [
     "schema_version",
     "engine_version",
-    "home"
+    "home",
+    "inventory"
   ],
   "$defs": {
+    "Agent": {
+      "description": "An AI coding agent, or the shared sources that several agents read.",
+      "oneOf": [
+        {
+          "description": "Anthropic's Claude Code (CLI, desktop and IDE extensions share `~/.claude`).",
+          "type": "string",
+          "const": "claude_code"
+        },
+        {
+          "description": "OpenAI Codex (CLI, IDE extension and desktop app share `~/.codex`).",
+          "type": "string",
+          "const": "codex"
+        },
+        {
+          "description": "Cursor (adapter arrives in M5).",
+          "type": "string",
+          "const": "cursor"
+        },
+        {
+          "description": "GitHub Copilot CLI (adapter arrives in M5).",
+          "type": "string",
+          "const": "copilot_cli"
+        },
+        {
+          "description": "GitHub Copilot in VS Code agent mode (adapter arrives in M5).",
+          "type": "string",
+          "const": "vs_code_agent"
+        },
+        {
+          "description": "Sources read by several agents at once, such as `~/.agents/skills`.",
+          "type": "string",
+          "const": "shared"
+        }
+      ]
+    },
+    "ArtifactKind": {
+      "description": "What kind of file an artifact is.",
+      "oneOf": [
+        {
+          "description": "A settings file (`settings.json`, `config.toml`).",
+          "type": "string",
+          "const": "settings"
+        },
+        {
+          "description": "Agent application state (`~/.claude.json`).",
+          "type": "string",
+          "const": "app_state"
+        },
+        {
+          "description": "A standalone MCP configuration (`.mcp.json`).",
+          "type": "string",
+          "const": "mcp_config"
+        },
+        {
+          "description": "A standalone hooks file (`hooks.json`).",
+          "type": "string",
+          "const": "hooks"
+        },
+        {
+          "description": "A skill, command or subagent definition (Markdown with frontmatter).",
+          "type": "string",
+          "const": "skill"
+        },
+        {
+          "description": "A plugin registry or manifest.",
+          "type": "string",
+          "const": "plugin"
+        },
+        {
+          "description": "An instruction file loaded into the agent's context.",
+          "type": "string",
+          "const": "instructions"
+        },
+        {
+          "description": "A credential file. Only metadata and key names are ever read.",
+          "type": "string",
+          "const": "credential"
+        }
+      ]
+    },
+    "ArtifactRef": {
+      "description": "A file the engine read, and where it sits in the agent's configuration.",
+      "type": "object",
+      "properties": {
+        "agent": {
+          "description": "The agent that reads this file.",
+          "$ref": "#/$defs/Agent"
+        },
+        "kind": {
+          "description": "What kind of file it is.",
+          "$ref": "#/$defs/ArtifactKind"
+        },
+        "path": {
+          "description": "Absolute path of the file (or directory, for a skill).",
+          "type": "string"
+        },
+        "scope": {
+          "description": "Where the file applies.",
+          "$ref": "#/$defs/Scope"
+        }
+      },
+      "required": [
+        "agent",
+        "scope",
+        "kind",
+        "path"
+      ]
+    },
+    "ArtifactView": {
+      "description": "An artifact as listed in a report, with the hash the change engine (M4)\nwill compare against.",
+      "type": "object",
+      "properties": {
+        "agent": {
+          "description": "The agent that reads this file.",
+          "$ref": "#/$defs/Agent"
+        },
+        "bytes": {
+          "description": "Size of the file in bytes.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "kind": {
+          "description": "What kind of file it is.",
+          "$ref": "#/$defs/ArtifactKind"
+        },
+        "path": {
+          "description": "Absolute path of the file.",
+          "type": "string"
+        },
+        "scope": {
+          "description": "Where the file applies.",
+          "$ref": "#/$defs/Scope"
+        },
+        "sha256": {
+          "description": "Lower-case hex SHA-256 of the file contents.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent",
+        "scope",
+        "kind",
+        "path",
+        "bytes",
+        "sha256"
+      ]
+    },
+    "Credential": {
+      "description": "Metadata about a credential file. Hard rule 2: never the values.",
+      "type": "object",
+      "properties": {
+        "exists": {
+          "description": "Whether the file exists. For Claude Code, `false` means the Keychain\nholds the credentials.",
+          "type": "boolean"
+        },
+        "keys": {
+          "description": "Top-level key names and their JSON value types, for a JSON file.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CredentialKey"
+          }
+        },
+        "mode": {
+          "description": "Unix permission bits as octal text (`0600`), when available.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "description": "Absolute path of the file.",
+          "type": "string"
+        },
+        "readable_by_others": {
+          "description": "Whether users other than the owner can read the file, when the\nplatform reports permission bits.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "source": {
+          "description": "Where the metadata was read from.",
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "path",
+        "exists",
+        "keys",
+        "source"
+      ]
+    },
+    "CredentialKey": {
+      "description": "One top-level key of a JSON credential file.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The key name.",
+          "type": "string"
+        },
+        "value_type": {
+          "description": "The JSON type of the value (`string`, `null`, `object`, …). Never the\nvalue itself.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value_type"
+      ]
+    },
     "HomeSource": {
       "description": "How the home directory was chosen.",
       "oneOf": [
@@ -65,6 +281,1277 @@ expression: schema
       "required": [
         "root",
         "source"
+      ]
+    },
+    "Hook": {
+      "description": "A hook handler registered for a lifecycle event.",
+      "type": "object",
+      "properties": {
+        "event": {
+          "description": "The event name as written (`PreToolUse`, `SessionStart`, …).",
+          "type": "string"
+        },
+        "handler": {
+          "description": "What runs.",
+          "$ref": "#/$defs/HookHandler"
+        },
+        "matcher": {
+          "description": "The matcher as written, when the group has one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "description": "Where the hook was read from.",
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "event",
+        "handler",
+        "source"
+      ]
+    },
+    "HookHandler": {
+      "description": "What a hook runs.",
+      "oneOf": [
+        {
+          "description": "A shell command.",
+          "type": "object",
+          "properties": {
+            "args": {
+              "description": "Exec-form arguments (Claude Code `args`), masked the same way.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "async": {
+              "description": "Whether the hook runs in the background.",
+              "type": "boolean"
+            },
+            "command": {
+              "description": "The command as written, with obvious credentials masked.",
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "const": "command"
+            },
+            "timeout_secs": {
+              "description": "Timeout in seconds, when set.",
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "command",
+            "args",
+            "async"
+          ]
+        },
+        {
+          "description": "An HTTP request to a URL (Claude Code).",
+          "type": "object",
+          "properties": {
+            "allowed_env_vars": {
+              "description": "Environment variables the hook may interpolate into headers.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "header_keys": {
+              "description": "Header names. Values are never recorded.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "http"
+            },
+            "timeout_secs": {
+              "description": "Timeout in seconds, when set.",
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "uint64",
+              "minimum": 0
+            },
+            "url": {
+              "description": "The URL with user information and the query string removed.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "url",
+            "header_keys",
+            "allowed_env_vars"
+          ]
+        },
+        {
+          "description": "A tool call on an MCP server.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "mcp_tool"
+            },
+            "server": {
+              "description": "The server name.",
+              "type": "string"
+            },
+            "timeout_secs": {
+              "description": "Timeout in seconds, when set.",
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "uint64",
+              "minimum": 0
+            },
+            "tool": {
+              "description": "The tool name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "server",
+            "tool"
+          ]
+        },
+        {
+          "description": "A single model turn with a prompt (the prompt text is not recorded).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "prompt"
+            },
+            "model": {
+              "description": "The model, when set.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "timeout_secs": {
+              "description": "Timeout in seconds, when set.",
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "description": "A subagent run (the prompt text is not recorded).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "agent"
+            },
+            "model": {
+              "description": "The model, when set.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "timeout_secs": {
+              "description": "Timeout in seconds, when set.",
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "description": "A handler type the engine does not know.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "unknown"
+            },
+            "type_name": {
+              "description": "The `type` value as written, if any.",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "Instruction": {
+      "description": "An instruction file the agent loads into context.",
+      "type": "object",
+      "properties": {
+        "always_apply": {
+          "description": "Whether the file loads in every session. `Some(false)` for a rule\nscoped to paths by its frontmatter; `None` when the format has no\nsuch switch.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "lines": {
+          "description": "Number of lines. The text is never recorded.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "path": {
+          "description": "Absolute path of the file.",
+          "type": "string"
+        },
+        "source": {
+          "description": "Where the file was read from.",
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "path",
+        "lines",
+        "source"
+      ]
+    },
+    "Inventory": {
+      "description": "Everything the adapters found in one home: what each agent can run.",
+      "type": "object",
+      "properties": {
+        "artifacts": {
+          "description": "Every file that was read, with its hash.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactView"
+          }
+        },
+        "items": {
+          "description": "The items, sorted by agent, scope, type and name.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Item"
+          }
+        },
+        "project_roots": {
+          "description": "Repository roots the agents recorded (trust decisions, local MCP\nservers), located under the scanned home and found to exist.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relocations": {
+          "description": "Relocation variables found in the home's shell profiles\n(`CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `COPILOT_HOME`), with the\ndirectory each resolved to.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "scanned": {
+          "description": "The agents that were looked for. An agent missing from this list was\nnot scanned, which is different from an agent with no items.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Agent"
+          }
+        },
+        "warnings": {
+          "description": "Files that could not be read or understood. Never fatal.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Warning"
+          }
+        }
+      },
+      "required": [
+        "scanned",
+        "project_roots",
+        "relocations",
+        "items",
+        "artifacts",
+        "warnings"
+      ]
+    },
+    "Item": {
+      "description": "One thing an agent can run or load, normalised across agents.",
+      "oneOf": [
+        {
+          "description": "An MCP server the agent can start or connect to.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "mcp_server"
+            }
+          },
+          "$ref": "#/$defs/McpServer",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A hook handler registered for a lifecycle event.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "hook"
+            }
+          },
+          "$ref": "#/$defs/Hook",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A skill, legacy command or subagent definition.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "skill"
+            }
+          },
+          "$ref": "#/$defs/Skill",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "An installed plugin.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "plugin"
+            }
+          },
+          "$ref": "#/$defs/Plugin",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "An instruction file loaded into context.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "instruction"
+            }
+          },
+          "$ref": "#/$defs/Instruction",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A security-relevant setting.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "setting"
+            }
+          },
+          "$ref": "#/$defs/Setting",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "Metadata about a credential file (never its contents).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "credential"
+            }
+          },
+          "$ref": "#/$defs/Credential",
+          "required": [
+            "type"
+          ]
+        }
+      ]
+    },
+    "Launch": {
+      "description": "How an MCP server is launched or reached.",
+      "oneOf": [
+        {
+          "description": "A package fetched and run by a package runner (`npx`, `uvx`, `docker`, …).",
+          "type": "object",
+          "properties": {
+            "args": {
+              "description": "The full argument list after the runner, with obvious credentials\nmasked.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "package"
+            },
+            "pin": {
+              "description": "Whether the specification pins an exact version.",
+              "$ref": "#/$defs/Pin"
+            },
+            "runner": {
+              "description": "The runner.",
+              "$ref": "#/$defs/Runner"
+            },
+            "spec": {
+              "description": "The package or image specification as written.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "runner",
+            "spec",
+            "pin",
+            "args"
+          ]
+        },
+        {
+          "description": "A script run by an interpreter (`node`, `python3`, `bash`, …).",
+          "type": "object",
+          "properties": {
+            "args": {
+              "description": "The full argument list after the interpreter, with obvious\ncredentials masked.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "interpreter": {
+              "description": "The interpreter command as written.",
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "const": "interpreter"
+            },
+            "script": {
+              "description": "The script path, or the first non-flag argument.",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "interpreter",
+            "args"
+          ]
+        },
+        {
+          "description": "Any other executable.",
+          "type": "object",
+          "properties": {
+            "args": {
+              "description": "The argument list, with obvious credentials masked.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "command": {
+              "description": "The command as written.",
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "const": "binary"
+            }
+          },
+          "required": [
+            "kind",
+            "command",
+            "args"
+          ]
+        },
+        {
+          "description": "A remote server reached over HTTP, SSE or WebSocket.",
+          "type": "object",
+          "properties": {
+            "auth": {
+              "description": "How the connection authenticates.",
+              "$ref": "#/$defs/RemoteAuth"
+            },
+            "kind": {
+              "type": "string",
+              "const": "remote"
+            },
+            "transport": {
+              "description": "The transport named in the configuration.",
+              "$ref": "#/$defs/Transport"
+            },
+            "url": {
+              "description": "The URL with user information and the query string removed.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "url",
+            "transport",
+            "auth"
+          ]
+        },
+        {
+          "description": "The configuration names neither a command nor a URL.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "unknown"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "McpServer": {
+      "description": "An MCP server definition.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether the configuration enables the server, when it says so\n(Codex `enabled`). `None` means the configuration does not say.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "env_header_keys": {
+          "description": "Names of headers whose values come from environment variables\n(Codex `env_http_headers`).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "env_keys": {
+          "description": "Names of the environment variables the configuration sets for the\nserver. Values are never recorded.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "header_keys": {
+          "description": "Names of static request headers. Values are never recorded.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "launch": {
+          "description": "How the server is started or reached.",
+          "$ref": "#/$defs/Launch"
+        },
+        "name": {
+          "description": "The server's name in its configuration.",
+          "type": "string"
+        },
+        "source": {
+          "description": "Where the definition was read from.",
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "name",
+        "launch",
+        "env_keys",
+        "header_keys",
+        "env_header_keys",
+        "source"
+      ]
+    },
+    "Pin": {
+      "description": "Whether a package specification pins an exact version.",
+      "oneOf": [
+        {
+          "description": "An exact version or digest (`pkg@1.2.3`, `pkg==1.2.3`, `image@sha256:…`).",
+          "type": "string",
+          "const": "exact"
+        },
+        {
+          "description": "No version, a tag, `latest` or a range: the code can change under the\nagent without a configuration change.",
+          "type": "string",
+          "const": "floating"
+        }
+      ]
+    },
+    "Plugin": {
+      "description": "An installed plugin.",
+      "type": "object",
+      "properties": {
+        "components": {
+          "description": "Component types found in the install folder.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PluginComponent"
+          }
+        },
+        "enabled": {
+          "description": "Whether settings enable the plugin. `None` when settings do not say.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The identifier as the agent writes it (`name@marketplace`).",
+          "type": "string"
+        },
+        "install_path": {
+          "description": "The install folder, as located under the scanned home.",
+          "type": "string"
+        },
+        "install_scope": {
+          "description": "The install scope recorded by the agent (`user`, `project`, …).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "installed": {
+          "description": "Whether the install folder exists.",
+          "type": "boolean"
+        },
+        "marketplace": {
+          "description": "The marketplace it was installed from, when the identifier has one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "marketplace_source": {
+          "description": "Where the marketplace comes from (`github:owner/repo`, a URL or a\npath), when the agent recorded it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "The plugin name.",
+          "type": "string"
+        },
+        "source": {
+          "description": "Where the plugin was read from (the install registry).",
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "version": {
+          "description": "The installed version, when recorded.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "install_path",
+        "installed",
+        "components",
+        "source"
+      ]
+    },
+    "PluginComponent": {
+      "description": "A component type a plugin bundles.",
+      "oneOf": [
+        {
+          "description": "`skills/`.",
+          "type": "string",
+          "const": "skills"
+        },
+        {
+          "description": "`commands/`.",
+          "type": "string",
+          "const": "commands"
+        },
+        {
+          "description": "`agents/`.",
+          "type": "string",
+          "const": "agents"
+        },
+        {
+          "description": "`hooks/hooks.json`.",
+          "type": "string",
+          "const": "hooks"
+        },
+        {
+          "description": "`.mcp.json`.",
+          "type": "string",
+          "const": "mcp_servers"
+        },
+        {
+          "description": "`.lsp.json`.",
+          "type": "string",
+          "const": "lsp_servers"
+        },
+        {
+          "description": "`output-styles/`.",
+          "type": "string",
+          "const": "output_styles"
+        },
+        {
+          "description": "`workflows/`.",
+          "type": "string",
+          "const": "workflows"
+        },
+        {
+          "description": "`monitors/monitors.json`: persistent background commands.",
+          "type": "string",
+          "const": "monitors"
+        },
+        {
+          "description": "`bin/`: executables added to the Bash tool's `PATH`.",
+          "type": "string",
+          "const": "bin"
+        },
+        {
+          "description": "`settings.json` at the plugin root.",
+          "type": "string",
+          "const": "settings"
+        }
+      ]
+    },
+    "RedactedValue": {
+      "description": "A setting value that is safe to show.\n\nObjects are reduced to their key names, so an `env` block never leaks a\nvalue. A secret rule (M2) turns matching text into masked evidence.",
+      "oneOf": [
+        {
+          "description": "A boolean.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "bool"
+            },
+            "value": {
+              "description": "The value.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ]
+        },
+        {
+          "description": "A number.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "number"
+            },
+            "value": {
+              "description": "The value.",
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ]
+        },
+        {
+          "description": "A string: a mode, a command, a URL or a path.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "text"
+            },
+            "value": {
+              "description": "The value.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ]
+        },
+        {
+          "description": "A list of strings (rules, paths, hosts).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "list"
+            },
+            "values": {
+              "description": "The values.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ]
+        },
+        {
+          "description": "An object, reduced to its key names.",
+          "type": "object",
+          "properties": {
+            "keys": {
+              "description": "The key names.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "const": "keys"
+            }
+          },
+          "required": [
+            "kind",
+            "keys"
+          ]
+        },
+        {
+          "description": "The key exists; nothing about its value is recorded.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "present"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "description": "The key is set to `null`.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "null"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "RemoteAuth": {
+      "description": "How a remote MCP server authenticates.",
+      "oneOf": [
+        {
+          "description": "Nothing in the configuration.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "none"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "description": "OAuth, with tokens held by the agent.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "oauth"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "description": "Static headers in the configuration (names in\n[`McpServer::header_keys`]).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "static_headers"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "description": "A bearer token read from the named environment variable at use time\n(Codex `bearer_token_env_var`).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "bearer_env_var"
+            },
+            "var": {
+              "description": "The variable name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "var"
+          ]
+        },
+        {
+          "description": "A command that prints headers at connection time (Claude Code\n`headersHelper`, Codex `http_headers_helper`).",
+          "type": "object",
+          "properties": {
+            "command": {
+              "description": "The command as written.",
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "const": "headers_helper"
+            }
+          },
+          "required": [
+            "kind",
+            "command"
+          ]
+        }
+      ]
+    },
+    "Runner": {
+      "description": "A package runner that downloads code before running it.",
+      "oneOf": [
+        {
+          "description": "`npx` (npm).",
+          "type": "string",
+          "const": "npx"
+        },
+        {
+          "description": "`pnpx` or `pnpm dlx`.",
+          "type": "string",
+          "const": "pnpx"
+        },
+        {
+          "description": "`bunx` or `bun x`.",
+          "type": "string",
+          "const": "bunx"
+        },
+        {
+          "description": "`uvx` or `uv tool run`.",
+          "type": "string",
+          "const": "uvx"
+        },
+        {
+          "description": "`pipx run`.",
+          "type": "string",
+          "const": "pipx"
+        },
+        {
+          "description": "`docker run`.",
+          "type": "string",
+          "const": "docker"
+        }
+      ]
+    },
+    "Scope": {
+      "description": "Where a configuration applies.\n\nProject paths are the ones the agent itself recorded (for example the\nkeys of `projects` in `~/.claude.json`), resolved to a directory under the\nscanned home when the recorded path does not exist there (see\n[`crate::HomeEnv::locate`]).",
+      "oneOf": [
+        {
+          "description": "Organisation policy deployed to the machine.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "managed"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "description": "The user's own files under the home directory.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "user"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "description": "A repository's shared files, usually committed.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "project"
+            },
+            "root": {
+              "description": "The repository root.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "root"
+          ]
+        },
+        {
+          "description": "The user's private settings for one repository, including agent state\nrecorded against that repository (trust, local MCP servers).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "local"
+            },
+            "root": {
+              "description": "The repository root.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "root"
+          ]
+        },
+        {
+          "description": "Bundled with an installed plugin.",
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "The plugin identifier, `name@marketplace` for Claude Code.",
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "const": "plugin"
+            }
+          },
+          "required": [
+            "kind",
+            "id"
+          ]
+        }
+      ]
+    },
+    "Setting": {
+      "description": "A security-relevant setting.",
+      "type": "object",
+      "properties": {
+        "key_path": {
+          "description": "The key path in the file, with `.` between segments and quoted\nsegments for paths (`projects[\"/Users/you/proj\"].trust_level`).",
+          "type": "string"
+        },
+        "source": {
+          "description": "Where the setting was read from.",
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "value": {
+          "description": "The value, reduced to what is safe to show.",
+          "$ref": "#/$defs/RedactedValue"
+        }
+      },
+      "required": [
+        "key_path",
+        "value",
+        "source"
+      ]
+    },
+    "Skill": {
+      "description": "A skill, legacy command or subagent.",
+      "type": "object",
+      "properties": {
+        "allowed_tools": {
+          "description": "Tools pre-approved while the skill runs (`allowed-tools`, or a\nsubagent's `tools`).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "description": "The frontmatter `description`, cut to a short length. The body is\nnever recorded.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hook_count": {
+          "description": "Number of hook handlers declared in the frontmatter. Each one is also\nreported as a [`Hook`] item with this definition as its source.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "kind": {
+          "description": "What kind of definition it is.",
+          "$ref": "#/$defs/SkillKind"
+        },
+        "model_invocable": {
+          "description": "Whether the model may invoke the skill on its own\n(`disable-model-invocation` inverted). `None` when unset.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "The name: frontmatter `name`, else the folder or file name.",
+          "type": "string"
+        },
+        "path": {
+          "description": "The skill folder, or the command or subagent file.",
+          "type": "string"
+        },
+        "permission_mode": {
+          "description": "A subagent's `permissionMode`, when set.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scripts": {
+          "description": "Script-like files bundled in the skill folder, relative to it.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "description": "Where the definition was read from.",
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "user_invocable": {
+          "description": "Whether the user may invoke the skill from the `/` menu\n(`user-invocable`). `None` when unset.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "path",
+        "allowed_tools",
+        "scripts",
+        "hook_count",
+        "source"
+      ]
+    },
+    "SkillKind": {
+      "description": "The kind of Markdown definition a [`Skill`] item came from.",
+      "oneOf": [
+        {
+          "description": "A `SKILL.md` folder (Agent Skills format).",
+          "type": "string",
+          "const": "skill"
+        },
+        {
+          "description": "A legacy Claude Code command file (`commands/<name>.md`).",
+          "type": "string",
+          "const": "command"
+        },
+        {
+          "description": "A Claude Code subagent file (`agents/<name>.md`).",
+          "type": "string",
+          "const": "subagent"
+        }
+      ]
+    },
+    "Transport": {
+      "description": "The transport of a remote MCP server.",
+      "oneOf": [
+        {
+          "description": "Streamable HTTP (`http`, `streamable-http`, or Codex's URL form).",
+          "type": "string",
+          "const": "http"
+        },
+        {
+          "description": "Server-sent events.",
+          "type": "string",
+          "const": "sse"
+        },
+        {
+          "description": "WebSocket.",
+          "type": "string",
+          "const": "ws"
+        },
+        {
+          "description": "A transport name the engine does not know.",
+          "type": "string",
+          "const": "unknown"
+        }
+      ]
+    },
+    "Warning": {
+      "description": "Something the engine could not read or understand. A warning never stops\na scan.",
+      "type": "object",
+      "properties": {
+        "agent": {
+          "description": "The agent whose file it concerns, when known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Agent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "description": "What went wrong, in one sentence.",
+          "type": "string"
+        },
+        "path": {
+          "description": "The file it concerns, when known.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "message"
       ]
     }
   }
