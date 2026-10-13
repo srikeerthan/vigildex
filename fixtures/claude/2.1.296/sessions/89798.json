@@ -1,0 +1,24 @@
+{
+  "pid": 89798,
+  "sessionId": "7e6c0a59-75a1-4433-bdd9-6f9a349856a6",
+  "cwd": "/Users/you/proj/5/.claude/worktrees/d3",
+  "startedAt": 1791832456557,
+  "procStart": "Mon Oct 12 19:14:15 2026",
+  "version": "2.1.295",
+  "peerProtocol": 1,
+  "peerFeatures": [
+    "notify_idle",
+    "reply_across_default_dirs",
+    "artifact_yield"
+  ],
+  "kind": "interactive",
+  "entrypoint": "claude-desktop",
+  "hostSessionId": "FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFA",
+  "pidDomain": "darwin",
+  "messagingSocketPath": "/tmp/cc-socks/89798.sock",
+  "name": "",
+  "nameSince": 1791832456557,
+  "updatedAt": 1791836779527,
+  "status": "idle",
+  "statusUpdatedAt": 1791836779527
+}

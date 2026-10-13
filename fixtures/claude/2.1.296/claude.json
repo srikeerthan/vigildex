@@ -1,0 +1,171 @@
+{
+  "hasAvailableSubscription": false,
+  "hasCompletedOnboarding": true,
+  "hasOpusPlanDefault": false,
+  "installMethod": "native",
+  "autoUpdates": false,
+  "autoUpdaterStatus": "migrated",
+  "numStartups": 280,
+  "firstStartTime": "2025-06-22T07:15:04.751Z",
+  "lastOnboardingVersion": "1.0.31",
+  "migrationVersion": 14,
+  "editorMode": "vim",
+  "autoCompactEnabled": false,
+  "claudeCodeFirstTokenDate": "2025-07-25T14:29:56.121813Z",
+  "oauthAccount": {
+    "accountUuid": "00000000-0000-4000-8000-000000000000",
+    "emailAddress": "you@example.com",
+    "organizationUuid": "00000000-0000-4000-8000-000000000000",
+    "hasExtraUsageEnabled": false,
+    "billingType": "stripe_subscription",
+    "accountCreatedAt": "2025-01-01T00:00:00.000Z",
+    "subscriptionCreatedAt": "2025-01-01T00:00:00.000Z",
+    "ccOnboardingFlags": {},
+    "claudeCodeTrialEndsAt": null,
+    "claudeCodeTrialDurationDays": null,
+    "seatTier": null,
+    "displayName": "You",
+    "fullName": "You Example",
+    "profileFetchedAt": 1791824627106,
+    "organizationRole": "admin",
+    "workspaceRole": null,
+    "organizationName": "you@example.com",
+    "organizationType": "claude_max",
+    "organizationRateLimitTier": "default_claude_max_20x",
+    "userRateLimitTier": null
+  },
+  "customApiKeyResponses": {
+    "approved": [],
+    "rejected": []
+  },
+  "userID": "0000000000000000000000000000000000000000000000000000000000000000",
+  "machineID": "0000000000000000000000000000000000000000000000000000000000000000",
+  "projects": {
+    "/Users/you/proj/6": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {
+        "context7": {
+          "type": "http",
+          "url": "https://mcp.context7.com/mcp"
+        },
+        "playwright": {
+          "type": "stdio",
+          "command": "npx",
+          "args": [
+            "@playwright/mcp@latest"
+          ],
+          "env": {}
+        }
+      },
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastCost": 2.4866705,
+      "lastAPIDuration": 542910,
+      "lastDuration": 1619068,
+      "lastTotalInputTokens": 392,
+      "lastTotalOutputTokens": 38545,
+      "lastTotalCacheCreationInputTokens": 160118,
+      "lastTotalCacheReadInputTokens": 1043984,
+      "lastTotalWebSearchRequests": 0,
+      "lastModelUsage": {
+        "claude-opus-4-7[1m]": {
+          "inputTokens": 46,
+          "outputTokens": 38532,
+          "cacheReadInputTokens": 1043984,
+          "cacheCreationInputTokens": 160118,
+          "webSearchRequests": 0,
+          "costUSD": 2.4862595
+        },
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 346,
+          "outputTokens": 13,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.000411
+        }
+      },
+      "lastSessionId": "e10e1dd6-f7e6-4c0d-8ec7-5cb53952db5a"
+    },
+    "/Users/you/proj/17": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastCost": 17.08859464999999,
+      "lastAPIDuration": 3750565,
+      "lastDuration": 270052012,
+      "lastTotalInputTokens": 53918,
+      "lastTotalOutputTokens": 196162,
+      "lastTotalCacheCreationInputTokens": 1106341,
+      "lastTotalCacheReadInputTokens": 18178427,
+      "lastTotalWebSearchRequests": 0,
+      "lastSessionId": "a4348c0b-6f6e-4d8f-a414-8509c5213695"
+    },
+    "/Users/you": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastDuration": 84752,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastSessionId": "28d44017-5fff-45e3-8bf5-d3ef07aec22b",
+      "lastVersionBase": "2.1.296",
+      "lastModelUsage": {}
+    },
+    "/Users/you/proj/16": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastDuration": 21848,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastSessionId": "239085b1-ab77-4bd2-a8e1-48dd31178c67"
+    },
+    "/Users/you/proj/18": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastCost": 3.5093320499999994,
+      "lastAPIDuration": 555477,
+      "lastDuration": 12728139,
+      "lastTotalInputTokens": 26994,
+      "lastTotalOutputTokens": 15405,
+      "lastTotalCacheCreationInputTokens": 21173,
+      "lastTotalCacheReadInputTokens": 1337929,
+      "lastSessionId": "7e7ecc44-c807-496c-a284-bdc1c54b2249"
+    }
+  }
+}

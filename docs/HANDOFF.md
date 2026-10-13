@@ -88,6 +88,15 @@ Run each agent for a day, then confirm the following. Save **redacted** samples 
 5. **Churn.** How often does each agent rewrite its own config files? This sets the alert noise budget.
 6. **Codex auth precedence.** Which credential wins when `OPENAI_API_KEY` or `CODEX_API_KEY` sits beside a ChatGPT login?
 
+**Status (13 Oct 2026, one Mac; details in `DATA_SOURCES.md`, samples under `fixtures/`):**
+
+1. Done. The 5m/1h split is on every record from 2.1.209 to 2.1.296 and sums to `cache_creation_input_tokens`; `output_tokens_details.thinking_tokens` exists from 2.1.266 on; the login marker is `oauthAccount` plus `hasAvailableSubscription`.
+2. Open. No status line was configured; capture it with `claude --settings <file>` (no write to real settings).
+3. Done for 0.32–0.46: structure confirmed, containment held on 131/131 events, totals cumulative. Caveats: `resets_in_seconds` not `resets_at`, duplicate events in 0.44, `info: null` on the first event. Current releases still to confirm.
+4. Partly. Copilot CLI 1.0.96 was installed on 13 Oct; a no-turn session persisted only context-window counts (`session.info`). Re-check after a real turn.
+5. Done. `~/.claude.json` every 60–70 s; `settings.json` at every session start; Codex writes `config.toml` on trust and `auth.json` on refresh; Cursor nothing in a year. A 24-hour diff of `scripts/collect-fixtures.py churn` output remains.
+6. Done. `CODEX_API_KEY` wins in `codex exec` only; the TUI ignores it; `OPENAI_API_KEY` is never read; inside `auth.json` the API key wins over tokens.
+
 ## Open questions (product)
 
 - Do hooks still run in YOLO/bypass modes in Cursor and Copilot? (Phase 3 enforcement depends on it.)

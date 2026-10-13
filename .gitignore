@@ -13,3 +13,6 @@
 .idea/
 .vscode/
 *.swp
+
+# Python bytecode from scripts/tests
+__pycache__/

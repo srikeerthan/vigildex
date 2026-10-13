@@ -53,6 +53,36 @@ Before you commit a sample (see also `CONTRIBUTING.md`):
    `state.vscdb`, Copilot `config.json`). Where a test needs one to exist,
    create an empty or key-names-only stand-in.
 
+## Collecting samples from a real Mac
+
+`scripts/collect-fixtures.py` produces the `<agent>/<version-or-date>/` and
+`shared/<date>/` samples from a real home directory. It only reads an explicit
+allowlist of files, never opens credential or prompt stores (and never follows
+symlinks), rebuilds transcripts from a key whitelist, replaces secrets with
+same-shape fakes, maps every project path to `/Users/you/proj/<n>`, and copies
+nothing until a verifier has passed over the staged output. Run it as:
+
+```sh
+python3 -I scripts/collect-fixtures.py plan                       # dry run
+python3 -I scripts/collect-fixtures.py write --public-name <repo> # stage, verify, copy
+python3 -I scripts/collect-fixtures.py churn                      # mtimes, for the churn spike
+python3 -I -m unittest discover -s scripts/tests                  # its tests
+```
+
+Review `git diff` before committing; the script never stages anything.
+
+### Provenance of the 2026-10-13 samples
+
+| Folder | Source | Notes |
+|---|---|---|
+| `claude/2.1.149` … `2.1.296` | Claude Code transcripts, one per CLI version, first 150 records each; one subagent transcript (2.1.295) | Side record types keep one blanked sample each. `2.1.209` has no `output_tokens_details`; later versions do. |
+| `claude/2.1.296/` | `settings.json`, `settings.local.json`, `claude.json` (reduced `~/.claude.json`), `plugins/*`, three official-marketplace plugin manifests, one session lock file | `autoMode.environment` and over-long rules are blanked; a third-party marketplace is renamed `marketplace-1`. |
+| `codex/0.32.0`, `0.44.0`, `0.46.0` | One rollout per CLI version plus a no-turn session | Every `token_count` and `turn_context` row is kept; prose rows are blanked. |
+| `codex/0.46.0/` | `config.toml`, `version.json`, legacy TypeScript-era files, three **synthesized** `auth.*.json` stand-ins | The real `auth.json` was never opened; the stand-ins carry the key names from the Codex source. |
+| `cursor/2026-10-13/` | `cli-config.json`, `argv.json` (JSONC), one `.workspace-trusted` marker | No Cursor IDE on the source machine. |
+| `copilot/2026-10-13/` | One Copilot CLI 1.0.96 `events.jsonl` (no turns), VS Code user settings reduced to the Copilot and chat keys | `assistant.usage` is still unverified. |
+| `shared/2026-10-13/` | `.zshrc` reduced to its key-bearing `export` lines | Values are fakes of the same shape. |
+
 ## Placeholders
 
 The `.gitkeep` files only keep empty folders in git. Delete one when its

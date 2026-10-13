@@ -1,0 +1,9 @@
+{
+  "terminal.integrated.env.osx": {
+    "Q_NEW_SESSION": "F"
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+  "chat.viewSessions.orientation": "stacked",
+  "chat.mcp.gallery.enabled": true,
+  "github.copilot.chat.organizationInstructions.enabled": false
+}
