@@ -1,0 +1,2 @@
+{"timestamp":"2025-10-10T08:15:53.320Z","type":"session_meta","payload":{"timestamp":"2025-10-10T08:15:53.305Z","originator":"codex_cli_rs","cwd":"/Users/you/proj/1","id":"0199cd30-d3d9-73c1-8afd-d5a011d5cc01","cli_version":"0.46.0","source":"cli","instructions":"","git":{"branch":"main","commit_hash":"0000000000000000000000000000000000000000","repository_url":"https://github.com/you/example.git"}}}
+{"timestamp":"2025-10-10T08:15:53.320Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text"}]}}

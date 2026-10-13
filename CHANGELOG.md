@@ -21,6 +21,14 @@ own **JSON contract** entry (CLAUDE.md § Conventions).
 - `vigildex-ffi` exports `engine_version()` through UniFFI.
 - `vigildex-statusline` placeholder that answers `--version` only.
 - CI on macOS and Ubuntu: `fmt`, `clippy`, `test`, `deny` and `audit`.
+- `scripts/collect-fixtures.py`: copies agent files from a real home into
+  `fixtures/` after redaction (allowlisted sources, key-whitelisted transcripts,
+  same-shape fake secrets, staged output checked by a verifier). Standard
+  library only; tests in `scripts/tests/`.
+- Redacted samples from a real Mac (13 Oct 2026) under `fixtures/claude/`,
+  `fixtures/codex/`, `fixtures/cursor/`, `fixtures/copilot/` and
+  `fixtures/shared/`, with the verification-spike results folded into
+  `docs/DATA_SOURCES.md`.
 
 ### JSON contract
 

@@ -1,0 +1,99 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go build:*)",
+      "Bash(npm show *)",
+      "Bash(python3 -c ' *)",
+      "Bash(npm search *)",
+      "WebFetch(domain:npmjs.com)",
+      "WebFetch(domain:example.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s \"https://api.npmjs.org/downloads/point/last-week/videojs-hls-quality-selector\")",
+      "Bash(curl -s \"https://api.npmjs.org/downloads/point/last-week/@silvermine/videojs-quality-selector\")",
+      "Bash(curl -s \"https://api.npmjs.org/downloads/point/last-week/videojs-contrib-quality-levels\")",
+      "Bash(npm pack *)",
+      "Bash(mkdir -p /tmp/vjs-inspect)",
+      "Read(//tmp/**)",
+      "Bash(tar xzf *)",
+      "Read(//private/tmp/vjs-inspect/package/**)"
+    ]
+  },
+  "model": "claude-fable-5-1[1m]",
+  "skillOverrides": {
+    "frontend-design": "user-invocable-only",
+    "mobile-design": "user-invocable-only",
+    "seo-optimizer": "user-invocable-only",
+    "swift-concurrency-expert": "user-invocable-only",
+    "ui-ux-pro-max": "user-invocable-only"
+  },
+  "disableBundledSkills": true,
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "explanatory-output-style@claude-plugins-official": true,
+    "kotlin-lsp@claude-plugins-official": true,
+    "product-tracking-skills@claude-plugins-official": true,
+    "warp@marketplace-1": true
+  },
+  "extraKnownMarketplaces": {
+    "marketplace-1": {
+      "source": {
+        "source": "github",
+        "repo": "you/example"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "modelSettings": {
+    "claude-fable-5-1": {
+      "effortLevel": "xhigh"
+    }
+  },
+  "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
+  "editorMode": "vim",
+  "autoCompactEnabled": false,
+  "agentPushNotifEnabled": true,
+  "autoMode": {
+    "environment": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  }
+}

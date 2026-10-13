@@ -1,0 +1,7 @@
+model = "gpt-5"
+model_reasoning_effort = "high"
+[projects."/Users/you/proj/1"]
+trust_level = "trusted"
+
+[projects."/Users/you/proj/2"]
+trust_level = "trusted"
