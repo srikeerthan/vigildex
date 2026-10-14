@@ -1,7 +1,7 @@
 //! The `vigildex` command-line interface.
 //!
-//! Exit codes: `0` ok; `1` findings at or above `--fail-on` (from M2);
-//! `2` usage or I/O error.
+//! Exit codes: `0` ok; `1` findings at or above `--fail-on`; `2` usage or
+//! I/O error.
 
 use std::collections::BTreeMap;
 use std::io::{self, Write};
@@ -11,9 +11,13 @@ use std::process::ExitCode;
 use anyhow::Context;
 use clap::{Parser, Subcommand, ValueEnum};
 use vigildex_core::{
-    Agent, HomeEnv, HomeSource, HookHandler, Inventory, InventoryReport, Item, Launch, Pin,
-    RedactedValue, RemoteAuth, ScanReport, Scope,
+    Agent, Finding, FindingsReport, HomeEnv, HomeSource, HookHandler, Inventory, InventoryReport,
+    Item, ItemEntry, Launch, Pin, RedactedValue, RemoteAuth, ScanReport, Scope, Severity,
+    SeverityCounts,
 };
+
+/// Exit code when findings reach `--fail-on`.
+const EXIT_FINDINGS: u8 = 1;
 
 /// Exit code for usage and I/O errors. Clap uses the same code for bad
 /// arguments.
@@ -37,7 +41,8 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Command {
-    /// Scan the home directory: the inventory, with counts per agent
+    /// Scan the home directory: the inventory, with counts per agent, and
+    /// the findings
     Scan {
         /// Print JSON; the output is a versioned contract (`schema_version`)
         #[arg(long)]
@@ -52,6 +57,19 @@ enum Command {
         /// Only this item type
         #[arg(long = "type", value_enum, value_name = "TYPE")]
         item_type: Option<TypeArg>,
+        /// Print JSON; the output is a versioned contract (`schema_version`)
+        #[arg(long)]
+        json: bool,
+    },
+    /// Report plaintext secrets, billing traps and risky settings
+    Findings {
+        /// Show only findings at or above this severity
+        #[arg(long, value_enum, value_name = "SEVERITY")]
+        severity: Option<SeverityArg>,
+        /// Exit with status 1 when any finding (shown or not) is at or above
+        /// this severity; the report is still printed
+        #[arg(long, value_enum, value_name = "SEVERITY")]
+        fail_on: Option<SeverityArg>,
         /// Print JSON; the output is a versioned contract (`schema_version`)
         #[arg(long)]
         json: bool,
@@ -107,10 +125,29 @@ impl TypeArg {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+enum SeverityArg {
+    High,
+    Medium,
+    Low,
+    Info,
+}
+
+impl From<SeverityArg> for Severity {
+    fn from(arg: SeverityArg) -> Self {
+        match arg {
+            SeverityArg::High => Severity::High,
+            SeverityArg::Medium => Severity::Medium,
+            SeverityArg::Low => Severity::Low,
+            SeverityArg::Info => Severity::Info,
+        }
+    }
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
     match run(&cli) {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(code) => code,
         Err(err) => {
             // Nothing useful can be done if stderr is gone too.
             let _ = writeln!(io::stderr().lock(), "error: {err:#}");
@@ -119,7 +156,7 @@ fn main() -> ExitCode {
     }
 }
 
-fn run(cli: &Cli) -> anyhow::Result<()> {
+fn run(cli: &Cli) -> anyhow::Result<ExitCode> {
     let home = HomeEnv::resolve(cli.home.as_deref())?;
     match &cli.command {
         Command::Scan { json } => {
@@ -129,7 +166,8 @@ fn run(cli: &Cli) -> anyhow::Result<()> {
             } else {
                 render_scan_text(&report)
             };
-            print(&text)
+            print(&text)?;
+            Ok(ExitCode::SUCCESS)
         }
         Command::Inventory {
             agent,
@@ -143,15 +181,45 @@ fn run(cli: &Cli) -> anyhow::Result<()> {
             } else {
                 render_inventory_text(&report)
             };
-            print(&text)
+            print(&text)?;
+            Ok(ExitCode::SUCCESS)
+        }
+        Command::Findings {
+            severity,
+            fail_on,
+            json,
+        } => {
+            let mut report = vigildex_core::findings_report(&home);
+            // `--fail-on` is judged before `--severity` filters the display,
+            // so a display filter cannot weaken a CI gate.
+            let failing = fail_on.is_some_and(|least| {
+                let least = Severity::from(least);
+                report.findings.iter().any(|f| f.severity <= least)
+            });
+            if let Some(least) = severity {
+                let least = Severity::from(*least);
+                report.findings.retain(|f| f.severity <= least);
+            }
+            let text = if *json {
+                render_json(&report)?
+            } else {
+                render_findings_text(&report)
+            };
+            print(&text)?;
+            Ok(if failing {
+                ExitCode::from(EXIT_FINDINGS)
+            } else {
+                ExitCode::SUCCESS
+            })
         }
     }
 }
 
 /// Keeps only the items (and artifacts) that match the filters.
 fn filter(inventory: &mut Inventory, agent: Option<Agent>, item_type: Option<TypeArg>) {
-    inventory.items.retain(|item| {
-        agent.is_none_or(|a| item.source().agent == a) && item_type.is_none_or(|t| t.matches(item))
+    inventory.items.retain(|entry| {
+        agent.is_none_or(|a| entry.source().agent == a)
+            && item_type.is_none_or(|t| t.matches(&entry.item))
     });
     if let Some(agent) = agent {
         inventory.artifacts.retain(|a| a.agent == agent);
@@ -184,6 +252,26 @@ fn agents_line(agents: &[Agent]) -> String {
     format!("Scanned: {}", names.join(", "))
 }
 
+fn counts_line(findings: &[Finding]) -> String {
+    let counts = SeverityCounts::of(findings);
+    let mut parts = Vec::new();
+    for (n, name) in [
+        (counts.high, "high"),
+        (counts.medium, "medium"),
+        (counts.low, "low"),
+        (counts.info, "info"),
+    ] {
+        if n > 0 {
+            parts.push(format!("{n} {name}"));
+        }
+    }
+    if parts.is_empty() {
+        format!("Findings: {}", counts.total())
+    } else {
+        format!("Findings: {} ({})", counts.total(), parts.join(", "))
+    }
+}
+
 fn render_scan_text(report: &ScanReport) -> String {
     let inv = &report.inventory;
     let mut out = format!(
@@ -206,11 +294,11 @@ fn render_scan_text(report: &ScanReport) -> String {
     for agent in &inv.scanned {
         counts.entry(*agent).or_default();
     }
-    for item in &inv.items {
+    for entry in &inv.items {
         *counts
-            .entry(item.source().agent)
+            .entry(entry.source().agent)
             .or_default()
-            .entry(item.type_name())
+            .entry(entry.item.type_name())
             .or_default() += 1;
     }
     out.push_str(&format!("{:<20}", "Agent"));
@@ -233,8 +321,70 @@ fn render_scan_text(report: &ScanReport) -> String {
     for warning in &inv.warnings {
         out.push_str(&format!("  {}\n", warning_line(warning, &report.home.root)));
     }
-    out.push_str("\nRun `vigildex inventory` for the items.\n");
+    out.push_str(&format!("\n{}\n", counts_line(&report.findings)));
+    for finding in &report.findings {
+        out.push_str(&format!("  {}\n", finding_line(finding, &report.home.root)));
+    }
+    out.push_str(
+        "\nRun `vigildex inventory` for the items and `vigildex findings` for the details.\n",
+    );
     out
+}
+
+fn render_findings_text(report: &FindingsReport) -> String {
+    let home = &report.home.root;
+    let mut out = format!(
+        "vigildex {}\n{}\n{}\n",
+        report.engine_version,
+        home_line(home, report.home.source),
+        counts_line(&report.findings)
+    );
+    let mut current: Option<Severity> = None;
+    for finding in &report.findings {
+        if current != Some(finding.severity) {
+            current = Some(finding.severity);
+            out.push_str(&format!(
+                "\n{}\n",
+                finding.severity.display_name().to_uppercase()
+            ));
+        }
+        out.push_str(&format!("  {}\n", finding_line(finding, home)));
+        if let Some(evidence) = &finding.evidence {
+            out.push_str(&format!("            {evidence}\n"));
+        }
+        out.push_str(&format!("            {}\n", finding.why));
+        out.push_str(&format!("            Fix: {}\n", finding.fix.summary));
+    }
+    if !report.warnings.is_empty() {
+        out.push_str("\nWarnings\n");
+        for warning in &report.warnings {
+            out.push_str(&format!("  {}\n", warning_line(warning, home)));
+        }
+    }
+    out
+}
+
+/// `RULE-NNN  Title  ~/path:line › key  [agents]`.
+fn finding_line(finding: &Finding, home: &Path) -> String {
+    let mut place = short_path(&finding.location.path, home);
+    if let Some(line) = finding.location.line {
+        place.push_str(&format!(":{line}"));
+    }
+    if let Some(key) = &finding.location.key_path {
+        place.push_str(&format!(" › {key}"));
+    }
+    let agents: Vec<&str> = finding.agents.iter().map(|a| a.display_name()).collect();
+    let tags = if finding.tags.is_empty() {
+        String::new()
+    } else {
+        format!("  +{}", finding.tags.join(" +"))
+    };
+    format!(
+        "{:<9} {:<34} {place}  [{}]{tags}",
+        finding.rule,
+        finding.title,
+        agents.join(", ")
+    )
 }
 
 fn render_inventory_text(report: &InventoryReport) -> String {
@@ -263,7 +413,8 @@ fn render_inventory_text(report: &InventoryReport) -> String {
 
     let mut current_agent: Option<Agent> = None;
     let mut current_scope: Option<&Scope> = None;
-    for item in &inv.items {
+    for entry in &inv.items {
+        let item = &entry.item;
         let source = item.source();
         if current_agent != Some(source.agent) {
             current_agent = Some(source.agent);
@@ -275,10 +426,11 @@ fn render_inventory_text(report: &InventoryReport) -> String {
             out.push_str(&format!("  {}\n", scope_line(&source.scope, home)));
         }
         out.push_str(&format!(
-            "    {:<11} {:<30} {}{}\n",
+            "    {:<11} {:<30} {}{}{}\n",
             item.type_name(),
             label_text(item, home),
             detail(item, home),
+            tags_suffix(entry),
             origin_suffix(source, home)
         ));
     }
@@ -317,6 +469,23 @@ fn label_text(item: &Item, home: &Path) -> String {
         Item::Credential(credential) => short_path(&credential.path, home),
         _ => item.label(),
     }
+}
+
+/// The inventory tags of an entry (`[bundled_scripts]`).
+fn tags_suffix(entry: &ItemEntry) -> String {
+    if entry.tags.is_empty() {
+        return String::new();
+    }
+    let tags: Vec<String> = entry
+        .tags
+        .iter()
+        .map(|t| serde_json::to_value(t).ok())
+        .map(|v| {
+            v.and_then(|v| v.as_str().map(str::to_owned))
+                .unwrap_or_default()
+        })
+        .collect();
+    format!("  [{}]", tags.join(", "))
 }
 
 /// Names the source file when a scope has more than one settings file

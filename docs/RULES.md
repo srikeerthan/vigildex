@@ -18,8 +18,8 @@ The titles shown in lists come from the app screens (`vigildex-mac/docs/SCREENS.
 | ID | List title |
 |---|---|
 | SEC-001 | `{Kind} in an MCP config` |
-| SEC-002 | `{Kind} in args` |
-| SEC-003 | `{Kind} in settings env` |
+| SEC-002 | `{Kind} in args` (`{Kind} in a server URL`, `{Kind} in a command` for a `url` or a headers-helper command) |
+| SEC-003 | `{Kind} in settings env` (`{Kind} in a helper command`, `{Kind} in a hook header`, `{Kind} in a hook command`, `{Kind} in a hook URL` for the other secret-bearing fields of a settings file) |
 | SEC-004 | `{Kind} in plain text` |
 | SEC-005 | `{Kind} in .env` |
 | SEC-006 | `Credential file readable by others` |
@@ -40,7 +40,7 @@ The titles shown in lists come from the app screens (`vigildex-mac/docs/SCREENS.
 | RISK-005 | `Credentials in a plain file` |
 | RISK-006 | `Trusts every project MCP server` |
 | RISK-007 | `Skill can run any command` |
-| RISK-008 | `Server runs from a hidden folder` |
+| RISK-008 | `Server runs from a hidden folder` (`… from a temp folder`; `Hook runs from a hidden folder` / `… temp folder` for hooks) |
 | RISK-009 | `Docker server runs privileged` |
 | RISK-010 | `Agent binary is shadowed` |
 | RISK-012 | `Rule in every Cursor chat` |
@@ -57,14 +57,18 @@ These rules decide how many findings a set of matches becomes. They were fixed o
 5. **Inventory tags, not findings.** A skill that merely bundles scripts, a plugin with `monitors` or `bin/` (RISK-011), and a hook that runs a package runner (`npx prettier …`) are shown as "Why flagged" tags on the inventory row; RISK-007 fires only on an unrestricted `Bash` in `allowed-tools`, and RISK-002 only on its listed patterns.
 6. **Repo severity bump.** The one-step bump for repository files applies to pre-flight reports only; the Findings list keeps catalogue severities.
 7. **Permission bits.** SEC-006 reads the mode of the real file. Git stores no `0600`, so fixture tests copy the home to a temporary directory and set the stand-ins' modes explicitly.
-8. **Masks.** Evidence keeps a short prefix and the last three characters: `sk-ant-••••7Qa`, `ghp_••••f9a`. A rule must capture the whole token, so the mask ends with the token's real last characters.
+8. **Masks.** Evidence for a token the engine recognises keeps its vendor prefix and the last three characters: `sk-ant-••••7Qa`, `ghp_••••f9a`. A rule must capture the whole token, so the mask ends with the token's real last characters. A token of a shape the engine does not know (a `LINT_HELPER_TOKEN`, an `X-Api-Key` header) keeps the last three only (`••••AKE`), and a password shows nothing (`postgresql://app:••••@db…`, `••••`); a URL in evidence loses its query string. No digest of a secret is computed or stored until the store has a per-installation key (M4): `fingerprint` is `null` in M2.
 9. **Fixture fakes.** Secret rules match on vendor prefix and length class (`ghp_` plus 36 characters, `sk-ant-api03-` plus at least 80), never on entropy alone, so the `FAKE` values in `fixtures/` trigger them.
+10. **Ids.** A finding's `id` hashes the rule, the home-relative path and the key path (or variable name), never the line, so editing a profile above a finding keeps its id; the same home scanned from another location gives the same ids. Inventory items carry an `id` (this occurrence) and an `identity` (what runs, without agent or scope), both computed from the masked model fields.
+11. **Values the rules never see.** `${VAR}`, `$VAR`, `${env:NAME}`, `${input:id}`, `op://…` and `$(…)` are references, never secrets; the default of `${VAR:-default}` and the body of `$(…)` are scanned as text. A reference in a JSON or TOML `env` block does not count as "set" for the BILL rules (whether Claude Code expands `${VAR}` in settings `env` is **verify**); in a shell profile it does, since the shell expands it.
+
+**Implemented in M2** (`crates/vigildex-core/src/analyze/`): SEC-001…006, BILL-001…007 (BILL-007 both forms), BILL-009, RISK-001…009. Not yet: SEC-007 (backups), BILL-008 (Codex rollouts, M3), RISK-010 (`PATH`), RISK-012 and RISK-013 and the Cursor, Copilot and VS Code forms of RISK-004, RISK-005 and BILL-009 (adapters in M5); RISK-011 is an inventory tag. "Loopback" for RISK-003 and BILL-006 is `localhost`, `*.localhost`, `127.0.0.0/8`, `::1` and `0.0.0.0`.
 
 ---
 
 ## Secrets (SEC)
 
-Engine: gitleaks/Betterleaks-format TOML rules in `rules/secrets/*.toml` (MIT, with attribution in `NOTICE`), or Kingfisher as an embedded engine (Apache-2.0). **No live verification.** Provider-format checks (prefix plus checksum, e.g. GitHub tokens) come before entropy, to keep false positives down.
+Engine: TOML rules in the gitleaks shape (`id`, `description`, `regex`, `keywords`, `secretGroup`, `allowlist.regexes`) under `rules/secrets/` (a link to `crates/vigildex-core/rules/secrets/`, where the files are embedded at build time). The rules are written for Vigildex, not copied, so no `NOTICE` entry is needed. Three extensions: `names` and `namesNot` (regexes on the field name, for the name-keyed rules that catch a `LINT_HELPER_TOKEN` or an `X-Api-Key` header whatever the value's shape) and `maskStyle` (`prefix`, `short`, `full`; policy 8). Vendor rules run first, then URL rules, then the name-keyed ones, and the first hit wins. **No live verification.** No entropy rule.
 
 **Fields to scan:**
 
@@ -80,9 +84,9 @@ Engine: gitleaks/Betterleaks-format TOML rules in `rules/secrets/*.toml` (MIT, w
 
 | ID | Check | Severity | Example | Fix (summary) |
 |---|---|---|---|---|
-| SEC-001 | Token stored in an MCP config | High | `~/.cursor/mcp.json › github › env › GITHUB_PERSONAL_ACCESS_TOKEN = ghp_••••f9a` | Replace with an env reference (`${env:…}` in Cursor, `${VAR}` in Claude), then rotate the token |
-| SEC-002 | Password in MCP server args/URL | Medium | `acme-api/.mcp.json › postgres › args › postgresql://app:••••@db…` | Use `${DATABASE_URL}` |
-| SEC-003 | Secret in a settings `env` block | High | `~/.claude/settings.json › env › OPENAI_API_KEY` | Move to the Keychain / `op run` / env file outside the repo |
+| SEC-001 | Token stored in an MCP config (`env`, `headers`, `http_headers`) | High | `~/.cursor/mcp.json › github › env › GITHUB_PERSONAL_ACCESS_TOKEN = ghp_••••f9a` | Replace with an env reference (`${env:…}` in Cursor, `${VAR}` in Claude), then rotate the token |
+| SEC-002 | Password in MCP server args, URL, `command` or a headers-helper command | Medium | `acme-api/.mcp.json › postgres › args › postgresql://app:••••@db…` | Use `${DATABASE_URL}` |
+| SEC-003 | Secret in a settings file: an `env` block, a helper command (`apiKeyHelper`, `awsAuthRefresh`, `awsCredentialExport`, `otelHeadersHelper`, `statusLine.command`, Codex `notify`, `shell_environment_policy.set`), a hook's header, command or URL | High | `~/.claude/settings.json › env › OPENAI_API_KEY` | Move to the Keychain / `op run` / env file outside the repo |
 | SEC-004 | Secret exported in a shell profile | Medium | `~/.zshrc:43 export GITHUB_TOKEN=…` | Load from the Keychain or 1Password at use time |
 | SEC-005 | Secret in a project `.env` the agent auto-loads | Medium | `<repo>/.env` | Keep out of git; check `.gitignore` |
 | SEC-006 | Credential file readable by others | High | `~/.claude/.credentials.json` mode not 0600 | `chmod 600` |
@@ -99,8 +103,8 @@ Local only. Never read values; presence and key names are enough.
 | BILL-003 | `apiKeyHelper` defined (project scope runs in `-p` without trust) | Medium | Claude settings, any scope |
 | BILL-004 | `CLAUDE_CODE_OAUTH_TOKEN` exported (a one-year token in plaintext) | Medium | Shell profiles, settings `env` |
 | BILL-005 | Cloud provider switch set unintentionally (`CLAUDE_CODE_USE_BEDROCK/VERTEX/FOUNDRY`) | Low | Env and settings |
-| BILL-006 | Base URL points at a non-vendor host (`ANTHROPIC_BASE_URL`, `OPENAI_BASE_URL`, `openai_base_url`, `[model_providers].base_url`, `COPILOT_PROVIDER_BASE_URL`). **High if set in a repo file** (CVE-2026-21852 pattern) | Medium / High | Env, settings `env`, `config.toml`, `.env`; host allowlist in `rules/hosts.toml` plus user-approved gateways and localhost |
-| BILL-007 | Codex signed in with an API key or custom provider | Low | `auth.json` key names, `config.toml` |
+| BILL-006 | Base URL points at a non-vendor host (`ANTHROPIC_BASE_URL`, `OPENAI_BASE_URL`, `COPILOT_PROVIDER_BASE_URL` in profiles, settings `env` and `.env`; Codex `openai_base_url`, `chatgpt_base_url` and the selected provider's `model_providers.<p>.base_url` in the user `config.toml`: only the effective one counts, `openai_base_url` is inert once a custom provider is selected, and a project `config.toml` is ignored as Codex ignores it). **High if set in a repo file** (project settings or `.env`; CVE-2026-21852 pattern) | Medium / High | Env, settings `env`, `config.toml`, `.env`; host allowlist in `rules/hosts.toml` plus loopback (user-approved gateways are an app feature) |
+| BILL-007 | Codex signed in with an API key (`auth.json` has `OPENAI_API_KEY` as a string and no `tokens` object; the `auth_mode` value is never read, hard rule 2) or a custom provider selected (`model_provider` names an entry other than `openai`) | Low | `auth.json` key names and value types, `config.toml` |
 | BILL-008 | Codex drawing on paid credits (plan limit reached, balance falling) | Medium | Rollout `rate_limits.credits` |
 | BILL-009 | Copilot login overridden by `COPILOT_GITHUB_TOKEN` / `GH_TOKEN` / `GITHUB_TOKEN`, or a BYOK provider set | Low | Env, `~/.copilot/providers.json` |
 
@@ -117,13 +121,13 @@ Local only. Never read values; presence and key names are enough.
 | ID | Check | Severity |
 |---|---|---|
 | RISK-001 | MCP server runs a floating version (`npx pkg`, `@latest`, a range, a Docker tag without digest) | Low |
-| RISK-002 | Hook or script downloads and runs code (`curl … \| sh`, `wget`, `base64 -d \| sh`, `eval`) | Medium |
+| RISK-002 | Hook command downloads and runs code: `curl … \| sh`, `wget … \| sh`, `base64 -d … \| sh`, `eval` around a `curl` or `wget` substitution, `sh <(curl …)`; the shell may be `sh`, `bash`, `zsh`, `dash` or `ksh`, with `sudo` or a directory prefix | Medium |
 | RISK-003 | HTTP hook posts to a non-loopback URL | Medium |
 | RISK-004 | Bypass or auto-approve mode on: Claude `defaultMode: bypassPermissions` in user or managed settings (a project or local value is inert since Claude Code 2.1.257 and is inventoried, not reported); Codex `approval_policy = "never"` with `danger-full-access`; VS Code `chat.tools.global.autoApprove: true`; Cursor CLI broad `Shell(*)` allow | Medium |
 | RISK-005 | Credentials kept in a plaintext file (Codex `cli_auth_credentials_store = "file"`, Copilot `config.json` token fallback, Copilot `mcp-secrets/` in use) | Low |
 | RISK-006 | `enableAllProjectMcpServers: true` | Medium |
 | RISK-007 | Skill has unrestricted `allowed-tools: Bash` (bundled scripts are an inventory tag, finding policy 5) | Low |
-| RISK-008 | MCP server or hook runs from a hidden or temp folder (`~/.cache/.x/…`, `/tmp/…`). Paths inside the owning agent's own directory (`~/.claude`, `~/.codex`, `~/.cursor`, `~/.copilot`, their relocated forms) and the plugin cache (`${CLAUDE_PLUGIN_ROOT}`) are not hidden folders | High |
+| RISK-008 | MCP server or hook runs from a hidden or temp folder: the executed path (a server's binary, or its interpreter and script; a hook command's first word per pipeline segment and the script after an interpreter) sits under `/tmp`, `/var/tmp`, `/private/tmp`, `/var/folders` or `$TMPDIR`, or in a hidden folder. Under the home a hidden folder is a dot-component *below* the first level (`~/.cache/.x/…` is hidden, `~/.nvm/…` is a tool directory); outside the home any dot-component counts; `node_modules/.bin` is exempt. Paths inside the owning agent's own directory (`~/.claude`, `~/.codex`, `~/.cursor`, `~/.copilot`, their relocated forms, `~/.agents`) and the plugin cache (`${CLAUDE_PLUGIN_ROOT}`) are not hidden folders. Arguments are data and are not checked | High |
 | RISK-009 | Docker MCP server with `--privileged`, host-root mounts or `--network host` | Medium |
 | RISK-010 | Agent binary on `PATH` shadowed or outside its usual install location | High |
 | RISK-011 | Plugin `monitors` (persistent background commands) or `bin/` added to `PATH` | Low |
@@ -166,10 +170,10 @@ The sample sheet for `fixtures/homes/mockup-demo/proj/demo-repo`: BILL-006 at Hi
 ## Rule data files
 
 ```
-rules/secrets/*.toml     # gitleaks-format: id, description, regex, keywords, entropy, secretGroup, allowlist
-rules/hosts.toml         # vendor API hosts per agent (base-URL allowlist)
-rules/launchers.toml     # npx/uvx/bunx/pipx/docker patterns and how to read their pins
-rules/managers.toml      # known config managers and package managers for attribution
+rules/secrets/*.toml     # gitleaks shape: id, description, regex, keywords, secretGroup, allowlist; plus names, namesNot, maskStyle
+rules/hosts.toml         # vendor API hosts (base-URL allowlist for BILL-006)
+rules/launchers.toml     # planned; the runner table lives in crates/vigildex-core/src/launch.rs for now
+rules/managers.toml      # known config managers and package managers for attribution (M4)
 ```
 
-Rule changes need a fixture that triggers the rule and one that must not.
+`rules/` is a link to `crates/vigildex-core/rules/`, where the files are embedded with `include_str!` so the crate packages on its own. Rule changes need a fixture that triggers the rule and one that must not.

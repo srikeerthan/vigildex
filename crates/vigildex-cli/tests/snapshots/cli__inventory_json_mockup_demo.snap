@@ -3,8 +3,9 @@ source: crates/vigildex-cli/tests/cli.rs
 expression: redact(&text)
 ---
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "engine_version": "[VERSION]",
+  "scanned_at": "[TIME]",
   "home": {
     "root": "[REPO]/fixtures/homes/mockup-demo",
     "source": "override"
@@ -22,6 +23,9 @@ expression: redact(&text)
     "relocations": {},
     "items": [
       {
+        "id": "ffdfa70ffde8ea73",
+        "identity": "d16a8e38a4ae106e",
+        "tags": [],
         "type": "mcp_server",
         "name": "context7",
         "launch": {
@@ -36,6 +40,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.context7",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -46,6 +52,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "679563aca0569ede",
+        "identity": "9e038ca1fd3dcf0b",
+        "tags": [],
         "type": "mcp_server",
         "name": "lint-helper",
         "launch": {
@@ -65,6 +74,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.lint-helper",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -75,6 +86,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "7a1a63d2a4d13582",
+        "identity": "40af27189bb9c03a",
+        "tags": [],
         "type": "mcp_server",
         "name": "playwright",
         "launch": {
@@ -91,6 +105,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.playwright",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -101,6 +117,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "be8050901b03d306",
+        "identity": "90badc209798d262",
+        "tags": [],
         "type": "hook",
         "event": "Notification",
         "matcher": null,
@@ -115,6 +134,8 @@ expression: redact(&text)
           ],
           "timeout_secs": 10
         },
+        "key_path": "hooks.Notification[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -125,6 +146,11 @@ expression: redact(&text)
         }
       },
       {
+        "id": "27c139de8ff08a0d",
+        "identity": "a18c1a7c3d934674",
+        "tags": [
+          "package_runner"
+        ],
         "type": "hook",
         "event": "PostToolUse",
         "matcher": "Write|Edit",
@@ -135,6 +161,8 @@ expression: redact(&text)
           "timeout_secs": 30,
           "async": false
         },
+        "key_path": "hooks.PostToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -145,6 +173,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "b9f66f6f0699319e",
+        "identity": "f15ef6374290fb1f",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "Bash",
@@ -155,6 +186,8 @@ expression: redact(&text)
           "timeout_secs": 20,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -165,6 +198,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "1223e078f91fe4d2",
+        "identity": "e924b01181fafad9",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "WebSearch",
@@ -175,6 +211,8 @@ expression: redact(&text)
           "timeout_secs": 5,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -185,6 +223,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "cde30d8f3e127b4d",
+        "identity": "413b810a66915629",
+        "tags": [],
         "type": "skill",
         "name": "browser-tester",
         "kind": "subagent",
@@ -210,6 +251,11 @@ expression: redact(&text)
         }
       },
       {
+        "id": "57f53f33e3e898b8",
+        "identity": "dc0529234758e51a",
+        "tags": [
+          "bundled_scripts"
+        ],
         "type": "skill",
         "name": "deploy",
         "kind": "skill",
@@ -237,6 +283,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "454cdfe3bf8755cb",
+        "identity": "8bb86c0e81c3fee9",
+        "tags": [],
         "type": "skill",
         "name": "fix-issue",
         "kind": "command",
@@ -261,6 +310,11 @@ expression: redact(&text)
         }
       },
       {
+        "id": "c9099ee29125ed4c",
+        "identity": "7e226d166b4c4594",
+        "tags": [
+          "bundled_scripts"
+        ],
         "type": "skill",
         "name": "release-notes",
         "kind": "skill",
@@ -288,6 +342,12 @@ expression: redact(&text)
         }
       },
       {
+        "id": "049752774439932a",
+        "identity": "ddc9e775eeb14aa8",
+        "tags": [
+          "plugin_monitors",
+          "plugin_bin"
+        ],
         "type": "plugin",
         "id": "acme-deploy@acme-tools",
         "name": "acme-deploy",
@@ -315,6 +375,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "e04c975c6ab15a81",
+        "identity": "5b0cc23b0fc95db6",
+        "tags": [],
         "type": "plugin",
         "id": "context7@claude-plugins-official",
         "name": "context7",
@@ -338,6 +401,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "628054f9fc7d8460",
+        "identity": "3a0e8814405c8c23",
+        "tags": [],
         "type": "plugin",
         "id": "explanatory-output-style@claude-plugins-official",
         "name": "explanatory-output-style",
@@ -361,6 +427,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "4ccd24cb7a7543d8",
+        "identity": "e8e2748dde6dfa4a",
+        "tags": [],
         "type": "plugin",
         "id": "superpowers@claude-plugins-official",
         "name": "superpowers",
@@ -382,6 +451,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "32ed63aeb21c0119",
+        "identity": "b3f5e986a0f51910",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/.claude/CLAUDE.md",
         "lines": 4,
@@ -396,6 +468,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "af296c1b2926abe6",
+        "identity": "2466464956c540a6",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/.claude/rules/style.md",
         "lines": 7,
@@ -410,12 +485,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "be9645a0bfc17048",
+        "identity": "6b69592eecbb3bf4",
+        "tags": [],
         "type": "setting",
         "key_path": "enableAllProjectMcpServers",
         "value": {
           "kind": "bool",
           "value": false
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -426,6 +505,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "de21aff9b683f172",
+        "identity": "1a1fcff6f6b3b2d8",
+        "tags": [],
         "type": "setting",
         "key_path": "env",
         "value": {
@@ -435,6 +517,7 @@ expression: redact(&text)
             "CLAUDE_CODE_ENABLE_TELEMETRY"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -445,6 +528,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "198167a2036aef19",
+        "identity": "1b57705f04427898",
+        "tags": [],
         "type": "setting",
         "key_path": "extraKnownMarketplaces",
         "value": {
@@ -453,6 +539,7 @@ expression: redact(&text)
             "acme-tools"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -463,12 +550,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "e06e0e225064a74e",
+        "identity": "6b656f36d2a0bed9",
+        "tags": [],
         "type": "setting",
         "key_path": "hasAvailableSubscription",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -479,6 +570,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "08c42c53aa5859db",
+        "identity": "022d1ce2d95ab911",
+        "tags": [],
         "type": "setting",
         "key_path": "oauthAccount",
         "value": {
@@ -493,6 +587,7 @@ expression: redact(&text)
             "organizationUuid"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -503,6 +598,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "0afef8ad730047ce",
+        "identity": "7402405de330061f",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.additionalDirectories",
         "value": {
@@ -511,6 +609,7 @@ expression: redact(&text)
             "~/proj/shared-libs"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -521,6 +620,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "ca9251e30d620908",
+        "identity": "b391cd998c325d21",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -532,6 +634,7 @@ expression: redact(&text)
             "WebFetch(domain:docs.acme-corp.example)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -542,6 +645,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "173f0e4c28d872e6",
+        "identity": "6f3e6dad263f6ff1",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -552,6 +658,7 @@ expression: redact(&text)
             "Read(//tmp/**)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -562,12 +669,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "4040896fb2e9e875",
+        "identity": "a25410913bf73228",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.defaultMode",
         "value": {
           "kind": "text",
           "value": "acceptEdits"
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -578,6 +689,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "1d4fcbf924bec1a7",
+        "identity": "56da1a230708ddb6",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.deny",
         "value": {
@@ -587,6 +701,7 @@ expression: redact(&text)
             "Read(~/.ssh/**)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -597,12 +712,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "33e5039963c207f9",
+        "identity": "1ac40e71801d570a",
+        "tags": [],
         "type": "setting",
         "key_path": "statusLine.command",
         "value": {
           "kind": "text",
           "value": "~/.claude/statusline.sh"
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -613,12 +732,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "4b5600155a0138ee",
+        "identity": "689c4602f7ce94c9",
+        "tags": [],
         "type": "setting",
         "key_path": "statusLine.type",
         "value": {
           "kind": "text",
           "value": "command"
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -629,6 +752,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "43eddedffe85549f",
+        "identity": "99171cb1fc82d95b",
+        "tags": [],
         "type": "credential",
         "path": "[REPO]/fixtures/homes/mockup-demo/.claude/.credentials.json",
         "exists": true,
@@ -650,6 +776,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "b5aebe420ce75a95",
+        "identity": "d7588bbe738d9446",
+        "tags": [],
         "type": "mcp_server",
         "name": "acme-docs",
         "launch": {
@@ -665,6 +794,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.acme-docs",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -676,6 +807,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "9995e641cee9ddd6",
+        "identity": "4aa1ca5ad0fea1ca",
+        "tags": [],
         "type": "mcp_server",
         "name": "github",
         "launch": {
@@ -692,6 +826,8 @@ expression: redact(&text)
         ],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.github",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -703,6 +839,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "340112704c3eb103",
+        "identity": "f6a07a9f753fbd46",
+        "tags": [],
         "type": "mcp_server",
         "name": "postgres",
         "launch": {
@@ -720,6 +859,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.postgres",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -731,6 +872,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "211721f97ee4ddd7",
+        "identity": "3da6e1b2a7139ee1",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "Bash",
@@ -741,6 +885,8 @@ expression: redact(&text)
           "timeout_secs": 10,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -752,6 +898,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "b74faccd664973af",
+        "identity": "3824a5b811b8d40f",
+        "tags": [],
         "type": "hook",
         "event": "Stop",
         "matcher": null,
@@ -761,6 +910,8 @@ expression: redact(&text)
           "tool": "log_session",
           "timeout_secs": null
         },
+        "key_path": "hooks.Stop[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -772,6 +923,11 @@ expression: redact(&text)
         }
       },
       {
+        "id": "41d3942205223db7",
+        "identity": "59c5a5b01c0eed0d",
+        "tags": [
+          "bundled_scripts"
+        ],
         "type": "skill",
         "name": "db-migrate",
         "kind": "skill",
@@ -800,6 +956,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "13eea0c7a697d308",
+        "identity": "44a23fcba2ed7e90",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/rules/api.md",
         "lines": 7,
@@ -815,6 +974,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "ba5abd885acb593e",
+        "identity": "2281d879e8014942",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/rules/testing.md",
         "lines": 3,
@@ -830,6 +992,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "e7876d970aa3809c",
+        "identity": "01dadcf61bb7a420",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/CLAUDE.md",
         "lines": 5,
@@ -845,6 +1010,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "52cf453cb5fc5fe1",
+        "identity": "512bdfc90d5fcd6e",
+        "tags": [],
         "type": "setting",
         "key_path": "enabledMcpjsonServers",
         "value": {
@@ -854,6 +1022,7 @@ expression: redact(&text)
             "github"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -865,6 +1034,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "c8c2756b6241fba7",
+        "identity": "effbcf7a9d562528",
+        "tags": [],
         "type": "setting",
         "key_path": "env",
         "value": {
@@ -873,6 +1045,7 @@ expression: redact(&text)
             "RUST_LOG"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -884,6 +1057,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "9eed781b066822ef",
+        "identity": "67f80a98f865da12",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -893,6 +1069,7 @@ expression: redact(&text)
             "Bash(docker compose *)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -904,6 +1081,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "f833b6d827c12e55",
+        "identity": "5db388f7870c30a6",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.deny",
         "value": {
@@ -912,6 +1092,7 @@ expression: redact(&text)
             "Read(./secrets/**)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -923,6 +1104,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "ec3f2ab50363e013",
+        "identity": "ea2026485fd45701",
+        "tags": [],
         "type": "hook",
         "event": "SessionStart",
         "matcher": null,
@@ -933,6 +1117,8 @@ expression: redact(&text)
           "timeout_secs": null,
           "async": false
         },
+        "key_path": "hooks.SessionStart[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -944,6 +1130,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "3a0c57155b652c36",
+        "identity": "6c0cc4f2b937ec1e",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/AGENTS.md",
         "lines": 3,
@@ -959,12 +1148,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "b674b7fb64345776",
+        "identity": "b1535e49ceb479e5",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you\"].allowedTools",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -976,12 +1169,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "9d9a7a183f2a93ed",
+        "identity": "fbcedca3c6116124",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you\"].disabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -993,12 +1190,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "1bae866b9cb71ce6",
+        "identity": "e30176649d5f2876",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you\"].enabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1010,12 +1211,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "a7fd5036a8cff00a",
+        "identity": "6727087adf11b87a",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you\"].hasTrustDialogAccepted",
         "value": {
           "kind": "bool",
           "value": false
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1027,6 +1232,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "380f9754366b6eb3",
+        "identity": "abb7158fb7534c16",
+        "tags": [],
         "type": "mcp_server",
         "name": "playwright",
         "launch": {
@@ -1042,6 +1250,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "projects[\"/Users/you/proj/acme-api\"].mcpServers.playwright",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1053,6 +1263,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "17e85e0837827b6f",
+        "identity": "659d777a11d95fc4",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -1063,6 +1276,7 @@ expression: redact(&text)
             "WebFetch(domain:crates.io)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1074,12 +1288,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "115d10c198147295",
+        "identity": "ae06d30f0d9a4aca",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].allowedTools",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1091,12 +1309,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "581d50af76bee698",
+        "identity": "9be2a064fda5fe0d",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].disabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1108,6 +1330,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "fba5141649cfc04d",
+        "identity": "bb02bc848650d699",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].enabledMcpjsonServers",
         "value": {
@@ -1116,6 +1341,7 @@ expression: redact(&text)
             "postgres"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1127,12 +1353,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "75b551cf735de405",
+        "identity": "07ff988fdf8ad24e",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].hasClaudeMdExternalIncludesApproved",
         "value": {
           "kind": "bool",
           "value": false
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1144,12 +1374,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "7e95d43162b1f102",
+        "identity": "cc73b135b801628d",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].hasTrustDialogAccepted",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1161,6 +1395,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "c76ef152153ed9fb",
+        "identity": "23bdf4de882fda68",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].allowedTools",
         "value": {
@@ -1169,6 +1406,7 @@ expression: redact(&text)
             "Bash(git pull:*)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1180,12 +1418,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "4dcb65fac0a2f45d",
+        "identity": "91bbdaa563312274",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].disabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1197,12 +1439,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "66e090c69fbc9065",
+        "identity": "3e3c184feae54016",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].enabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1214,12 +1460,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "f0f5cdbbf8c9e7c8",
+        "identity": "69ec492c18aec790",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].hasTrustDialogAccepted",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1231,12 +1481,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "c3c63f67d7875848",
+        "identity": "b80e57e9fafc2a0e",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].hasTrustDialogHooksAccepted",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1248,6 +1502,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "c0db85aeedc9f685",
+        "identity": "c6412a819100d921",
+        "tags": [],
         "type": "mcp_server",
         "name": "acme-deploy",
         "launch": {
@@ -1264,6 +1521,8 @@ expression: redact(&text)
         ],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "acme-deploy",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1275,6 +1534,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "1b778fbf8fbac3ca",
+        "identity": "7196834ab17042a8",
+        "tags": [],
         "type": "hook",
         "event": "PostToolUse",
         "matcher": "Write|Edit",
@@ -1285,6 +1547,8 @@ expression: redact(&text)
           "timeout_secs": 15,
           "async": false
         },
+        "key_path": "hooks.PostToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1296,6 +1560,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "60c9382e3f002d25",
+        "identity": "0c8b564a6baf6733",
+        "tags": [],
         "type": "skill",
         "name": "deploy-check",
         "kind": "skill",
@@ -1320,6 +1587,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "17a49ea7ebd93596",
+        "identity": "d16a8e38a4ae106e",
+        "tags": [],
         "type": "mcp_server",
         "name": "context7",
         "launch": {
@@ -1334,6 +1604,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.context7",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1345,6 +1617,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "5b6f88e9bd9a0621",
+        "identity": "202ae011d3b31bf7",
+        "tags": [],
         "type": "hook",
         "event": "SessionStart",
         "matcher": null,
@@ -1355,6 +1630,8 @@ expression: redact(&text)
           "timeout_secs": null,
           "async": false
         },
+        "key_path": "hooks.SessionStart[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1366,6 +1643,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "c279255636728a66",
+        "identity": "fbbe3194e37bfccc",
+        "tags": [],
         "type": "mcp_server",
         "name": "fetch",
         "launch": {
@@ -1381,6 +1661,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": false,
+        "key_path": "mcp_servers.fetch",
+        "line": 27,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1391,6 +1673,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "e9d29e79e4dd9768",
+        "identity": "4aa1ca5ad0fea1ca",
+        "tags": [],
         "type": "mcp_server",
         "name": "github",
         "launch": {
@@ -1406,6 +1691,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcp_servers.github",
+        "line": 22,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1416,6 +1703,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "9e172cf4d3a79dcb",
+        "identity": "11139cc047660ebc",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "Bash",
@@ -1426,6 +1716,8 @@ expression: redact(&text)
           "timeout_secs": 10,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": 37,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1436,6 +1728,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "c6142f63e199d0b2",
+        "identity": "96c8ff6c0744e562",
+        "tags": [],
         "type": "hook",
         "event": "SessionStart",
         "matcher": null,
@@ -1446,6 +1741,8 @@ expression: redact(&text)
           "timeout_secs": 5,
           "async": false
         },
+        "key_path": "hooks.SessionStart[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1456,6 +1753,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "a3ec575e0fc459fd",
+        "identity": "8532d91c51fbbff8",
+        "tags": [],
         "type": "hook",
         "event": "UserPromptSubmit",
         "matcher": null,
@@ -1466,6 +1766,8 @@ expression: redact(&text)
           "timeout_secs": null,
           "async": true
         },
+        "key_path": "hooks.UserPromptSubmit[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1476,6 +1778,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "0f7a5f299f93a3d4",
+        "identity": "b035a142835336ed",
+        "tags": [],
         "type": "skill",
         "name": "pr-summary",
         "kind": "skill",
@@ -1497,6 +1802,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "38d1bcf0c7488244",
+        "identity": "28e576e664dce8ec",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/.codex/AGENTS.md",
         "lines": 3,
@@ -1511,12 +1819,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "745dfc46cd77e76f",
+        "identity": "a0990f03d39ac079",
+        "tags": [],
         "type": "setting",
         "key_path": "approval_policy",
         "value": {
           "kind": "text",
           "value": "never"
         },
+        "line": 3,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1527,12 +1839,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "ba9c82b6f4d90032",
+        "identity": "244e81b786ea127e",
+        "tags": [],
         "type": "setting",
         "key_path": "cli_auth_credentials_store",
         "value": {
           "kind": "text",
           "value": "file"
         },
+        "line": 5,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1543,12 +1859,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "e72c82adafbac1eb",
+        "identity": "2638b1b18857cd2f",
+        "tags": [],
         "type": "setting",
         "key_path": "features.hooks",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": 13,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1559,12 +1879,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "2ba329e1b2c259d1",
+        "identity": "c22e97095198932f",
+        "tags": [],
         "type": "setting",
         "key_path": "model_providers.local.base_url",
         "value": {
           "kind": "text",
           "value": "http://localhost:11434/v1"
         },
+        "line": 19,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1575,12 +1899,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "8f143216ee7ae5e5",
+        "identity": "175e031947ea296b",
+        "tags": [],
         "type": "setting",
         "key_path": "model_providers.local.name",
         "value": {
           "kind": "text",
           "value": "Ollama"
         },
+        "line": 18,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1591,12 +1919,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "a8b1d5118371a136",
+        "identity": "8936426183046083",
+        "tags": [],
         "type": "setting",
         "key_path": "model_providers.local.wire_api",
         "value": {
           "kind": "text",
           "value": "chat"
         },
+        "line": 20,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1607,6 +1939,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "8eebe1cb4cb9ba35",
+        "identity": "46f5f351c6cc7554",
+        "tags": [],
         "type": "setting",
         "key_path": "notify",
         "value": {
@@ -1616,6 +1951,7 @@ expression: redact(&text)
             "/Users/you/.codex/notify.py"
           ]
         },
+        "line": 6,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1626,12 +1962,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "b62fb0570291c733",
+        "identity": "f6586b6688709a2d",
+        "tags": [],
         "type": "setting",
         "key_path": "sandbox_mode",
         "value": {
           "kind": "text",
           "value": "danger-full-access"
         },
+        "line": 4,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1642,12 +1982,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "fa12a1c63e246095",
+        "identity": "ccbef3248ee4f698",
+        "tags": [],
         "type": "setting",
         "key_path": "shell_environment_policy.inherit",
         "value": {
           "kind": "text",
           "value": "core"
         },
+        "line": 9,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1658,6 +2002,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "89e90c8647dc16f9",
+        "identity": "7f873fcaa58b3b33",
+        "tags": [],
         "type": "setting",
         "key_path": "shell_environment_policy.set",
         "value": {
@@ -1666,6 +2013,7 @@ expression: redact(&text)
             "CODEX_SANDBOX"
           ]
         },
+        "line": 10,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1676,12 +2024,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "279251e890bb1e49",
+        "identity": "3334dca215baa926",
+        "tags": [],
         "type": "setting",
         "key_path": "skills.config[\"/Users/you/.agents/skills/changelog/SKILL.md\"].enabled",
         "value": {
           "kind": "bool",
           "value": false
         },
+        "line": 54,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1692,6 +2044,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "19fcfdf03e41851a",
+        "identity": "23d4db1585c627bd",
+        "tags": [],
         "type": "credential",
         "path": "[REPO]/fixtures/homes/mockup-demo/.codex/auth.json",
         "exists": true,
@@ -1717,6 +2072,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "61ba799506ff7992",
+        "identity": "cb3b049d1faf1a94",
+        "tags": [],
         "type": "mcp_server",
         "name": "acme-docs",
         "launch": {
@@ -1732,6 +2090,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcp_servers.acme-docs",
+        "line": 3,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1743,6 +2103,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "f623d284ce4b05bc",
+        "identity": "ba838895535ea890",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "Bash",
@@ -1753,6 +2116,8 @@ expression: redact(&text)
           "timeout_secs": 10,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1764,6 +2129,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "f2121b6bc77eb290",
+        "identity": "5d9ab06f3e17538a",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/AGENTS.md",
         "lines": 3,
@@ -1779,12 +2147,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "12ca0441067f58b1",
+        "identity": "673659d09862f096",
+        "tags": [],
         "type": "setting",
         "key_path": "approval_policy",
         "value": {
           "kind": "text",
           "value": "on-request"
         },
+        "line": 1,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1796,6 +2168,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "58893bf8a794510a",
+        "identity": "6c0cc4f2b937ec1e",
+        "tags": [],
         "type": "instruction",
         "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/AGENTS.md",
         "lines": 3,
@@ -1811,12 +2186,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "59bacb73d9b6597e",
+        "identity": "c39a13de94eabf75",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].trust_level",
         "value": {
           "kind": "text",
           "value": "trusted"
         },
+        "line": 47,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1828,12 +2207,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "4130d656164e5014",
+        "identity": "aca5185a5c961778",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].trust_level",
         "value": {
           "kind": "text",
           "value": "trusted"
         },
+        "line": 50,
         "source": {
           "agent": "codex",
           "scope": {
@@ -1845,6 +2228,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "48302dced4788895",
+        "identity": "8b0b95f7a53a8c57",
+        "tags": [],
         "type": "skill",
         "name": "changelog",
         "kind": "skill",
@@ -1866,6 +2252,49 @@ expression: redact(&text)
         }
       },
       {
+        "id": "3c6cd19254ea05dc",
+        "identity": "bc15d5640779379b",
+        "tags": [],
+        "type": "setting",
+        "key_path": "ANTHROPIC_API_KEY",
+        "value": {
+          "kind": "present"
+        },
+        "line": 42,
+        "source": {
+          "agent": "shared",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "shell_profile",
+          "path": "[REPO]/fixtures/homes/mockup-demo/.zshrc"
+        }
+      },
+      {
+        "id": "ca715461c0230fa4",
+        "identity": "7f48f33673a9ed69",
+        "tags": [],
+        "type": "setting",
+        "key_path": "GITHUB_TOKEN",
+        "value": {
+          "kind": "present"
+        },
+        "line": 43,
+        "source": {
+          "agent": "shared",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "shell_profile",
+          "path": "[REPO]/fixtures/homes/mockup-demo/.zshrc"
+        }
+      },
+      {
+        "id": "f7421322b28bd9e2",
+        "identity": "2227a85ddb275cc4",
+        "tags": [
+          "bundled_scripts"
+        ],
         "type": "skill",
         "name": "openapi-lint",
         "kind": "skill",
@@ -2142,6 +2571,16 @@ expression: redact(&text)
       {
         "agent": "shared",
         "scope": {
+          "kind": "user"
+        },
+        "kind": "shell_profile",
+        "path": "[REPO]/fixtures/homes/mockup-demo/.zshrc",
+        "bytes": 1268,
+        "sha256": null
+      },
+      {
+        "agent": "shared",
+        "scope": {
           "kind": "project",
           "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
         },
@@ -2226,6 +2665,17 @@ expression: redact(&text)
         "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.codex/hooks.json",
         "bytes": 245,
         "sha256": "f9737487361a504acb70bb53c9458f0cf80c93baed912bc108d639853d780181"
+      },
+      {
+        "agent": "shared",
+        "scope": {
+          "kind": "project",
+          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+        },
+        "kind": "env_file",
+        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.env",
+        "bytes": 25,
+        "sha256": null
       },
       {
         "agent": "claude_code",

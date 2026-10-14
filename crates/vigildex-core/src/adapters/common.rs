@@ -34,10 +34,11 @@ pub fn skill(agent: Agent, scope: &Scope, dir: &Path, out: &mut Collector) {
     let Some(text) = out.read_text(&art) else {
         return;
     };
-    let (items, warnings) =
+    let (items, warnings, observations) =
         skills::parse_definition(SkillKind::Skill, &path, Some(dir), &text, &art);
     out.extend(items);
     out.warnings_from(warnings);
+    out.observations_from(observations);
 }
 
 /// Parses every Markdown file under `dir` as a command or subagent.
@@ -53,9 +54,11 @@ pub fn definitions_dir(
         let Some(text) = out.read_text(&art) else {
             continue;
         };
-        let (items, warnings) = skills::parse_definition(kind, &path, None, &text, &art);
+        let (items, warnings, observations) =
+            skills::parse_definition(kind, &path, None, &text, &art);
         out.extend(items);
         out.warnings_from(warnings);
+        out.observations_from(observations);
     }
 }
 
@@ -104,9 +107,11 @@ pub fn hooks_file(agent: Agent, scope: &Scope, path: &Path, out: &mut Collector)
     };
     let mut items = Vec::new();
     let mut warnings = Vec::new();
-    hooks::parse_hooks_file(&doc, &art, &mut items, &mut warnings);
+    let mut observations = Vec::new();
+    hooks::parse_hooks_file(&doc, &art, &mut items, &mut warnings, &mut observations);
     out.extend(items);
     out.warnings_from(warnings);
+    out.observations_from(observations);
 }
 
 /// Records metadata about a credential file: existence, permission bits

@@ -4,20 +4,149 @@
 //! `toml_edit` keeps spans, which later milestones use for line numbers in
 //! findings; for the inventory only the values matter.
 
-use std::str::FromStr;
+use std::ops::Range;
 
 use serde_json::{Map, Value};
-use toml_edit::{DocumentMut, Item, Table};
+use toml_edit::{Item, Table};
+
+/// The 1-based line on which the value at `path` (raw key segments) starts,
+/// or `None` when the text does not parse or the key is absent. Dotted and
+/// quoted keys, inline tables, arrays (by index) and arrays of tables (by
+/// index) are all walked. A table that exists only implicitly (`[a.b]`
+/// creates `a`) has no span of its own; the lookup carries on and reports
+/// the first explicit span below it.
+#[must_use]
+pub fn line_of(text: &str, path: &[&str]) -> Option<u32> {
+    Parsed::parse(text).ok()?.line_of(path)
+}
+
+/// The byte offset at which the value at `path` starts.
+fn offset_of(root: &Table, path: &[&str]) -> Option<usize> {
+    // Only the immutable document keeps spans; `DocumentMut` drops them.
+    let mut node = Node::Table(root);
+    let mut span: Option<Range<usize>> = None;
+    for key in path {
+        let (next, next_span) = match node {
+            Node::Table(table) => descend_table(table, key)?,
+            Node::Item(item) => match item {
+                Item::Table(table) => descend_table(table, key)?,
+                Item::Value(value) => descend_value(value, key)?,
+                Item::ArrayOfTables(tables) => {
+                    let index: usize = key.parse().ok()?;
+                    let table = tables.get(index)?;
+                    (Node::Table(table), table.span())
+                }
+                Item::None => return None,
+            },
+            Node::Value(value) => descend_value(value, key)?,
+        };
+        node = next;
+        span = next_span.or(span);
+    }
+    span.map(|s| s.start)
+}
+
+/// A position in a TOML document while walking a key path.
+enum Node<'a> {
+    Table(&'a Table),
+    Item(&'a Item),
+    Value(&'a toml_edit::Value),
+}
+
+fn descend_table<'a>(table: &'a Table, key: &str) -> Option<(Node<'a>, Option<Range<usize>>)> {
+    let (k, v) = table.get_key_value(key)?;
+    Some((Node::Item(v), v.span().or_else(|| k.span())))
+}
+
+fn descend_value<'a>(
+    value: &'a toml_edit::Value,
+    key: &str,
+) -> Option<(Node<'a>, Option<Range<usize>>)> {
+    match value {
+        toml_edit::Value::InlineTable(table) => {
+            let (k, v) = table.get_key_value(key)?;
+            Some((Node::Item(v), v.span().or_else(|| k.span())))
+        }
+        toml_edit::Value::Array(array) => {
+            let index: usize = key.parse().ok()?;
+            let v = array.get(index)?;
+            Some((Node::Value(v), v.span()))
+        }
+        _ => None,
+    }
+}
+
+/// 1-based line of a byte offset.
+fn line_at(text: &str, offset: usize) -> u32 {
+    let count = text
+        .as_bytes()
+        .iter()
+        .take(offset)
+        .filter(|b| **b == b'\n')
+        .count();
+    u32::try_from(count + 1).unwrap_or(u32::MAX)
+}
 
 /// Parses TOML text into a JSON-shaped value. Tables become objects, arrays
 /// of tables become arrays, and date-times become their string form.
 ///
 /// # Errors
 ///
-/// Returns the parser's message when the text is not valid TOML.
+/// Returns the parser's message and position when the text is not valid
+/// TOML. The message never quotes the source: a broken line can hold a
+/// token.
 pub fn to_json(text: &str) -> Result<Value, String> {
-    let doc = DocumentMut::from_str(text).map_err(|err| err.to_string())?;
-    Ok(table_to_json(doc.as_table()))
+    Ok(Parsed::parse(text)?.value)
+}
+
+/// A parsed TOML document: its JSON-shaped value and, for line numbers,
+/// the document with its spans.
+#[derive(Debug)]
+pub struct Parsed {
+    /// The document as a JSON-shaped value.
+    pub value: Value,
+    doc: toml_edit::Document<String>,
+    text_len: usize,
+    newlines: Vec<usize>,
+}
+
+impl Parsed {
+    /// Parses `text`.
+    ///
+    /// # Errors
+    ///
+    /// The parser's message and position, without the source line.
+    pub fn parse(text: &str) -> Result<Self, String> {
+        let doc = toml_edit::Document::parse(text.to_owned()).map_err(|err| {
+            let position = err
+                .span()
+                .map(|span| format!(" at line {}", line_at(text, span.start)))
+                .unwrap_or_default();
+            format!("{}{position}", err.message())
+        })?;
+        Ok(Self {
+            value: table_to_json(doc.as_table()),
+            doc,
+            text_len: text.len(),
+            newlines: text
+                .bytes()
+                .enumerate()
+                .filter(|(_, b)| *b == b'\n')
+                .map(|(i, _)| i)
+                .collect(),
+        })
+    }
+
+    /// The 1-based line on which the value at `path` (raw key segments)
+    /// starts; see [`line_of`].
+    #[must_use]
+    pub fn line_of(&self, path: &[&str]) -> Option<u32> {
+        let offset = offset_of(self.doc.as_table(), path)?;
+        let before = self
+            .newlines
+            .partition_point(|nl| *nl < offset.min(self.text_len));
+        u32::try_from(before + 1).ok()
+    }
 }
 
 fn table_to_json(table: &Table) -> Value {
@@ -103,9 +232,52 @@ enabled = false
     }
 
     #[test]
-    fn invalid_toml_is_an_error_message() {
+    fn lines_are_found_for_keys_tables_inline_tables_and_arrays_of_tables() {
+        let text = "model = \"x\"\napproval_policy = \"never\"\n\n[shell_environment_policy]\nset = { A = \"1\", TOKEN = \"t\" }\n\n[mcp_servers.lint-helper]\ncommand = \"npx\"\nenv = { LINT_HELPER_TOKEN = \"lh\" }\n\n[projects.\"/Users/you/proj\"]\ntrust_level = \"trusted\"\n\n[[skills.config]]\npath = \"a\"\n\n[[skills.config]]\npath = \"b\"\nenabled = false\n";
+        assert_eq!(line_of(text, &["approval_policy"]), Some(2));
+        assert_eq!(
+            line_of(text, &["shell_environment_policy", "set", "TOKEN"]),
+            Some(5)
+        );
+        assert_eq!(
+            line_of(
+                text,
+                &["mcp_servers", "lint-helper", "env", "LINT_HELPER_TOKEN"]
+            ),
+            Some(9)
+        );
+        assert_eq!(line_of(text, &["mcp_servers", "lint-helper"]), Some(7));
+        assert_eq!(
+            line_of(text, &["projects", "/Users/you/proj", "trust_level"]),
+            Some(12)
+        );
+        assert_eq!(
+            line_of(text, &["skills", "config", "1", "enabled"]),
+            Some(19)
+        );
+        assert_eq!(line_of(text, &["missing"]), None);
+        assert_eq!(line_of(text, &["approval_policy", "deeper"]), None);
+        assert_eq!(line_of("not = toml =", &["not"]), None);
+    }
+
+    #[test]
+    fn invalid_toml_is_an_error_message_without_the_source() {
         let err = to_json("model = ").unwrap_err();
         assert!(!err.is_empty());
+        let err =
+            to_json("ok = 1\nset = { TOKEN = \"ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a\" \n")
+                .unwrap_err();
+        assert!(!err.contains("ghp_"), "{err}");
+        assert!(err.contains("line 2"), "{err}");
+    }
+
+    #[test]
+    fn parsed_documents_resolve_lines_without_reparsing() {
+        let parsed = Parsed::parse("a = 1\n[t]\nb = 2\n").unwrap();
+        assert_eq!(parsed.value["t"]["b"], json!(2));
+        assert_eq!(parsed.line_of(&["t", "b"]), Some(3));
+        assert_eq!(parsed.line_of(&["t"]), Some(2));
+        assert_eq!(parsed.line_of(&["x"]), None);
     }
 
     #[test]

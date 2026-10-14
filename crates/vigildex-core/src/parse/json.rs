@@ -2,6 +2,7 @@
 
 use serde_json::Value;
 
+use crate::launch::{mask_text, sanitize_url};
 use crate::model::RedactedValue;
 
 /// The string at `key`, when the value is an object with a string there.
@@ -75,6 +76,10 @@ pub fn scalar_text(value: &Value) -> Option<String> {
 }
 
 /// Reduces a value to what is safe to show (see [`RedactedValue`]).
+///
+/// Strings lose URL user information and query strings and have obvious
+/// inline credentials masked, so a base URL or helper command written with
+/// a password in it never reaches a report whole.
 #[must_use]
 pub fn redact(value: &Value) -> RedactedValue {
     match value {
@@ -83,17 +88,26 @@ pub fn redact(value: &Value) -> RedactedValue {
         Value::Number(n) => RedactedValue::Number {
             value: n.as_f64().unwrap_or(f64::NAN),
         },
-        Value::String(s) => RedactedValue::Text { value: s.clone() },
+        Value::String(s) => RedactedValue::Text {
+            value: safe_text(s),
+        },
         Value::Array(items) => RedactedValue::List {
             values: items
                 .iter()
-                .map(|v| scalar_text(v).unwrap_or_else(|| "<object>".to_owned()))
+                .map(|v| scalar_text(v).map_or_else(|| "<object>".to_owned(), |t| safe_text(&t)))
                 .collect(),
         },
         Value::Object(map) => RedactedValue::Keys {
             keys: map.keys().cloned().collect(),
         },
     }
+}
+
+/// A string as it may appear in a report: URLs reduced to
+/// `scheme://host/path`, inline credentials masked.
+#[must_use]
+pub fn safe_text(text: &str) -> String {
+    mask_text(&sanitize_url(text))
 }
 
 /// Formats one key-path segment: identifiers are bare, anything else is
@@ -157,6 +171,28 @@ mod tests {
             redact(&json!({"OPENAI_API_KEY": "sk-secret", "B": 1})),
             RedactedValue::Keys {
                 keys: vec!["B".into(), "OPENAI_API_KEY".into()]
+            }
+        );
+    }
+
+    #[test]
+    fn strings_lose_url_credentials_and_inline_secrets() {
+        assert_eq!(
+            redact(&json!("https://u:pw@proxy.example/v1?key=FAKE")),
+            RedactedValue::Text {
+                value: "https://proxy.example/v1".into()
+            }
+        );
+        assert_eq!(
+            redact(&json!(["https://a.example/?t=FAKE", "x"])),
+            RedactedValue::List {
+                values: vec!["https://a.example/".into(), "x".into()]
+            }
+        );
+        assert_eq!(
+            redact(&json!("sh -c 'API_TOKEN=acme_FAKEFAKEFAKEFAKE echo'")),
+            RedactedValue::Text {
+                value: "sh -c 'API_TOKEN=acme_••••AKE echo'".into()
             }
         );
     }

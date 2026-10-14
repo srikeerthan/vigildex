@@ -1,0 +1,339 @@
+---
+source: crates/vigildex-core/tests/contract.rs
+expression: schema
+---
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FindingsReport",
+  "description": "Output of `vigildex findings --json`.",
+  "type": "object",
+  "properties": {
+    "engine_version": {
+      "description": "Version of the engine that produced the report.",
+      "type": "string"
+    },
+    "findings": {
+      "description": "The findings, sorted by severity, rule and location.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Finding"
+      }
+    },
+    "home": {
+      "description": "The home directory that was scanned and how it was chosen.",
+      "$ref": "#/$defs/HomeView"
+    },
+    "scanned_at": {
+      "description": "When the scan ran, as RFC 3339 UTC.",
+      "type": "string"
+    },
+    "schema_version": {
+      "description": "Version of this JSON contract; see [`SCHEMA_VERSION`].",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    },
+    "warnings": {
+      "description": "Files that could not be read or understood while scanning. Never\nfatal.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Warning"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "engine_version",
+    "scanned_at",
+    "home",
+    "findings",
+    "warnings"
+  ],
+  "$defs": {
+    "Agent": {
+      "description": "An AI coding agent, or the shared sources that several agents read.",
+      "oneOf": [
+        {
+          "description": "Anthropic's Claude Code (CLI, desktop and IDE extensions share `~/.claude`).",
+          "type": "string",
+          "const": "claude_code"
+        },
+        {
+          "description": "OpenAI Codex (CLI, IDE extension and desktop app share `~/.codex`).",
+          "type": "string",
+          "const": "codex"
+        },
+        {
+          "description": "Cursor (adapter arrives in M5).",
+          "type": "string",
+          "const": "cursor"
+        },
+        {
+          "description": "GitHub Copilot CLI (adapter arrives in M5).",
+          "type": "string",
+          "const": "copilot_cli"
+        },
+        {
+          "description": "GitHub Copilot in VS Code agent mode (adapter arrives in M5).",
+          "type": "string",
+          "const": "vs_code_agent"
+        },
+        {
+          "description": "Sources read by several agents at once, such as `~/.agents/skills`.",
+          "type": "string",
+          "const": "shared"
+        }
+      ]
+    },
+    "Category": {
+      "description": "The rule family a finding belongs to.",
+      "oneOf": [
+        {
+          "description": "`SEC-`: a credential in plain text.",
+          "type": "string",
+          "const": "secret"
+        },
+        {
+          "description": "`BILL-`: a billing trap.",
+          "type": "string",
+          "const": "billing"
+        },
+        {
+          "description": "`RISK-`: a risky setting.",
+          "type": "string",
+          "const": "risk"
+        }
+      ]
+    },
+    "Finding": {
+      "description": "One finding.",
+      "type": "object",
+      "properties": {
+        "agents": {
+          "description": "The agents affected.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Agent"
+          }
+        },
+        "category": {
+          "description": "The rule family.",
+          "$ref": "#/$defs/Category"
+        },
+        "evidence": {
+          "description": "Masked evidence (`ghp_••••f9a`, `approval_policy = \"never\"`), when\nthere is something to show.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fingerprint": {
+          "description": "Keyed fingerprint of the secret, for secret findings only. Always\n`null` until a store with a per-installation key exists (M4): the\nengine computes no digest of a secret before then, because a hash\nunder a public constant would let anyone holding a report confirm a\nguessed password offline.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fix": {
+          "description": "How to fix it.",
+          "$ref": "#/$defs/FixSteps"
+        },
+        "id": {
+          "description": "Stable identifier: a hash of the rule and the location, relative to\nthe home, so it survives rescans and moves between machines.",
+          "type": "string"
+        },
+        "items": {
+          "description": "Identifiers of the inventory items involved.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "location": {
+          "description": "Where it is.",
+          "$ref": "#/$defs/Location"
+        },
+        "rule": {
+          "description": "The rule ID (`SEC-004`).",
+          "type": "string"
+        },
+        "severity": {
+          "description": "Catalogue severity.",
+          "$ref": "#/$defs/Severity"
+        },
+        "tags": {
+          "description": "Rule IDs that also matched this location but lost the tie\n(finding policy 1), and notes such as `repo_file`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "description": "The list title (`GitHub token in plain text`).",
+          "type": "string"
+        },
+        "why": {
+          "description": "One sentence on why it matters.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "rule",
+        "category",
+        "severity",
+        "title",
+        "why",
+        "location",
+        "fix",
+        "agents",
+        "items",
+        "tags"
+      ]
+    },
+    "FixSteps": {
+      "description": "How to fix a finding.",
+      "type": "object",
+      "properties": {
+        "steps": {
+          "description": "Steps in order, copyable; commands are written as the user would\ntype them.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary": {
+          "description": "One line, shown in the list.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "summary",
+        "steps"
+      ]
+    },
+    "HomeSource": {
+      "description": "How the home directory was chosen.",
+      "oneOf": [
+        {
+          "description": "Passed explicitly: the CLI `--home` flag or the FFI configuration.",
+          "type": "string",
+          "const": "override"
+        },
+        {
+          "description": "Taken from the `VIGILDEX_HOME` environment variable.",
+          "type": "string",
+          "const": "env"
+        },
+        {
+          "description": "The current user's own home directory.",
+          "type": "string",
+          "const": "user"
+        }
+      ]
+    },
+    "HomeView": {
+      "description": "A resolved home directory as it appears in reports: plain data with no\nvalidation, so a report can be read on a machine where the directory\ndoes not exist. See [`HomeEnv`] for the validated form.",
+      "type": "object",
+      "properties": {
+        "root": {
+          "description": "Absolute path of the home directory.",
+          "type": "string"
+        },
+        "source": {
+          "description": "How `root` was chosen.",
+          "$ref": "#/$defs/HomeSource"
+        }
+      },
+      "required": [
+        "root",
+        "source"
+      ]
+    },
+    "Location": {
+      "description": "Where something sits in a file.",
+      "type": "object",
+      "properties": {
+        "key_path": {
+          "description": "The key path inside the file, when the format has keys\n(`mcpServers.github.env.GITHUB_TOKEN`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "line": {
+          "description": "1-based line number, when the format gives one (shell profiles,\n`.env`, TOML).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "path": {
+          "description": "Absolute path of the file.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    },
+    "Severity": {
+      "description": "How much a finding matters. Ordered from most to least severe, so\n`High < Low` in the `Ord` sense and lists sort High first. The four\nlevels are fixed by `docs/RULES.md`; the enum is still non-exhaustive\nlike every other public enum of the contract.",
+      "oneOf": [
+        {
+          "description": "Likely costs money, leaks a credential, or runs untrusted code.",
+          "type": "string",
+          "const": "high"
+        },
+        {
+          "description": "Risky default or exposure worth fixing soon.",
+          "type": "string",
+          "const": "medium"
+        },
+        {
+          "description": "Hygiene; worth knowing.",
+          "type": "string",
+          "const": "low"
+        },
+        {
+          "description": "Neutral inventory fact.",
+          "type": "string",
+          "const": "info"
+        }
+      ]
+    },
+    "Warning": {
+      "description": "Something the engine could not read or understand. A warning never stops\na scan.",
+      "type": "object",
+      "properties": {
+        "agent": {
+          "description": "The agent whose file it concerns, when known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Agent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "description": "What went wrong, in one sentence.",
+          "type": "string"
+        },
+        "path": {
+          "description": "The file it concerns, when known.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "message"
+      ]
+    }
+  }
+}

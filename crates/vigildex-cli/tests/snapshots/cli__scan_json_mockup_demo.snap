@@ -1,12 +1,13 @@
 ---
 source: crates/vigildex-cli/tests/cli.rs
-expression: redact(&text)
+expression: "redact_temp(&text, &home)"
 ---
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "engine_version": "[VERSION]",
+  "scanned_at": "[TIME]",
   "home": {
-    "root": "[REPO]/fixtures/homes/mockup-demo",
+    "root": "[HOME]",
     "source": "override"
   },
   "inventory": {
@@ -16,12 +17,15 @@ expression: redact(&text)
       "shared"
     ],
     "project_roots": [
-      "[REPO]/fixtures/homes/mockup-demo/proj/acme-api",
-      "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+      "[HOME]/proj/acme-api",
+      "[HOME]/proj/dotfiles-sync"
     ],
     "relocations": {},
     "items": [
       {
+        "id": "ffdfa70ffde8ea73",
+        "identity": "d16a8e38a4ae106e",
+        "tags": [],
         "type": "mcp_server",
         "name": "context7",
         "launch": {
@@ -36,16 +40,21 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.context7",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "679563aca0569ede",
+        "identity": "9e038ca1fd3dcf0b",
+        "tags": [],
         "type": "mcp_server",
         "name": "lint-helper",
         "launch": {
@@ -65,16 +74,21 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.lint-helper",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "7a1a63d2a4d13582",
+        "identity": "40af27189bb9c03a",
+        "tags": [],
         "type": "mcp_server",
         "name": "playwright",
         "launch": {
@@ -91,16 +105,21 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.playwright",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/agents/browser-tester.md"
+          "path": "[HOME]/.claude/agents/browser-tester.md"
         }
       },
       {
+        "id": "be8050901b03d306",
+        "identity": "90badc209798d262",
+        "tags": [],
         "type": "hook",
         "event": "Notification",
         "matcher": null,
@@ -115,16 +134,23 @@ expression: redact(&text)
           ],
           "timeout_secs": 10
         },
+        "key_path": "hooks.Notification[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "27c139de8ff08a0d",
+        "identity": "a18c1a7c3d934674",
+        "tags": [
+          "package_runner"
+        ],
         "type": "hook",
         "event": "PostToolUse",
         "matcher": "Write|Edit",
@@ -135,16 +161,21 @@ expression: redact(&text)
           "timeout_secs": 30,
           "async": false
         },
+        "key_path": "hooks.PostToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "b9f66f6f0699319e",
+        "identity": "f15ef6374290fb1f",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "Bash",
@@ -155,16 +186,21 @@ expression: redact(&text)
           "timeout_secs": 20,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/skills/deploy/SKILL.md"
+          "path": "[HOME]/.claude/skills/deploy/SKILL.md"
         }
       },
       {
+        "id": "1223e078f91fe4d2",
+        "identity": "e924b01181fafad9",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "WebSearch",
@@ -175,20 +211,25 @@ expression: redact(&text)
           "timeout_secs": 5,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.local.json"
+          "path": "[HOME]/.claude/settings.local.json"
         }
       },
       {
+        "id": "cde30d8f3e127b4d",
+        "identity": "413b810a66915629",
+        "tags": [],
         "type": "skill",
         "name": "browser-tester",
         "kind": "subagent",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/agents/browser-tester.md",
+        "path": "[HOME]/.claude/agents/browser-tester.md",
         "description": "Tests features in a real browser using Playwright",
         "allowed_tools": [
           "Read",
@@ -206,14 +247,19 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/agents/browser-tester.md"
+          "path": "[HOME]/.claude/agents/browser-tester.md"
         }
       },
       {
+        "id": "57f53f33e3e898b8",
+        "identity": "dc0529234758e51a",
+        "tags": [
+          "bundled_scripts"
+        ],
         "type": "skill",
         "name": "deploy",
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/skills/deploy",
+        "path": "[HOME]/.claude/skills/deploy",
         "description": "Deploy the current branch to staging with a pre-flight check",
         "allowed_tools": [
           "Bash(./scripts/deploy.py *)",
@@ -233,14 +279,17 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/skills/deploy/SKILL.md"
+          "path": "[HOME]/.claude/skills/deploy/SKILL.md"
         }
       },
       {
+        "id": "454cdfe3bf8755cb",
+        "identity": "8bb86c0e81c3fee9",
+        "tags": [],
         "type": "skill",
         "name": "fix-issue",
         "kind": "command",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/commands/fix-issue.md",
+        "path": "[HOME]/.claude/commands/fix-issue.md",
         "description": "Fix a GitHub issue by number",
         "allowed_tools": [
           "Bash(gh issue view *)",
@@ -257,14 +306,19 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/commands/fix-issue.md"
+          "path": "[HOME]/.claude/commands/fix-issue.md"
         }
       },
       {
+        "id": "c9099ee29125ed4c",
+        "identity": "7e226d166b4c4594",
+        "tags": [
+          "bundled_scripts"
+        ],
         "type": "skill",
         "name": "release-notes",
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/skills/release-notes",
+        "path": "[HOME]/.claude/skills/release-notes",
         "description": "Draft release notes from merged pull requests since the last tag",
         "allowed_tools": [
           "Bash(git log *)",
@@ -284,10 +338,16 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/skills/release-notes/SKILL.md"
+          "path": "[HOME]/.claude/skills/release-notes/SKILL.md"
         }
       },
       {
+        "id": "049752774439932a",
+        "identity": "ddc9e775eeb14aa8",
+        "tags": [
+          "plugin_monitors",
+          "plugin_bin"
+        ],
         "type": "plugin",
         "id": "acme-deploy@acme-tools",
         "name": "acme-deploy",
@@ -295,7 +355,7 @@ expression: redact(&text)
         "marketplace_source": "github:acme-corp/claude-plugins",
         "version": "0.3.1",
         "install_scope": "user",
-        "install_path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1",
+        "install_path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1",
         "installed": true,
         "enabled": true,
         "components": [
@@ -311,10 +371,13 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "plugin",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/installed_plugins.json"
+          "path": "[HOME]/.claude/plugins/installed_plugins.json"
         }
       },
       {
+        "id": "e04c975c6ab15a81",
+        "identity": "5b0cc23b0fc95db6",
+        "tags": [],
         "type": "plugin",
         "id": "context7@claude-plugins-official",
         "name": "context7",
@@ -322,7 +385,7 @@ expression: redact(&text)
         "marketplace_source": "github:anthropics/claude-plugins-official",
         "version": "b8e53f1c05df",
         "install_scope": "user",
-        "install_path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df",
+        "install_path": "[HOME]/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df",
         "installed": true,
         "enabled": true,
         "components": [
@@ -334,10 +397,13 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "plugin",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/installed_plugins.json"
+          "path": "[HOME]/.claude/plugins/installed_plugins.json"
         }
       },
       {
+        "id": "628054f9fc7d8460",
+        "identity": "3a0e8814405c8c23",
+        "tags": [],
         "type": "plugin",
         "id": "explanatory-output-style@claude-plugins-official",
         "name": "explanatory-output-style",
@@ -345,7 +411,7 @@ expression: redact(&text)
         "marketplace_source": "github:anthropics/claude-plugins-official",
         "version": "1.0.0",
         "install_scope": "user",
-        "install_path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0",
+        "install_path": "[HOME]/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0",
         "installed": true,
         "enabled": false,
         "components": [
@@ -357,10 +423,13 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "plugin",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/installed_plugins.json"
+          "path": "[HOME]/.claude/plugins/installed_plugins.json"
         }
       },
       {
+        "id": "4ccd24cb7a7543d8",
+        "identity": "e8e2748dde6dfa4a",
+        "tags": [],
         "type": "plugin",
         "id": "superpowers@claude-plugins-official",
         "name": "superpowers",
@@ -378,12 +447,15 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "plugin",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/installed_plugins.json"
+          "path": "[HOME]/.claude/plugins/installed_plugins.json"
         }
       },
       {
+        "id": "32ed63aeb21c0119",
+        "identity": "b3f5e986a0f51910",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/CLAUDE.md",
+        "path": "[HOME]/.claude/CLAUDE.md",
         "lines": 4,
         "always_apply": null,
         "source": {
@@ -392,12 +464,15 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/CLAUDE.md"
+          "path": "[HOME]/.claude/CLAUDE.md"
         }
       },
       {
+        "id": "af296c1b2926abe6",
+        "identity": "2466464956c540a6",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/rules/style.md",
+        "path": "[HOME]/.claude/rules/style.md",
         "lines": 7,
         "always_apply": false,
         "source": {
@@ -406,26 +481,33 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/rules/style.md"
+          "path": "[HOME]/.claude/rules/style.md"
         }
       },
       {
+        "id": "be9645a0bfc17048",
+        "identity": "6b69592eecbb3bf4",
+        "tags": [],
         "type": "setting",
         "key_path": "enableAllProjectMcpServers",
         "value": {
           "kind": "bool",
           "value": false
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "de21aff9b683f172",
+        "identity": "1a1fcff6f6b3b2d8",
+        "tags": [],
         "type": "setting",
         "key_path": "env",
         "value": {
@@ -435,16 +517,20 @@ expression: redact(&text)
             "CLAUDE_CODE_ENABLE_TELEMETRY"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "198167a2036aef19",
+        "identity": "1b57705f04427898",
+        "tags": [],
         "type": "setting",
         "key_path": "extraKnownMarketplaces",
         "value": {
@@ -453,32 +539,40 @@ expression: redact(&text)
             "acme-tools"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "e06e0e225064a74e",
+        "identity": "6b656f36d2a0bed9",
+        "tags": [],
         "type": "setting",
         "key_path": "hasAvailableSubscription",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "08c42c53aa5859db",
+        "identity": "022d1ce2d95ab911",
+        "tags": [],
         "type": "setting",
         "key_path": "oauthAccount",
         "value": {
@@ -493,16 +587,20 @@ expression: redact(&text)
             "organizationUuid"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "0afef8ad730047ce",
+        "identity": "7402405de330061f",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.additionalDirectories",
         "value": {
@@ -511,16 +609,20 @@ expression: redact(&text)
             "~/proj/shared-libs"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "ca9251e30d620908",
+        "identity": "b391cd998c325d21",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -532,16 +634,20 @@ expression: redact(&text)
             "WebFetch(domain:docs.acme-corp.example)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "173f0e4c28d872e6",
+        "identity": "6f3e6dad263f6ff1",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -552,32 +658,40 @@ expression: redact(&text)
             "Read(//tmp/**)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.local.json"
+          "path": "[HOME]/.claude/settings.local.json"
         }
       },
       {
+        "id": "4040896fb2e9e875",
+        "identity": "a25410913bf73228",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.defaultMode",
         "value": {
           "kind": "text",
           "value": "acceptEdits"
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "1d4fcbf924bec1a7",
+        "identity": "56da1a230708ddb6",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.deny",
         "value": {
@@ -587,53 +701,65 @@ expression: redact(&text)
             "Read(~/.ssh/**)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "33e5039963c207f9",
+        "identity": "1ac40e71801d570a",
+        "tags": [],
         "type": "setting",
         "key_path": "statusLine.command",
         "value": {
           "kind": "text",
           "value": "~/.claude/statusline.sh"
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "4b5600155a0138ee",
+        "identity": "689c4602f7ce94c9",
+        "tags": [],
         "type": "setting",
         "key_path": "statusLine.type",
         "value": {
           "kind": "text",
           "value": "command"
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json"
+          "path": "[HOME]/.claude/settings.json"
         }
       },
       {
+        "id": "43eddedffe85549f",
+        "identity": "99171cb1fc82d95b",
+        "tags": [],
         "type": "credential",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/.credentials.json",
+        "path": "[HOME]/.claude/.credentials.json",
         "exists": true,
-        "mode": "[MODE]",
-        "readable_by_others": "[UMASK]",
+        "mode": "0600",
+        "readable_by_others": false,
         "keys": [
           {
             "name": "claudeAiOauth",
@@ -646,10 +772,13 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "credential",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/.credentials.json"
+          "path": "[HOME]/.claude/.credentials.json"
         }
       },
       {
+        "id": "b5aebe420ce75a95",
+        "identity": "d7588bbe738d9446",
+        "tags": [],
         "type": "mcp_server",
         "name": "acme-docs",
         "launch": {
@@ -665,17 +794,22 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.acme-docs",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "mcp_config",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.mcp.json"
+          "path": "[HOME]/proj/acme-api/.mcp.json"
         }
       },
       {
+        "id": "9995e641cee9ddd6",
+        "identity": "4aa1ca5ad0fea1ca",
+        "tags": [],
         "type": "mcp_server",
         "name": "github",
         "launch": {
@@ -692,17 +826,22 @@ expression: redact(&text)
         ],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.github",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "mcp_config",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.mcp.json"
+          "path": "[HOME]/proj/acme-api/.mcp.json"
         }
       },
       {
+        "id": "340112704c3eb103",
+        "identity": "f6a07a9f753fbd46",
+        "tags": [],
         "type": "mcp_server",
         "name": "postgres",
         "launch": {
@@ -720,17 +859,22 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.postgres",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "mcp_config",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.mcp.json"
+          "path": "[HOME]/proj/acme-api/.mcp.json"
         }
       },
       {
+        "id": "211721f97ee4ddd7",
+        "identity": "3da6e1b2a7139ee1",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "Bash",
@@ -741,17 +885,22 @@ expression: redact(&text)
           "timeout_secs": 10,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.json"
+          "path": "[HOME]/proj/acme-api/.claude/settings.json"
         }
       },
       {
+        "id": "b74faccd664973af",
+        "identity": "3824a5b811b8d40f",
+        "tags": [],
         "type": "hook",
         "event": "Stop",
         "matcher": null,
@@ -761,21 +910,28 @@ expression: redact(&text)
           "tool": "log_session",
           "timeout_secs": null
         },
+        "key_path": "hooks.Stop[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.json"
+          "path": "[HOME]/proj/acme-api/.claude/settings.json"
         }
       },
       {
+        "id": "41d3942205223db7",
+        "identity": "59c5a5b01c0eed0d",
+        "tags": [
+          "bundled_scripts"
+        ],
         "type": "skill",
         "name": "db-migrate",
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/skills/db-migrate",
+        "path": "[HOME]/proj/acme-api/.claude/skills/db-migrate",
         "description": "Create and apply a database migration",
         "allowed_tools": [
           "Bash(./scripts/migrate.sh *)",
@@ -793,58 +949,70 @@ expression: redact(&text)
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/skills/db-migrate/SKILL.md"
+          "path": "[HOME]/proj/acme-api/.claude/skills/db-migrate/SKILL.md"
         }
       },
       {
+        "id": "13eea0c7a697d308",
+        "identity": "44a23fcba2ed7e90",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/rules/api.md",
+        "path": "[HOME]/proj/acme-api/.claude/rules/api.md",
         "lines": 7,
         "always_apply": false,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/rules/api.md"
+          "path": "[HOME]/proj/acme-api/.claude/rules/api.md"
         }
       },
       {
+        "id": "ba5abd885acb593e",
+        "identity": "2281d879e8014942",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/rules/testing.md",
+        "path": "[HOME]/proj/acme-api/.claude/rules/testing.md",
         "lines": 3,
         "always_apply": true,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/rules/testing.md"
+          "path": "[HOME]/proj/acme-api/.claude/rules/testing.md"
         }
       },
       {
+        "id": "e7876d970aa3809c",
+        "identity": "01dadcf61bb7a420",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/CLAUDE.md",
+        "path": "[HOME]/proj/acme-api/CLAUDE.md",
         "lines": 5,
         "always_apply": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/CLAUDE.md"
+          "path": "[HOME]/proj/acme-api/CLAUDE.md"
         }
       },
       {
+        "id": "52cf453cb5fc5fe1",
+        "identity": "512bdfc90d5fcd6e",
+        "tags": [],
         "type": "setting",
         "key_path": "enabledMcpjsonServers",
         "value": {
@@ -854,17 +1022,21 @@ expression: redact(&text)
             "github"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.json"
+          "path": "[HOME]/proj/acme-api/.claude/settings.json"
         }
       },
       {
+        "id": "c8c2756b6241fba7",
+        "identity": "effbcf7a9d562528",
+        "tags": [],
         "type": "setting",
         "key_path": "env",
         "value": {
@@ -873,17 +1045,21 @@ expression: redact(&text)
             "RUST_LOG"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.json"
+          "path": "[HOME]/proj/acme-api/.claude/settings.json"
         }
       },
       {
+        "id": "9eed781b066822ef",
+        "identity": "67f80a98f865da12",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -893,17 +1069,21 @@ expression: redact(&text)
             "Bash(docker compose *)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.json"
+          "path": "[HOME]/proj/acme-api/.claude/settings.json"
         }
       },
       {
+        "id": "f833b6d827c12e55",
+        "identity": "5db388f7870c30a6",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.deny",
         "value": {
@@ -912,17 +1092,21 @@ expression: redact(&text)
             "Read(./secrets/**)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.json"
+          "path": "[HOME]/proj/acme-api/.claude/settings.json"
         }
       },
       {
+        "id": "ec3f2ab50363e013",
+        "identity": "ea2026485fd45701",
+        "tags": [],
         "type": "hook",
         "event": "SessionStart",
         "matcher": null,
@@ -933,100 +1117,124 @@ expression: redact(&text)
           "timeout_secs": null,
           "async": false
         },
+        "key_path": "hooks.SessionStart[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/.claude/settings.json"
+          "path": "[HOME]/proj/dotfiles-sync/.claude/settings.json"
         }
       },
       {
+        "id": "3a0c57155b652c36",
+        "identity": "6c0cc4f2b937ec1e",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/AGENTS.md",
+        "path": "[HOME]/proj/dotfiles-sync/AGENTS.md",
         "lines": 3,
         "always_apply": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/AGENTS.md"
+          "path": "[HOME]/proj/dotfiles-sync/AGENTS.md"
         }
       },
       {
+        "id": "b674b7fb64345776",
+        "identity": "b1535e49ceb479e5",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you\"].allowedTools",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo"
+            "root": "[HOME]"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "9d9a7a183f2a93ed",
+        "identity": "fbcedca3c6116124",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you\"].disabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo"
+            "root": "[HOME]"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "1bae866b9cb71ce6",
+        "identity": "e30176649d5f2876",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you\"].enabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo"
+            "root": "[HOME]"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "a7fd5036a8cff00a",
+        "identity": "6727087adf11b87a",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you\"].hasTrustDialogAccepted",
         "value": {
           "kind": "bool",
           "value": false
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo"
+            "root": "[HOME]"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "380f9754366b6eb3",
+        "identity": "abb7158fb7534c16",
+        "tags": [],
         "type": "mcp_server",
         "name": "playwright",
         "launch": {
@@ -1042,17 +1250,22 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "projects[\"/Users/you/proj/acme-api\"].mcpServers.playwright",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "17e85e0837827b6f",
+        "identity": "659d777a11d95fc4",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -1063,51 +1276,63 @@ expression: redact(&text)
             "WebFetch(domain:crates.io)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.local.json"
+          "path": "[HOME]/proj/acme-api/.claude/settings.local.json"
         }
       },
       {
+        "id": "115d10c198147295",
+        "identity": "ae06d30f0d9a4aca",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].allowedTools",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "581d50af76bee698",
+        "identity": "9be2a064fda5fe0d",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].disabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "fba5141649cfc04d",
+        "identity": "bb02bc848650d699",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].enabledMcpjsonServers",
         "value": {
@@ -1116,51 +1341,63 @@ expression: redact(&text)
             "postgres"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "75b551cf735de405",
+        "identity": "07ff988fdf8ad24e",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].hasClaudeMdExternalIncludesApproved",
         "value": {
           "kind": "bool",
           "value": false
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "7e95d43162b1f102",
+        "identity": "cc73b135b801628d",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].hasTrustDialogAccepted",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "c76ef152153ed9fb",
+        "identity": "23bdf4de882fda68",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].allowedTools",
         "value": {
@@ -1169,85 +1406,105 @@ expression: redact(&text)
             "Bash(git pull:*)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "4dcb65fac0a2f45d",
+        "identity": "91bbdaa563312274",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].disabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "66e090c69fbc9065",
+        "identity": "3e3c184feae54016",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].enabledMcpjsonServers",
         "value": {
           "kind": "list",
           "values": []
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "f0f5cdbbf8c9e7c8",
+        "identity": "69ec492c18aec790",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].hasTrustDialogAccepted",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "c3c63f67d7875848",
+        "identity": "b80e57e9fafc2a0e",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].hasTrustDialogHooksAccepted",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "app_state",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json"
+          "path": "[HOME]/.claude.json"
         }
       },
       {
+        "id": "c0db85aeedc9f685",
+        "identity": "c6412a819100d921",
+        "tags": [],
         "type": "mcp_server",
         "name": "acme-deploy",
         "launch": {
@@ -1264,6 +1521,8 @@ expression: redact(&text)
         ],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "acme-deploy",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1271,10 +1530,13 @@ expression: redact(&text)
             "id": "acme-deploy@acme-tools"
           },
           "kind": "mcp_config",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/.mcp.json"
+          "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/.mcp.json"
         }
       },
       {
+        "id": "1b778fbf8fbac3ca",
+        "identity": "7196834ab17042a8",
+        "tags": [],
         "type": "hook",
         "event": "PostToolUse",
         "matcher": "Write|Edit",
@@ -1285,6 +1547,8 @@ expression: redact(&text)
           "timeout_secs": 15,
           "async": false
         },
+        "key_path": "hooks.PostToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1292,14 +1556,17 @@ expression: redact(&text)
             "id": "acme-deploy@acme-tools"
           },
           "kind": "hooks",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/hooks/hooks.json"
+          "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/hooks/hooks.json"
         }
       },
       {
+        "id": "60c9382e3f002d25",
+        "identity": "0c8b564a6baf6733",
+        "tags": [],
         "type": "skill",
         "name": "deploy-check",
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check",
+        "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check",
         "description": "Check that a deployment is healthy before announcing it",
         "allowed_tools": [
           "Bash(acme-deploy *)"
@@ -1316,10 +1583,13 @@ expression: redact(&text)
             "id": "acme-deploy@acme-tools"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check/SKILL.md"
+          "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check/SKILL.md"
         }
       },
       {
+        "id": "17a49ea7ebd93596",
+        "identity": "d16a8e38a4ae106e",
+        "tags": [],
         "type": "mcp_server",
         "name": "context7",
         "launch": {
@@ -1334,6 +1604,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.context7",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1341,10 +1613,13 @@ expression: redact(&text)
             "id": "context7@claude-plugins-official"
           },
           "kind": "mcp_config",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df/.mcp.json"
+          "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df/.mcp.json"
         }
       },
       {
+        "id": "5b6f88e9bd9a0621",
+        "identity": "202ae011d3b31bf7",
+        "tags": [],
         "type": "hook",
         "event": "SessionStart",
         "matcher": null,
@@ -1355,6 +1630,8 @@ expression: redact(&text)
           "timeout_secs": null,
           "async": false
         },
+        "key_path": "hooks.SessionStart[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -1362,10 +1639,13 @@ expression: redact(&text)
             "id": "explanatory-output-style@claude-plugins-official"
           },
           "kind": "hooks",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/hooks/hooks.json"
+          "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/hooks/hooks.json"
         }
       },
       {
+        "id": "c279255636728a66",
+        "identity": "fbbe3194e37bfccc",
+        "tags": [],
         "type": "mcp_server",
         "name": "fetch",
         "launch": {
@@ -1381,16 +1661,21 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": false,
+        "key_path": "mcp_servers.fetch",
+        "line": 27,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "e9d29e79e4dd9768",
+        "identity": "4aa1ca5ad0fea1ca",
+        "tags": [],
         "type": "mcp_server",
         "name": "github",
         "launch": {
@@ -1406,16 +1691,21 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcp_servers.github",
+        "line": 22,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "9e172cf4d3a79dcb",
+        "identity": "11139cc047660ebc",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "Bash",
@@ -1426,16 +1716,21 @@ expression: redact(&text)
           "timeout_secs": 10,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": 37,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "c6142f63e199d0b2",
+        "identity": "96c8ff6c0744e562",
+        "tags": [],
         "type": "hook",
         "event": "SessionStart",
         "matcher": null,
@@ -1446,16 +1741,21 @@ expression: redact(&text)
           "timeout_secs": 5,
           "async": false
         },
+        "key_path": "hooks.SessionStart[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "hooks",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/hooks.json"
+          "path": "[HOME]/.codex/hooks.json"
         }
       },
       {
+        "id": "a3ec575e0fc459fd",
+        "identity": "8532d91c51fbbff8",
+        "tags": [],
         "type": "hook",
         "event": "UserPromptSubmit",
         "matcher": null,
@@ -1466,20 +1766,25 @@ expression: redact(&text)
           "timeout_secs": null,
           "async": true
         },
+        "key_path": "hooks.UserPromptSubmit[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "hooks",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/hooks.json"
+          "path": "[HOME]/.codex/hooks.json"
         }
       },
       {
+        "id": "0f7a5f299f93a3d4",
+        "identity": "b035a142835336ed",
+        "tags": [],
         "type": "skill",
         "name": "pr-summary",
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.codex/skills/pr-summary",
+        "path": "[HOME]/.codex/skills/pr-summary",
         "description": "Summarise a pull request for reviewers",
         "allowed_tools": [],
         "scripts": [],
@@ -1493,12 +1798,15 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/skills/pr-summary/SKILL.md"
+          "path": "[HOME]/.codex/skills/pr-summary/SKILL.md"
         }
       },
       {
+        "id": "38d1bcf0c7488244",
+        "identity": "28e576e664dce8ec",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.codex/AGENTS.md",
+        "path": "[HOME]/.codex/AGENTS.md",
         "lines": 3,
         "always_apply": null,
         "source": {
@@ -1507,106 +1815,133 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/AGENTS.md"
+          "path": "[HOME]/.codex/AGENTS.md"
         }
       },
       {
+        "id": "745dfc46cd77e76f",
+        "identity": "a0990f03d39ac079",
+        "tags": [],
         "type": "setting",
         "key_path": "approval_policy",
         "value": {
           "kind": "text",
           "value": "never"
         },
+        "line": 3,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "ba9c82b6f4d90032",
+        "identity": "244e81b786ea127e",
+        "tags": [],
         "type": "setting",
         "key_path": "cli_auth_credentials_store",
         "value": {
           "kind": "text",
           "value": "file"
         },
+        "line": 5,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "e72c82adafbac1eb",
+        "identity": "2638b1b18857cd2f",
+        "tags": [],
         "type": "setting",
         "key_path": "features.hooks",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": 13,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "2ba329e1b2c259d1",
+        "identity": "c22e97095198932f",
+        "tags": [],
         "type": "setting",
         "key_path": "model_providers.local.base_url",
         "value": {
           "kind": "text",
           "value": "http://localhost:11434/v1"
         },
+        "line": 19,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "8f143216ee7ae5e5",
+        "identity": "175e031947ea296b",
+        "tags": [],
         "type": "setting",
         "key_path": "model_providers.local.name",
         "value": {
           "kind": "text",
           "value": "Ollama"
         },
+        "line": 18,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "a8b1d5118371a136",
+        "identity": "8936426183046083",
+        "tags": [],
         "type": "setting",
         "key_path": "model_providers.local.wire_api",
         "value": {
           "kind": "text",
           "value": "chat"
         },
+        "line": 20,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "8eebe1cb4cb9ba35",
+        "identity": "46f5f351c6cc7554",
+        "tags": [],
         "type": "setting",
         "key_path": "notify",
         "value": {
@@ -1616,48 +1951,60 @@ expression: redact(&text)
             "/Users/you/.codex/notify.py"
           ]
         },
+        "line": 6,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "b62fb0570291c733",
+        "identity": "f6586b6688709a2d",
+        "tags": [],
         "type": "setting",
         "key_path": "sandbox_mode",
         "value": {
           "kind": "text",
           "value": "danger-full-access"
         },
+        "line": 4,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "fa12a1c63e246095",
+        "identity": "ccbef3248ee4f698",
+        "tags": [],
         "type": "setting",
         "key_path": "shell_environment_policy.inherit",
         "value": {
           "kind": "text",
           "value": "core"
         },
+        "line": 9,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "89e90c8647dc16f9",
+        "identity": "7f873fcaa58b3b33",
+        "tags": [],
         "type": "setting",
         "key_path": "shell_environment_policy.set",
         "value": {
@@ -1666,37 +2013,45 @@ expression: redact(&text)
             "CODEX_SANDBOX"
           ]
         },
+        "line": 10,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "279251e890bb1e49",
+        "identity": "3334dca215baa926",
+        "tags": [],
         "type": "setting",
         "key_path": "skills.config[\"/Users/you/.agents/skills/changelog/SKILL.md\"].enabled",
         "value": {
           "kind": "bool",
           "value": false
         },
+        "line": 54,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "user"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "19fcfdf03e41851a",
+        "identity": "23d4db1585c627bd",
+        "tags": [],
         "type": "credential",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.codex/auth.json",
+        "path": "[HOME]/.codex/auth.json",
         "exists": true,
-        "mode": "[MODE]",
-        "readable_by_others": "[UMASK]",
+        "mode": "0600",
+        "readable_by_others": false,
         "keys": [
           {
             "name": "OPENAI_API_KEY",
@@ -1713,10 +2068,13 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "credential",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/auth.json"
+          "path": "[HOME]/.codex/auth.json"
         }
       },
       {
+        "id": "61ba799506ff7992",
+        "identity": "cb3b049d1faf1a94",
+        "tags": [],
         "type": "mcp_server",
         "name": "acme-docs",
         "launch": {
@@ -1732,17 +2090,22 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcp_servers.acme-docs",
+        "line": 3,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.codex/config.toml"
+          "path": "[HOME]/proj/acme-api/.codex/config.toml"
         }
       },
       {
+        "id": "f623d284ce4b05bc",
+        "identity": "ba838895535ea890",
+        "tags": [],
         "type": "hook",
         "event": "PreToolUse",
         "matcher": "Bash",
@@ -1753,102 +2116,125 @@ expression: redact(&text)
           "timeout_secs": 10,
           "async": false
         },
+        "key_path": "hooks.PreToolUse[0].hooks[0]",
+        "line": null,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "hooks",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.codex/hooks.json"
+          "path": "[HOME]/proj/acme-api/.codex/hooks.json"
         }
       },
       {
+        "id": "f2121b6bc77eb290",
+        "identity": "5d9ab06f3e17538a",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/AGENTS.md",
+        "path": "[HOME]/proj/acme-api/AGENTS.md",
         "lines": 3,
         "always_apply": null,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/AGENTS.md"
+          "path": "[HOME]/proj/acme-api/AGENTS.md"
         }
       },
       {
+        "id": "12ca0441067f58b1",
+        "identity": "673659d09862f096",
+        "tags": [],
         "type": "setting",
         "key_path": "approval_policy",
         "value": {
           "kind": "text",
           "value": "on-request"
         },
+        "line": 1,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.codex/config.toml"
+          "path": "[HOME]/proj/acme-api/.codex/config.toml"
         }
       },
       {
+        "id": "58893bf8a794510a",
+        "identity": "6c0cc4f2b937ec1e",
+        "tags": [],
         "type": "instruction",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/AGENTS.md",
+        "path": "[HOME]/proj/dotfiles-sync/AGENTS.md",
         "lines": 3,
         "always_apply": null,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "instructions",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/AGENTS.md"
+          "path": "[HOME]/proj/dotfiles-sync/AGENTS.md"
         }
       },
       {
+        "id": "59bacb73d9b6597e",
+        "identity": "c39a13de94eabf75",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/acme-api\"].trust_level",
         "value": {
           "kind": "text",
           "value": "trusted"
         },
+        "line": 47,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "4130d656164e5014",
+        "identity": "aca5185a5c961778",
+        "tags": [],
         "type": "setting",
         "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].trust_level",
         "value": {
           "kind": "text",
           "value": "trusted"
         },
+        "line": 50,
         "source": {
           "agent": "codex",
           "scope": {
             "kind": "local",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+            "root": "[HOME]/proj/dotfiles-sync"
           },
           "kind": "settings",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml"
+          "path": "[HOME]/.codex/config.toml"
         }
       },
       {
+        "id": "48302dced4788895",
+        "identity": "8b0b95f7a53a8c57",
+        "tags": [],
         "type": "skill",
         "name": "changelog",
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.agents/skills/changelog",
+        "path": "[HOME]/.agents/skills/changelog",
         "description": "Add a Keep a Changelog entry for the current change",
         "allowed_tools": [],
         "scripts": [],
@@ -1862,14 +2248,57 @@ expression: redact(&text)
             "kind": "user"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/.agents/skills/changelog/SKILL.md"
+          "path": "[HOME]/.agents/skills/changelog/SKILL.md"
         }
       },
       {
+        "id": "3c6cd19254ea05dc",
+        "identity": "bc15d5640779379b",
+        "tags": [],
+        "type": "setting",
+        "key_path": "ANTHROPIC_API_KEY",
+        "value": {
+          "kind": "present"
+        },
+        "line": 42,
+        "source": {
+          "agent": "shared",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "shell_profile",
+          "path": "[HOME]/.zshrc"
+        }
+      },
+      {
+        "id": "ca715461c0230fa4",
+        "identity": "7f48f33673a9ed69",
+        "tags": [],
+        "type": "setting",
+        "key_path": "GITHUB_TOKEN",
+        "value": {
+          "kind": "present"
+        },
+        "line": 43,
+        "source": {
+          "agent": "shared",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "shell_profile",
+          "path": "[HOME]/.zshrc"
+        }
+      },
+      {
+        "id": "f7421322b28bd9e2",
+        "identity": "2227a85ddb275cc4",
+        "tags": [
+          "bundled_scripts"
+        ],
         "type": "skill",
         "name": "openapi-lint",
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.agents/skills/openapi-lint",
+        "path": "[HOME]/proj/acme-api/.agents/skills/openapi-lint",
         "description": "Lint the OpenAPI document after changing an endpoint",
         "allowed_tools": [],
         "scripts": [
@@ -1883,10 +2312,10 @@ expression: redact(&text)
           "agent": "shared",
           "scope": {
             "kind": "project",
-            "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+            "root": "[HOME]/proj/acme-api"
           },
           "kind": "skill",
-          "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.agents/skills/openapi-lint/SKILL.md"
+          "path": "[HOME]/proj/acme-api/.agents/skills/openapi-lint/SKILL.md"
         }
       }
     ],
@@ -1897,7 +2326,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.agents/skills/changelog/SKILL.md",
+        "path": "[HOME]/.agents/skills/changelog/SKILL.md",
         "bytes": 162,
         "sha256": "e858ceb59ad4fdc2384059140efe5d69c4e670df8e49d2d5c4c6e30c37fa0763"
       },
@@ -1907,7 +2336,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "instructions",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/CLAUDE.md",
+        "path": "[HOME]/.claude/CLAUDE.md",
         "bytes": 129,
         "sha256": "241e939e1b72e2a18e0ecb81e16b3949a1ba49d1e27c6b6fcd35a4aecbe786da"
       },
@@ -1917,7 +2346,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/agents/browser-tester.md",
+        "path": "[HOME]/.claude/agents/browser-tester.md",
         "bytes": 352,
         "sha256": "ed07af22b81658b6cc71868508283bdd2f368480fa924b88c15512f3e514f624"
       },
@@ -1927,7 +2356,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/commands/fix-issue.md",
+        "path": "[HOME]/.claude/commands/fix-issue.md",
         "bytes": 209,
         "sha256": "ba105f38b953eb01f07445a2e29948bdbca0724fb6402813d0f4a2a6c9ef07f6"
       },
@@ -1938,7 +2367,7 @@ expression: redact(&text)
           "id": "acme-deploy@acme-tools"
         },
         "kind": "plugin",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/.claude-plugin/plugin.json",
+        "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/.claude-plugin/plugin.json",
         "bytes": 254,
         "sha256": "44446dbd3f965778bb000d95ffa877aca6c76377a80f8e4faf0bcc1bd2c438b9"
       },
@@ -1949,7 +2378,7 @@ expression: redact(&text)
           "id": "acme-deploy@acme-tools"
         },
         "kind": "mcp_config",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/.mcp.json",
+        "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/.mcp.json",
         "bytes": 161,
         "sha256": "674955a31f446be0c801fc9ba22b83da5e4d72e3230b78a3ac0c68d0c0f3b45d"
       },
@@ -1960,7 +2389,7 @@ expression: redact(&text)
           "id": "acme-deploy@acme-tools"
         },
         "kind": "hooks",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/hooks/hooks.json",
+        "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/hooks/hooks.json",
         "bytes": 277,
         "sha256": "b4b8f902cbf8490e905abc366e4698f8c364c863d6ca2581c568ad4278d6c74c"
       },
@@ -1971,7 +2400,7 @@ expression: redact(&text)
           "id": "acme-deploy@acme-tools"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check/SKILL.md",
+        "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check/SKILL.md",
         "bytes": 172,
         "sha256": "890af3d925641bcbb7c28a8794ce6b3f1decf3f113f3b3b24d0d9bf37f6cda72"
       },
@@ -1982,7 +2411,7 @@ expression: redact(&text)
           "id": "context7@claude-plugins-official"
         },
         "kind": "plugin",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df/.claude-plugin/plugin.json",
+        "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df/.claude-plugin/plugin.json",
         "bytes": 151,
         "sha256": "b35ccf67c5a8ac89c0ed2a8980c4526409b62ed9e00aba95a723bddf9ad7eb49"
       },
@@ -1993,7 +2422,7 @@ expression: redact(&text)
           "id": "context7@claude-plugins-official"
         },
         "kind": "mcp_config",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df/.mcp.json",
+        "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/context7/b8e53f1c05df/.mcp.json",
         "bytes": 142,
         "sha256": "e5dfed1749b361fbb2d0ad64a3792a28622e788c3c058fa0f0c923991f941c17"
       },
@@ -2004,7 +2433,7 @@ expression: redact(&text)
           "id": "explanatory-output-style@claude-plugins-official"
         },
         "kind": "plugin",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/.claude-plugin/plugin.json",
+        "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/.claude-plugin/plugin.json",
         "bytes": 203,
         "sha256": "459ad48517c31e3b5474eb7f641b5eed6ea0219d85136361009220d40cd3972e"
       },
@@ -2015,7 +2444,7 @@ expression: redact(&text)
           "id": "explanatory-output-style@claude-plugins-official"
         },
         "kind": "hooks",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/hooks/hooks.json",
+        "path": "[HOME]/.claude/plugins/cache/claude-plugins-official/explanatory-output-style/1.0.0/hooks/hooks.json",
         "bytes": 323,
         "sha256": "f941cedcbac07688675fb8d0fad741e9ba13900d73416409861001efe3fedba9"
       },
@@ -2025,7 +2454,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "plugin",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/installed_plugins.json",
+        "path": "[HOME]/.claude/plugins/installed_plugins.json",
         "bytes": 1542,
         "sha256": "a2c5b16bd0ddc30c280330e7fd22480a77f0ce25fbdc861b3257ed341268f5d4"
       },
@@ -2035,7 +2464,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "plugin",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/plugins/known_marketplaces.json",
+        "path": "[HOME]/.claude/plugins/known_marketplaces.json",
         "bytes": 511,
         "sha256": "91e0cb0a5c111c3fe77a78c65002845e455d83dab410fb194a541dff5cfcf122"
       },
@@ -2045,7 +2474,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "instructions",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/rules/style.md",
+        "path": "[HOME]/.claude/rules/style.md",
         "bytes": 100,
         "sha256": "3655b59eb6c96f7d7d8ccd0c9bc11c43f74f5be50a19ddc3ad51e9f83ef7cc61"
       },
@@ -2055,7 +2484,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "settings",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.json",
+        "path": "[HOME]/.claude/settings.json",
         "bytes": 1699,
         "sha256": "f9825c8e919940c3d25e08278f688ffbe72c221b73a0f5866ec30f1c25733d3c"
       },
@@ -2065,7 +2494,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "settings",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/settings.local.json",
+        "path": "[HOME]/.claude/settings.local.json",
         "bytes": 400,
         "sha256": "4c962965a844f02581931fe806741e6d5d819c562daa99bb32f6874c6fa0bf11"
       },
@@ -2075,7 +2504,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/skills/deploy/SKILL.md",
+        "path": "[HOME]/.claude/skills/deploy/SKILL.md",
         "bytes": 417,
         "sha256": "70ee3a019e7bcdba0b7f9a5caa98e2865c200d9a8f3a3813c959c4d61a45a43f"
       },
@@ -2085,7 +2514,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude/skills/release-notes/SKILL.md",
+        "path": "[HOME]/.claude/skills/release-notes/SKILL.md",
         "bytes": 256,
         "sha256": "af46e56c290e1c4617ef55050067b030ebaaaecfe2fdacbd38120fd8e79d26f4"
       },
@@ -2095,7 +2524,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "app_state",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.claude.json",
+        "path": "[HOME]/.claude.json",
         "bytes": 2613,
         "sha256": "2610342615168129886bfd3bf1cdea996b182c46b8dac9d0f2eef2b3bd6cd54f"
       },
@@ -2105,7 +2534,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "instructions",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.codex/AGENTS.md",
+        "path": "[HOME]/.codex/AGENTS.md",
         "bytes": 67,
         "sha256": "bec5b33efaf377c015fe061ef0af721acfa0a629ed3bad32f64c9b92d5bd6a3a"
       },
@@ -2115,7 +2544,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "settings",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.codex/config.toml",
+        "path": "[HOME]/.codex/config.toml",
         "bytes": 1375,
         "sha256": "ef850174659b5b379b9ef6983569f085d89ca39181392bfff3625367090e6af9"
       },
@@ -2125,7 +2554,7 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "hooks",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.codex/hooks.json",
+        "path": "[HOME]/.codex/hooks.json",
         "bytes": 550,
         "sha256": "fe8d1086276fe6b52174eea0de49faab8bf6718859501e9d66d7331ac7147bd7"
       },
@@ -2135,18 +2564,28 @@ expression: redact(&text)
           "kind": "user"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/.codex/skills/pr-summary/SKILL.md",
+        "path": "[HOME]/.codex/skills/pr-summary/SKILL.md",
         "bytes": 128,
         "sha256": "9edc4df6760614734c89b5d88d8b47f4f8bd1bc69a7c697ee4b3f0b1b96bf3d1"
       },
       {
         "agent": "shared",
         "scope": {
+          "kind": "user"
+        },
+        "kind": "shell_profile",
+        "path": "[HOME]/.zshrc",
+        "bytes": 1268,
+        "sha256": null
+      },
+      {
+        "agent": "shared",
+        "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.agents/skills/openapi-lint/SKILL.md",
+        "path": "[HOME]/proj/acme-api/.agents/skills/openapi-lint/SKILL.md",
         "bytes": 117,
         "sha256": "bb92ab752b7a55cd890aa2ba92fd4774acd7b9141811ab907ff17ec920832c28"
       },
@@ -2154,10 +2593,10 @@ expression: redact(&text)
         "agent": "claude_code",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "instructions",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/rules/api.md",
+        "path": "[HOME]/proj/acme-api/.claude/rules/api.md",
         "bytes": 84,
         "sha256": "9e1e21c80dd5f41ecb5d6a3b4182647839bee37c0bca8aa4778ef2a5c2f33e1c"
       },
@@ -2165,10 +2604,10 @@ expression: redact(&text)
         "agent": "claude_code",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "instructions",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/rules/testing.md",
+        "path": "[HOME]/proj/acme-api/.claude/rules/testing.md",
         "bytes": 62,
         "sha256": "3c872490aae579b2173e208fe7bcfe7692eabacdee48381f1ffb72084507f5db"
       },
@@ -2176,10 +2615,10 @@ expression: redact(&text)
         "agent": "claude_code",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "settings",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.json",
+        "path": "[HOME]/proj/acme-api/.claude/settings.json",
         "bytes": 709,
         "sha256": "4dd27ee99a20df0b3596e47c8095203390994486a184404be876fbd34c69729c"
       },
@@ -2187,10 +2626,10 @@ expression: redact(&text)
         "agent": "claude_code",
         "scope": {
           "kind": "local",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "settings",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/settings.local.json",
+        "path": "[HOME]/proj/acme-api/.claude/settings.local.json",
         "bytes": 138,
         "sha256": "b74dd4a9e80258ae4f688f79b527c601a5d2155d88f9908753eb1f32a5074ae4"
       },
@@ -2198,10 +2637,10 @@ expression: redact(&text)
         "agent": "claude_code",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "skill",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.claude/skills/db-migrate/SKILL.md",
+        "path": "[HOME]/proj/acme-api/.claude/skills/db-migrate/SKILL.md",
         "bytes": 186,
         "sha256": "7e356599750d260eb3614f678827a9fc90121f07f07d1e146ca828e5789bc811"
       },
@@ -2209,10 +2648,10 @@ expression: redact(&text)
         "agent": "codex",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "settings",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.codex/config.toml",
+        "path": "[HOME]/proj/acme-api/.codex/config.toml",
         "bytes": 136,
         "sha256": "40e7d960c881f302f9445b3ef1db2fafe02d737818b14f8431a2e3e24282cc64"
       },
@@ -2220,21 +2659,32 @@ expression: redact(&text)
         "agent": "codex",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "hooks",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.codex/hooks.json",
+        "path": "[HOME]/proj/acme-api/.codex/hooks.json",
         "bytes": 245,
         "sha256": "f9737487361a504acb70bb53c9458f0cf80c93baed912bc108d639853d780181"
+      },
+      {
+        "agent": "shared",
+        "scope": {
+          "kind": "project",
+          "root": "[HOME]/proj/acme-api"
+        },
+        "kind": "env_file",
+        "path": "[HOME]/proj/acme-api/.env",
+        "bytes": 25,
+        "sha256": null
       },
       {
         "agent": "claude_code",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "mcp_config",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/.mcp.json",
+        "path": "[HOME]/proj/acme-api/.mcp.json",
         "bytes": 602,
         "sha256": "cb31d200a2e8d875a703a502226ec0364463961e73ae1113d88bb3acfd780933"
       },
@@ -2242,10 +2692,10 @@ expression: redact(&text)
         "agent": "codex",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "instructions",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/AGENTS.md",
+        "path": "[HOME]/proj/acme-api/AGENTS.md",
         "bytes": 53,
         "sha256": "df557d62c26a71e4c35e63ff0dbb1bc1173b19dda4c6b8859f0d8cc3e8412cc1"
       },
@@ -2253,10 +2703,10 @@ expression: redact(&text)
         "agent": "claude_code",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api"
+          "root": "[HOME]/proj/acme-api"
         },
         "kind": "instructions",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/acme-api/CLAUDE.md",
+        "path": "[HOME]/proj/acme-api/CLAUDE.md",
         "bytes": 83,
         "sha256": "cfce9830e36276211a135dd26c92a713761ae1e02960372d1d502580d669641e"
       },
@@ -2264,10 +2714,10 @@ expression: redact(&text)
         "agent": "claude_code",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+          "root": "[HOME]/proj/dotfiles-sync"
         },
         "kind": "settings",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/.claude/settings.json",
+        "path": "[HOME]/proj/dotfiles-sync/.claude/settings.json",
         "bytes": 229,
         "sha256": "4f8f721274910d48fdbe0479a4f416707bd6ac587fc868006ec089e8c6aee8c0"
       },
@@ -2275,14 +2725,284 @@ expression: redact(&text)
         "agent": "claude_code",
         "scope": {
           "kind": "project",
-          "root": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync"
+          "root": "[HOME]/proj/dotfiles-sync"
         },
         "kind": "instructions",
-        "path": "[REPO]/fixtures/homes/mockup-demo/proj/dotfiles-sync/AGENTS.md",
+        "path": "[HOME]/proj/dotfiles-sync/AGENTS.md",
         "bytes": 101,
         "sha256": "1cd94fabb9d8ac7e28625a1e3d5c116c9153f1e78a57d6a1eaee0c2252b800d3"
       }
     ],
     "warnings": []
-  }
+  },
+  "findings": [
+    {
+      "id": "a854cbc7b6c5c6f6",
+      "rule": "BILL-001",
+      "category": "billing",
+      "severity": "high",
+      "title": "API key bills headless runs",
+      "why": "Claude Code uses `ANTHROPIC_API_KEY` for every `claude -p` run even though a subscription is signed in, so those runs are billed to the key.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 42,
+        "key_path": "ANTHROPIC_API_KEY"
+      },
+      "evidence": "ANTHROPIC_API_KEY=sk-ant-••••7Qa",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Remove the key from your environment and let the subscription login bill",
+        "steps": [
+          "Delete the export from the profile (or scope it to the one script that needs it).",
+          "Start a new shell and check `env | grep ANTHROPIC` shows nothing."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "3c6cd19254ea05dc"
+      ],
+      "tags": [
+        "SEC-004"
+      ]
+    },
+    {
+      "id": "0854c66a81d7d0e9",
+      "rule": "BILL-006",
+      "category": "billing",
+      "severity": "medium",
+      "title": "Custom API gateway",
+      "why": "Requests, and the API key with them, go to this host instead of the vendor.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "env.ANTHROPIC_BASE_URL"
+      },
+      "evidence": "ANTHROPIC_BASE_URL=https://llm-proxy.acme-corp.example",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Point the base URL back at the vendor unless you trust this gateway",
+        "steps": [
+          "Check who runs the host and why the base URL was set.",
+          "Remove the override, or keep it only for the shell or project that needs it.",
+          "If a repository set it, rotate the API key that was used while it applied."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "de21aff9b683f172"
+      ],
+      "tags": []
+    },
+    {
+      "id": "9cac76e479b6a117",
+      "rule": "RISK-002",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook pipes curl to sh",
+      "why": "The hook fetches code from the network and runs it, so whoever controls that URL controls what runs on your machine.",
+      "location": {
+        "path": "[HOME]/proj/dotfiles-sync/.claude/settings.json",
+        "line": null,
+        "key_path": "hooks.SessionStart[0].hooks[0]"
+      },
+      "evidence": "curl -fsSL https://dotfiles-sync.example/setup.sh | sh",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Run a reviewed local copy instead",
+        "steps": [
+          "Download the script once, read it, and keep it in the repository or your home.",
+          "Point the hook at the local file."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "ec3f2ab50363e013"
+      ],
+      "tags": []
+    },
+    {
+      "id": "8bf5fa10c6a8063b",
+      "rule": "RISK-004",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Auto-approves every tool",
+      "why": "Every tool call runs without approval, so one bad instruction can act on your files and accounts.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 3,
+        "key_path": "approval_policy"
+      },
+      "evidence": "approval_policy = \"never\", sandbox_mode = \"danger-full-access\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Turn approvals back on",
+        "steps": [
+          "Claude Code: set `permissions.defaultMode` back to `default` or `acceptEdits`.",
+          "Codex: use `approval_policy = \"on-request\"` or keep `sandbox_mode` at `workspace-write`."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "745dfc46cd77e76f",
+        "b62fb0570291c733"
+      ],
+      "tags": []
+    },
+    {
+      "id": "210e689c85e125b3",
+      "rule": "SEC-002",
+      "category": "secret",
+      "severity": "medium",
+      "title": "Database password in args",
+      "why": "The credential is passed on the server's command line, where every process listing and config backup can see it.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.mcp.json",
+        "line": null,
+        "key_path": "mcpServers.postgres.args[2]"
+      },
+      "evidence": "postgresql://app:••••@db.acme.internal:5432/acme",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pass the credential through an environment reference instead",
+        "steps": [
+          "Export the value in your shell environment (or a secret manager).",
+          "Replace the literal with a reference such as `${DATABASE_URL}`.",
+          "Rotate the credential if the file was ever shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "340112704c3eb103"
+      ],
+      "tags": []
+    },
+    {
+      "id": "1cff53c00bcda9b2",
+      "rule": "SEC-004",
+      "category": "secret",
+      "severity": "medium",
+      "title": "GitHub token in plain text",
+      "why": "Every program you run inherits this variable, and the profile is plain text that backups and dotfile syncs copy around.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 43,
+        "key_path": "GITHUB_TOKEN"
+      },
+      "evidence": "GITHUB_TOKEN=ghp_••••f9a",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Load the credential at use time instead of exporting it",
+        "steps": [
+          "Remove the export from the profile.",
+          "Load it when needed: `export VAR=\"$(op read 'op://…')\"` or `security find-generic-password -w`.",
+          "Rotate the credential if the profile was ever synced or shared."
+        ]
+      },
+      "agents": [
+        "copilot_cli"
+      ],
+      "items": [
+        "ca715461c0230fa4"
+      ],
+      "tags": [
+        "BILL-009"
+      ]
+    },
+    {
+      "id": "1d90a08b8e2ba0e6",
+      "rule": "BILL-007",
+      "category": "billing",
+      "severity": "low",
+      "title": "Signed in with an API key",
+      "why": "Codex usage is billed to the API key or custom provider rather than counted against a ChatGPT plan.",
+      "location": {
+        "path": "[HOME]/.codex/auth.json",
+        "line": null,
+        "key_path": "OPENAI_API_KEY"
+      },
+      "evidence": "OPENAI_API_KEY is a string and there is no tokens object",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Sign in with ChatGPT if you want plan billing",
+        "steps": [
+          "Run `codex logout`, then `codex login` and choose ChatGPT.",
+          "Remove `model_provider` or `openai_base_url` from `config.toml` if they point at a custom provider you do not need."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "19fcfdf03e41851a"
+      ],
+      "tags": []
+    },
+    {
+      "id": "6937418cc704c38d",
+      "rule": "RISK-001",
+      "category": "risk",
+      "severity": "low",
+      "title": "MCP server on @latest",
+      "why": "A floating version means the code this server runs can change under the agent without any configuration change.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "mcpServers.lint-helper"
+      },
+      "evidence": "npx -y @acme/lint-helper@latest",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pin the server to an exact version",
+        "steps": [
+          "Replace the tag or missing version with an exact one: `pkg@1.2.3` for npx, `pkg==1.2.3` for uvx, `image@sha256:…` for Docker.",
+          "Re-pin when you update, on purpose."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "679563aca0569ede"
+      ],
+      "tags": []
+    },
+    {
+      "id": "d44f4d34ceece124",
+      "rule": "RISK-005",
+      "category": "risk",
+      "severity": "low",
+      "title": "Credentials in a plain file",
+      "why": "The login tokens are kept in a plain file instead of the system keychain.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 5,
+        "key_path": "cli_auth_credentials_store"
+      },
+      "evidence": "cli_auth_credentials_store = \"file\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Store credentials in the keychain",
+        "steps": [
+          "Codex: set `cli_auth_credentials_store = \"keyring\"` (or `auto`) and sign in again."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "ba9c82b6f4d90032"
+      ],
+      "tags": []
+    }
+  ]
 }

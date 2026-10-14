@@ -8,8 +8,9 @@ use serde_json::Value;
 
 use crate::collect;
 use crate::model::{ArtifactRef, Item, Skill, SkillKind, Warning};
+use crate::observe::Observation;
 use crate::parse::frontmatter::{self, Frontmatter};
-use crate::parse::{hooks, mcp};
+use crate::parse::{hooks, mcp, no_lines, Context};
 
 /// File extensions that mark a bundled script.
 const SCRIPT_EXTENSIONS: &[&str] = &[
@@ -40,7 +41,8 @@ const SCRIPT_EXTENSIONS: &[&str] = &[
 /// `path` is the Markdown file; `dir` is the skill folder when `kind` is
 /// [`SkillKind::Skill`], whose bundled scripts are listed. Hooks and inline
 /// MCP servers in the frontmatter become items of their own, with the file
-/// as their source. Returns the items and any warnings.
+/// as their source. Returns the items, any warnings and the observations
+/// made on hook and server values.
 #[must_use]
 pub fn parse_definition(
     kind: SkillKind,
@@ -48,9 +50,10 @@ pub fn parse_definition(
     dir: Option<&Path>,
     text: &str,
     source: &ArtifactRef,
-) -> (Vec<Item>, Vec<Warning>) {
+) -> (Vec<Item>, Vec<Warning>, Vec<Observation>) {
     let mut items = Vec::new();
     let mut warnings = Vec::new();
+    let mut observations = Vec::new();
     let fm = frontmatter::parse(text);
     if let Some(reason) = &fm.lenient {
         warnings.push(Warning::new(
@@ -76,7 +79,19 @@ pub fn parse_definition(
 
     let hook_count = match fm.fields.get("hooks") {
         Some(hooks_value) if hooks_value.is_object() => {
-            hooks::parse_event_map(hooks_value, source, &mut items, &mut warnings)
+            let ctx = Context {
+                source,
+                key_prefix: "hooks",
+                segments: &["hooks"],
+                line_of: &no_lines,
+            };
+            hooks::parse_event_map(
+                hooks_value,
+                &ctx,
+                &mut items,
+                &mut warnings,
+                &mut observations,
+            )
         }
         Some(_) => {
             warnings.push(Warning::new(
@@ -90,7 +105,7 @@ pub fn parse_definition(
     };
 
     if kind == SkillKind::Subagent {
-        inline_mcp_servers(&fm, source, &mut items, &mut warnings);
+        inline_mcp_servers(&fm, source, &mut items, &mut warnings, &mut observations);
     }
 
     let allowed_tools = match kind {
@@ -120,7 +135,7 @@ pub fn parse_definition(
         source: source.clone(),
     };
     items.insert(0, Item::Skill(skill));
-    (items, warnings)
+    (items, warnings, observations)
 }
 
 /// A subagent's `mcpServers` list: names (references, skipped) or inline
@@ -130,19 +145,26 @@ fn inline_mcp_servers(
     source: &ArtifactRef,
     items: &mut Vec<Item>,
     warnings: &mut Vec<Warning>,
+    observations: &mut Vec<Observation>,
 ) {
     let Some(list) = fm.fields.get("mcpServers") else {
         return;
+    };
+    let ctx = Context {
+        source,
+        key_prefix: "mcpServers",
+        segments: &["mcpServers"],
+        line_of: &no_lines,
     };
     match list {
         Value::Array(entries) => {
             for entry in entries {
                 if let Some(map) = entry.as_object() {
-                    mcp::parse_server_map(map, source, items, warnings);
+                    mcp::parse_server_map(map, &ctx, items, warnings, observations);
                 }
             }
         }
-        Value::Object(map) => mcp::parse_server_map(map, source, items, warnings),
+        Value::Object(map) => mcp::parse_server_map(map, &ctx, items, warnings, observations),
         _ => warnings.push(Warning::new(
             source.agent,
             &source.path,
@@ -212,7 +234,7 @@ mod tests {
     fn skill_frontmatter_yields_a_skill_and_its_hooks() {
         let text = "---\nname: secure-ops\ndescription: Run with checks\nallowed-tools: Bash(git *) Read\ndisable-model-invocation: true\nhooks:\n  PreToolUse:\n    - matcher: Bash\n      hooks:\n        - type: command\n          command: ./scripts/check.sh\n---\n\nBody text that must not be stored.\n";
         let dir = Path::new("/home/you/.claude/skills/secure-ops");
-        let (items, warnings) = parse_definition(
+        let (items, warnings, _) = parse_definition(
             SkillKind::Skill,
             &dir.join("SKILL.md"),
             Some(dir),
@@ -238,7 +260,7 @@ mod tests {
 
     #[test]
     fn name_falls_back_to_the_folder_or_file_name() {
-        let (items, _) = parse_definition(
+        let (items, _, _) = parse_definition(
             SkillKind::Skill,
             Path::new("/s/release-notes/SKILL.md"),
             Some(Path::new("/s/release-notes")),
@@ -251,7 +273,7 @@ mod tests {
         assert_eq!(skill.name, "release-notes");
         assert!(skill.description.is_none());
 
-        let (items, _) = parse_definition(
+        let (items, _, _) = parse_definition(
             SkillKind::Command,
             Path::new("/c/fix-issue.md"),
             None,
@@ -268,7 +290,7 @@ mod tests {
     #[test]
     fn subagents_report_tools_permission_mode_and_inline_servers() {
         let text = "---\nname: browser-tester\ndescription: Tests in a browser\ntools: Read, Grep\npermissionMode: acceptEdits\nmcpServers:\n  - playwright:\n      type: stdio\n      command: npx\n      args: [\"-y\", \"@playwright/mcp@latest\"]\n  - github\n---\n";
-        let (items, warnings) = parse_definition(
+        let (items, warnings, _) = parse_definition(
             SkillKind::Subagent,
             Path::new("/a/browser-tester.md"),
             None,
@@ -289,7 +311,7 @@ mod tests {
 
     #[test]
     fn broken_frontmatter_is_a_warning_not_a_failure() {
-        let (items, warnings) = parse_definition(
+        let (items, warnings, _) = parse_definition(
             SkillKind::Skill,
             Path::new("/s/odd/SKILL.md"),
             Some(Path::new("/s/odd")),

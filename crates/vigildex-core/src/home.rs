@@ -165,6 +165,29 @@ impl HomeEnv {
         }
     }
 
+    /// A path relative to this home, as `~/rest`, for identifiers that must
+    /// not depend on where the home sits. A recorded path under another
+    /// home-like prefix (`/Users/you/x`) is treated the same way; any other
+    /// path is returned as written.
+    #[must_use]
+    pub fn relative(&self, path: &Path) -> String {
+        if let Ok(rest) = path.strip_prefix(&self.root) {
+            return if rest.as_os_str().is_empty() {
+                "~".to_owned()
+            } else {
+                format!("~/{}", rest.to_string_lossy().replace('\\', "/"))
+            };
+        }
+        if let Some(rest) = strip_home_prefix(path) {
+            return if rest.as_os_str().is_empty() {
+                "~".to_owned()
+            } else {
+                format!("~/{}", rest.to_string_lossy().replace('\\', "/"))
+            };
+        }
+        path.to_string_lossy().into_owned()
+    }
+
     /// Finds a path an agent recorded in its own files.
     ///
     /// Agents write absolute paths (`/Users/you/proj/acme`). When such a path
@@ -458,6 +481,19 @@ mod tests {
             env.locate(Path::new("/opt/no-such-dir")),
             PathBuf::from("/opt/no-such-dir")
         );
+    }
+
+    #[test]
+    fn relative_paths_use_a_tilde() {
+        let dir = existing_dir();
+        let env = HomeEnv::resolve_with(Some(&dir), None, must_not_ask_for_user_home).unwrap();
+        assert_eq!(env.relative(&dir), "~");
+        assert_eq!(env.relative(&dir.join(".zshrc")), "~/.zshrc");
+        assert_eq!(
+            env.relative(Path::new("/Users/you/.claude/x")),
+            "~/.claude/x"
+        );
+        assert_eq!(env.relative(Path::new("/opt/x")), "/opt/x");
     }
 
     #[test]

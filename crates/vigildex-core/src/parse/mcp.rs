@@ -7,17 +7,27 @@
 //! | remote | `type`, `url`, `headers`, `headersHelper`, `oauth` | `url`, `bearer_token_env_var`, `http_headers`, `env_http_headers`, `http_headers_helper` |
 //! | switch | | `enabled` |
 //!
-//! Values of `env` and headers are never recorded, only their names.
+//! Values of `env` and headers are never recorded, only their names. Every
+//! value that could hold a credential (`env`, headers, `args`, `url`,
+//! `command`) is passed through [`observe`], which keeps a masked,
+//! fingerprinted hit for the findings and drops the text.
 
 use serde_json::Value;
 
 use crate::launch;
-use crate::model::{ArtifactRef, Item, Launch, McpServer, RemoteAuth, Transport, Warning};
+use crate::model::{Item, Launch, McpServer, RemoteAuth, Transport, Warning};
+use crate::observe::{observe, Field, Locator, Observation};
 use crate::parse::json::{bool_at, keys_at, str_at, string_list_at};
+use crate::parse::Context;
 
-/// Parses one server definition.
+/// Parses one server definition at `ctx` (the key path of the server map).
 #[must_use]
-pub fn parse_server(name: &str, cfg: &Value, source: &ArtifactRef) -> McpServer {
+pub fn parse_server(
+    name: &str,
+    cfg: &Value,
+    ctx: &Context<'_>,
+    observations: &mut Vec<Observation>,
+) -> McpServer {
     let launch = if let Some(command) = str_at(cfg, "command") {
         launch::classify(command, &string_list_at(cfg, "args"))
     } else if let Some(url) = str_at(cfg, "url") {
@@ -41,6 +51,8 @@ pub fn parse_server(name: &str, cfg: &Value, source: &ArtifactRef) -> McpServer 
     env_keys.sort();
     env_keys.dedup();
 
+    observe_values(name, cfg, ctx, observations);
+
     McpServer {
         name: name.to_owned(),
         launch,
@@ -48,7 +60,58 @@ pub fn parse_server(name: &str, cfg: &Value, source: &ArtifactRef) -> McpServer 
         header_keys,
         env_header_keys: keys_at(cfg, "env_http_headers"),
         enabled: bool_at(cfg, "enabled"),
-        source: source.clone(),
+        key_path: ctx.key_path(&[name]),
+        line: ctx.line(&[name]),
+        source: ctx.source.clone(),
+    }
+}
+
+/// Runs the secret rules over every value a server definition can carry.
+fn observe_values(name: &str, cfg: &Value, ctx: &Context<'_>, observations: &mut Vec<Observation>) {
+    let locator = Locator::McpServer {
+        name: name.to_owned(),
+    };
+    let mut record = |segments: &[&str], field: Field, var: Option<&str>, value: &str| {
+        observations.push(observe(
+            ctx.source,
+            ctx.location(segments),
+            field,
+            var,
+            locator.clone(),
+            value,
+        ));
+    };
+    for (key, field) in [
+        ("env", Field::McpEnv),
+        ("headers", Field::McpHeader),
+        ("http_headers", Field::McpHeader),
+    ] {
+        if let Some(map) = cfg.get(key).and_then(Value::as_object) {
+            for (var, value) in map {
+                if let Some(text) = value.as_str() {
+                    record(&[name, key, var], field, Some(var), text);
+                }
+            }
+        }
+    }
+    if let Some(args) = cfg.get("args").and_then(Value::as_array) {
+        for (index, arg) in args.iter().enumerate() {
+            if let Some(text) = arg.as_str() {
+                let index = index.to_string();
+                record(&[name, "args", &index], Field::McpArg, None, text);
+            }
+        }
+    }
+    if let Some(url) = str_at(cfg, "url") {
+        record(&[name, "url"], Field::McpUrl, None, url);
+    }
+    if let Some(command) = str_at(cfg, "command") {
+        record(&[name, "command"], Field::McpCommand, None, command);
+    }
+    for key in ["headersHelper", "http_headers_helper"] {
+        if let Some(command) = str_at(cfg, key) {
+            record(&[name, key], Field::McpCommand, None, command);
+        }
     }
 }
 
@@ -94,33 +157,37 @@ fn auth_of(cfg: &Value) -> RemoteAuth {
 ///
 /// The bare form is accepted only when every value is an object, so a
 /// settings file with other keys is never mistaken for a server map.
+/// Returns the map and the key segment it sits under (`None` for the bare
+/// form).
 #[must_use]
-pub fn server_map(doc: &Value) -> Option<&serde_json::Map<String, Value>> {
+pub fn server_map(doc: &Value) -> Option<(&serde_json::Map<String, Value>, Option<&'static str>)> {
     if let Some(map) = doc.get("mcpServers").and_then(Value::as_object) {
-        return Some(map);
+        return Some((map, Some("mcpServers")));
     }
     let map = doc.as_object()?;
     if !map.is_empty() && map.values().all(Value::is_object) {
-        Some(map)
+        Some((map, None))
     } else {
         None
     }
 }
 
-/// Parses every server in a map, appending items and warnings.
+/// Parses every server in a map at `ctx`, appending items, warnings and
+/// observations.
 pub fn parse_server_map(
     map: &serde_json::Map<String, Value>,
-    source: &ArtifactRef,
+    ctx: &Context<'_>,
     items: &mut Vec<Item>,
     warnings: &mut Vec<Warning>,
+    observations: &mut Vec<Observation>,
 ) {
     for (name, cfg) in map {
         if cfg.is_object() {
-            items.push(Item::McpServer(parse_server(name, cfg, source)));
+            items.push(Item::McpServer(parse_server(name, cfg, ctx, observations)));
         } else {
             warnings.push(Warning::new(
-                source.agent,
-                &source.path,
+                ctx.source.agent,
+                &ctx.source.path,
                 format!("MCP server \"{name}\" is not an object; skipped"),
             ));
         }
@@ -130,7 +197,8 @@ pub fn parse_server_map(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{Agent, ArtifactKind, Pin, Runner, Scope};
+    use crate::model::{Agent, ArtifactKind, ArtifactRef, Pin, Runner, Scope};
+    use crate::parse::no_lines;
     use serde_json::json;
 
     fn src() -> ArtifactRef {
@@ -142,16 +210,28 @@ mod tests {
         }
     }
 
+    fn ctx(source: &ArtifactRef) -> Context<'_> {
+        Context {
+            source,
+            key_prefix: "mcpServers",
+            segments: &["mcpServers"],
+            line_of: &no_lines,
+        }
+    }
+
     #[test]
-    fn stdio_server_records_env_key_names_only() {
+    fn stdio_server_records_env_key_names_only_and_observes_the_values() {
         let cfg = json!({
             "type": "stdio",
             "command": "npx",
             "args": ["-y", "@acme/lint-helper@latest"],
-            "env": {"LINT_HELPER_TOKEN": "lh_FAKEFAKEFAKEFAKE", "LOG": "1"}
+            "env": {"LINT_HELPER_TOKEN": "lh_FAKEFAKEFAKEFAKEFAKEFAKEFAKE", "LOG": "1"}
         });
-        let server = parse_server("lint-helper", &cfg, &src());
+        let source = src();
+        let mut observations = Vec::new();
+        let server = parse_server("lint-helper", &cfg, &ctx(&source), &mut observations);
         assert_eq!(server.env_keys, vec!["LINT_HELPER_TOKEN", "LOG"]);
+        assert_eq!(server.key_path, "mcpServers.lint-helper");
         match server.launch {
             Launch::Package { runner, pin, .. } => {
                 assert_eq!(runner, Runner::Npx);
@@ -164,6 +244,17 @@ mod tests {
             !text.contains("lh_FAKE"),
             "env values must never appear: {text}"
         );
+        // env ×2, args ×2, command: the token is the only hit.
+        assert_eq!(observations.len(), 5);
+        let hits: Vec<&Observation> = observations.iter().filter(|o| o.secret.is_some()).collect();
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].field, Field::McpEnv);
+        assert_eq!(hits[0].name.as_deref(), Some("LINT_HELPER_TOKEN"));
+        assert_eq!(
+            hits[0].location.key_path.as_deref(),
+            Some("mcpServers.lint-helper.env.LINT_HELPER_TOKEN")
+        );
+        assert!(!format!("{observations:?}").contains("lh_FAKE"));
     }
 
     #[test]
@@ -173,7 +264,9 @@ mod tests {
             "url": "https://mcp.example.com/mcp?key=FAKE",
             "headers": {"Authorization": "Bearer ${TOKEN}"}
         });
-        let server = parse_server("remote", &cfg, &src());
+        let source = src();
+        let mut observations = Vec::new();
+        let server = parse_server("remote", &cfg, &ctx(&source), &mut observations);
         assert_eq!(
             server.launch,
             Launch::Remote {
@@ -183,6 +276,7 @@ mod tests {
             }
         );
         assert_eq!(server.header_keys, vec!["Authorization"]);
+        assert!(observations.iter().all(|o| o.secret.is_none()));
     }
 
     #[test]
@@ -193,7 +287,8 @@ mod tests {
             "env_http_headers": {"X-Org": "ORG_VAR"},
             "enabled": false
         });
-        let server = parse_server("github", &cfg, &src());
+        let source = src();
+        let server = parse_server("github", &cfg, &ctx(&source), &mut Vec::new());
         assert_eq!(server.enabled, Some(false));
         assert_eq!(server.env_header_keys, vec!["X-Org"]);
         match server.launch {
@@ -214,7 +309,13 @@ mod tests {
 
     #[test]
     fn neither_command_nor_url_is_unknown_not_an_error() {
-        let server = parse_server("odd", &json!({"type": "sdk"}), &src());
+        let source = src();
+        let server = parse_server(
+            "odd",
+            &json!({"type": "sdk"}),
+            &ctx(&source),
+            &mut Vec::new(),
+        );
         assert_eq!(server.launch, Launch::Unknown);
     }
 
@@ -223,18 +324,46 @@ mod tests {
         let wrapped = json!({"mcpServers": {"a": {"url": "https://a"}}});
         let bare = json!({"a": {"url": "https://a"}, "b": {"command": "x"}});
         let settings = json!({"model": "x", "a": {"url": "https://a"}});
-        assert_eq!(server_map(&wrapped).unwrap().len(), 1);
-        assert_eq!(server_map(&bare).unwrap().len(), 2);
+        assert_eq!(server_map(&wrapped).unwrap().0.len(), 1);
+        assert_eq!(server_map(&wrapped).unwrap().1, Some("mcpServers"));
+        assert_eq!(server_map(&bare).unwrap().0.len(), 2);
+        assert_eq!(server_map(&bare).unwrap().1, None);
         assert!(server_map(&settings).is_none());
         assert!(server_map(&json!({})).is_none());
     }
 
     #[test]
+    fn identity_ignores_the_masked_password() {
+        let source = src();
+        let server = |pw: &str| {
+            let cfg = json!({"command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2", format!("postgresql://app:{pw}@db.acme.internal:5432/acme")]});
+            Item::McpServer(parse_server(
+                "postgres",
+                &cfg,
+                &ctx(&source),
+                &mut Vec::new(),
+            ))
+        };
+        let rel = |p: &std::path::Path| p.display().to_string();
+        let a = server("FAKEPASSWORDFAKE").identity_text(&rel);
+        let b = server("OTHERPASSWORDFAKE").identity_text(&rel);
+        assert_eq!(a, b);
+        assert!(!a.contains("FAKE"), "{a}");
+    }
+
+    #[test]
     fn non_object_entries_are_warnings() {
         let map = json!({"good": {"command": "x"}, "bad": "oops"});
+        let source = src();
         let mut items = Vec::new();
         let mut warnings = Vec::new();
-        parse_server_map(map.as_object().unwrap(), &src(), &mut items, &mut warnings);
+        parse_server_map(
+            map.as_object().unwrap(),
+            &ctx(&source),
+            &mut items,
+            &mut warnings,
+            &mut Vec::new(),
+        );
         assert_eq!(items.len(), 1);
         assert_eq!(warnings.len(), 1);
         assert!(warnings[0].message.contains("\"bad\""));

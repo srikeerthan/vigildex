@@ -1,18 +1,29 @@
 ---
 source: crates/vigildex-cli/tests/cli.rs
-expression: redact(&text)
+expression: "redact_temp(&text, &home)"
 ---
 vigildex [VERSION]
-Home: [REPO]/fixtures/homes/mockup-demo (from --home)
+Home: [HOME] (from --home)
 Scanned: Claude Code, Codex, Shared
 Projects: 2
 
 Agent                     MCP    Hooks   Skills  Plugins   Instr. Settings    Creds
 Claude Code                 9        9        6        4        6       31        1
 Codex                       3        4        1        0        3       14        1
-Shared                      0        0        2        0        0        0        0
+Shared                      0        0        2        0        0        2        0
 
-Files read: 37
+Files read: 39
 Warnings: 0
 
-Run `vigildex inventory` for the items.
+Findings: 9 (1 high, 5 medium, 3 low)
+  BILL-001  API key bills headless runs        ~/.zshrc:42 › ANTHROPIC_API_KEY  [Claude Code]  +SEC-004
+  BILL-006  Custom API gateway                 ~/.claude/settings.json › env.ANTHROPIC_BASE_URL  [Claude Code]
+  RISK-002  Hook pipes curl to sh              ~/proj/dotfiles-sync/.claude/settings.json › hooks.SessionStart[0].hooks[0]  [Claude Code]
+  RISK-004  Auto-approves every tool           ~/.codex/config.toml:3 › approval_policy  [Codex]
+  SEC-002   Database password in args          ~/proj/acme-api/.mcp.json › mcpServers.postgres.args[2]  [Claude Code]
+  SEC-004   GitHub token in plain text         ~/.zshrc:43 › GITHUB_TOKEN  [Copilot CLI]  +BILL-009
+  BILL-007  Signed in with an API key          ~/.codex/auth.json › OPENAI_API_KEY  [Codex]
+  RISK-001  MCP server on @latest              ~/.claude.json › mcpServers.lint-helper  [Claude Code]
+  RISK-005  Credentials in a plain file        ~/.codex/config.toml:5 › cli_auth_credentials_store  [Codex]
+
+Run `vigildex inventory` for the items and `vigildex findings` for the details.

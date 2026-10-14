@@ -15,6 +15,15 @@ Churn: **H** = the agent rewrites it in normal use; **M** = written on approvals
 - Hidden directories are never descended into when listing skills, commands, agents or rules (so Codex's `~/.codex/skills/.system/` is skipped). Credential files contribute key names, JSON value types and permission bits only, and are not hashed.
 - System-wide directories outside the home (Claude Code's managed policy directory, `/etc/codex/skills`) are not scanned yet; they cannot live in a fixture home.
 
+**Engine conventions (M2 findings):**
+
+- Values the inventory never records (MCP `env`, header and argument values, URLs, commands, settings `env` blocks, helper commands, hook headers, commands and URLs, profile exports, `.env` lines) are passed to the secret rules while in memory and dropped; what survives is the field name, its class (literal, reference, dynamic, empty), the origin of a URL-shaped literal and the masked hit. `${VAR}`, `$VAR`, `${env:NAME}`, `${input:id}`, `op://…` are references and `$(…)` is dynamic; the default of `${VAR:-default}` and the body of `$(…)` are scanned as text.
+- Shell profiles (`SHELL_PROFILES` plus `.envrc`, in the home and at each project root) and the `.env` at each project root are parsed line by line for `NAME=value` and `export NAME=value` (quotes removed, `$(…)` kept whole, comments and compound lines skipped). Agent-relevant variables (`ANTHROPIC_*`, `CLAUDE_*`, `OPENAI_*`, `CODEX_*`, `COPILOT_*`, `CURSOR_*`, `GITHUB_TOKEN`, `GH_TOKEN`) and any export that hit a secret rule become settings with the line number; only switches, URLs and directory variables show a value (sanitised), everything else is `present`. These files are listed as artifacts without a content hash.
+- `config.toml` is parsed once with spans kept, so every Codex setting, server, hook and value carries a line number; TOML syntax warnings give the position, never the source line.
+- Settings values that are strings are sanitised before they are recorded: URLs lose user information and query strings, and any vendor token or inline credential in a command (`apiKeyHelper`, `statusLine.command`, `notify`, a `headersHelper`) is masked.
+- Whether Claude Code expands `${VAR}` references inside a settings `env` block is **verify**; until confirmed, such a value is treated as not set for the billing rules and never as a secret.
+- Codex `auth.json`: the engine never reads the `auth_mode` value (hard rule 2). The login mode is inferred from key names and JSON value types only: `OPENAI_API_KEY` as a string with no `tokens` object means an API-key login. A file with `auth_mode` set and a stale `tokens` object is not recognised as an API-key login; this is accepted.
+
 ---
 
 ## Claude Code
@@ -81,7 +90,7 @@ Relocation: `CODEX_HOME` moves `~/.codex`. The CLI, IDE extension and ChatGPT de
 | Hooks | `~/.codex/hooks.json`, `[hooks]` in `config.toml`, `<repo>/.codex/hooks.json` | 12 events; Codex records trust against each hook's hash | L | Key-level and hash |
 | Skills | `.agents/skills` (cwd, parents, repo root), `~/.agents/skills`, `/etc/codex/skills` | Folders with `SKILL.md` | L | Hash |
 | Instructions | `AGENTS.md` | | L | Hash |
-| Credentials | `~/.codex/auth.json` (when `cli_auth_credentials_store` is `file` or `auto`) | **Key names only; never read values.** Keys at 0.46: `OPENAI_API_KEY` (always present, `null` when unused), `tokens` (`id_token`, `access_token`, `refresh_token`, `account_id`), `last_refresh`. Current `main` adds `auth_mode`, `agent_identity`, `personal_access_token`, `bedrock_api_key`, `bedrock_access_keys`. Because the API-key slot is always present, key names alone cannot tell the mode: use `auth_mode` when present, otherwise the JSON *type* of `OPENAI_API_KEY` (null vs string; policy decision pending). `codex login status` prints the mode without values, but it reflects the file, not whether the login still works: a stale refresh token fails with 401 at use. | M (rewritten on token refresh) | Mode/owner |
+| Credentials | `~/.codex/auth.json` (when `cli_auth_credentials_store` is `file` or `auto`) | **Key names only; never read values.** Keys at 0.46: `OPENAI_API_KEY` (always present, `null` when unused), `tokens` (`id_token`, `access_token`, `refresh_token`, `account_id`), `last_refresh`. Current `main` adds `auth_mode`, `agent_identity`, `personal_access_token`, `bedrock_api_key`, `bedrock_access_keys`. Because the API-key slot is always present, key names alone cannot tell the mode; the `auth_mode` value is never read (hard rule 2), so the engine uses the JSON *type* of `OPENAI_API_KEY` (null vs string) and the presence of a `tokens` object (decided in M2). `codex login status` prints the mode without values, but it reflects the file, not whether the login still works: a stale refresh token fails with 401 at use. | M (rewritten on token refresh) | Mode/owner |
 
 ### Sessions and usage (internal format, open source in `codex-rs/protocol`)
 

@@ -5,12 +5,19 @@ expression: schema
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ScanReport",
-  "description": "Output of `vigildex scan --json`.\n\nAt milestone M1 a scan is an inventory. Findings (M2) and sessions (M3)\nare added as further sections.",
+  "description": "Output of `vigildex scan --json`: the inventory and the findings.\nSessions (M3) join as a further section.",
   "type": "object",
   "properties": {
     "engine_version": {
       "description": "Version of the engine that produced the report.",
       "type": "string"
+    },
+    "findings": {
+      "description": "The findings, sorted by severity, rule and location.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Finding"
+      }
     },
     "home": {
       "description": "The home directory that was scanned and how it was chosen.",
@@ -19,6 +26,10 @@ expression: schema
     "inventory": {
       "description": "The inventory.",
       "$ref": "#/$defs/Inventory"
+    },
+    "scanned_at": {
+      "description": "When the scan ran, as RFC 3339 UTC.",
+      "type": "string"
     },
     "schema_version": {
       "description": "Version of this JSON contract; see [`SCHEMA_VERSION`].",
@@ -30,8 +41,10 @@ expression: schema
   "required": [
     "schema_version",
     "engine_version",
+    "scanned_at",
     "home",
-    "inventory"
+    "inventory",
+    "findings"
   ],
   "$defs": {
     "Agent": {
@@ -111,6 +124,16 @@ expression: schema
           "description": "A credential file. Only metadata and key names are ever read.",
           "type": "string",
           "const": "credential"
+        },
+        {
+          "description": "A shell profile (`.zshrc`, `.bashrc`, `.envrc`): exports are read for\nagent-relevant variables and secrets.",
+          "type": "string",
+          "const": "shell_profile"
+        },
+        {
+          "description": "A dotenv file (`.env`) at a project root.",
+          "type": "string",
+          "const": "env_file"
         }
       ]
     },
@@ -169,8 +192,11 @@ expression: schema
           "$ref": "#/$defs/Scope"
         },
         "sha256": {
-          "description": "Lower-case hex SHA-256 of the file contents.",
-          "type": "string"
+          "description": "Lower-case hex SHA-256 of the file contents. `None` for shell\nprofiles and `.env` files, whose few lines of `NAME=value` would make\nthe hash a checkable digest of the secrets they hold.",
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
@@ -178,8 +204,27 @@ expression: schema
         "scope",
         "kind",
         "path",
-        "bytes",
-        "sha256"
+        "bytes"
+      ]
+    },
+    "Category": {
+      "description": "The rule family a finding belongs to.",
+      "oneOf": [
+        {
+          "description": "`SEC-`: a credential in plain text.",
+          "type": "string",
+          "const": "secret"
+        },
+        {
+          "description": "`BILL-`: a billing trap.",
+          "type": "string",
+          "const": "billing"
+        },
+        {
+          "description": "`RISK-`: a risky setting.",
+          "type": "string",
+          "const": "risk"
+        }
       ]
     },
     "Credential": {
@@ -245,6 +290,113 @@ expression: schema
         "value_type"
       ]
     },
+    "Finding": {
+      "description": "One finding.",
+      "type": "object",
+      "properties": {
+        "agents": {
+          "description": "The agents affected.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Agent"
+          }
+        },
+        "category": {
+          "description": "The rule family.",
+          "$ref": "#/$defs/Category"
+        },
+        "evidence": {
+          "description": "Masked evidence (`ghp_••••f9a`, `approval_policy = \"never\"`), when\nthere is something to show.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fingerprint": {
+          "description": "Keyed fingerprint of the secret, for secret findings only. Always\n`null` until a store with a per-installation key exists (M4): the\nengine computes no digest of a secret before then, because a hash\nunder a public constant would let anyone holding a report confirm a\nguessed password offline.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fix": {
+          "description": "How to fix it.",
+          "$ref": "#/$defs/FixSteps"
+        },
+        "id": {
+          "description": "Stable identifier: a hash of the rule and the location, relative to\nthe home, so it survives rescans and moves between machines.",
+          "type": "string"
+        },
+        "items": {
+          "description": "Identifiers of the inventory items involved.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "location": {
+          "description": "Where it is.",
+          "$ref": "#/$defs/Location"
+        },
+        "rule": {
+          "description": "The rule ID (`SEC-004`).",
+          "type": "string"
+        },
+        "severity": {
+          "description": "Catalogue severity.",
+          "$ref": "#/$defs/Severity"
+        },
+        "tags": {
+          "description": "Rule IDs that also matched this location but lost the tie\n(finding policy 1), and notes such as `repo_file`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "description": "The list title (`GitHub token in plain text`).",
+          "type": "string"
+        },
+        "why": {
+          "description": "One sentence on why it matters.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "rule",
+        "category",
+        "severity",
+        "title",
+        "why",
+        "location",
+        "fix",
+        "agents",
+        "items",
+        "tags"
+      ]
+    },
+    "FixSteps": {
+      "description": "How to fix a finding.",
+      "type": "object",
+      "properties": {
+        "steps": {
+          "description": "Steps in order, copyable; commands are written as the user would\ntype them.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary": {
+          "description": "One line, shown in the list.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "summary",
+        "steps"
+      ]
+    },
     "HomeSource": {
       "description": "How the home directory was chosen.",
       "oneOf": [
@@ -295,6 +447,19 @@ expression: schema
           "description": "What runs.",
           "$ref": "#/$defs/HookHandler"
         },
+        "key_path": {
+          "description": "The key path of the handler in its file\n(`hooks.PreToolUse[0].hooks[0]`).",
+          "type": "string"
+        },
+        "line": {
+          "description": "1-based line of the handler, when the format records one (TOML).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
         "matcher": {
           "description": "The matcher as written, when the group has one.",
           "type": [
@@ -310,6 +475,7 @@ expression: schema
       "required": [
         "event",
         "handler",
+        "key_path",
         "source"
       ]
     },
@@ -555,10 +721,10 @@ expression: schema
           }
         },
         "items": {
-          "description": "The items, sorted by agent, scope, type and name.",
+          "description": "The items, sorted by agent, scope, type and name, each with its\nidentifiers and tags.",
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Item"
+            "$ref": "#/$defs/ItemEntry"
           }
         },
         "project_roots": {
@@ -599,8 +765,26 @@ expression: schema
         "warnings"
       ]
     },
-    "Item": {
-      "description": "One thing an agent can run or load, normalised across agents.",
+    "ItemEntry": {
+      "description": "An inventory item with the identifiers reports and findings refer to.\n\n`id` names this one occurrence (this file, this agent, this scope) and is\nstable across scans and machines because paths are taken relative to the\nhome. `identity` names *what runs*: the same MCP server configured for\ntwo agents has two entries with one identity, which is how the app shows\nit as one row with two agent badges.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Stable identifier of this occurrence (16 hex characters).",
+          "type": "string"
+        },
+        "identity": {
+          "description": "Identifier of what the item runs or loads, shared across agents and\nfiles (16 hex characters).",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Why the row is marked, when it is.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ItemTag"
+          }
+        }
+      },
       "oneOf": [
         {
           "description": "An MCP server the agent can start or connect to.",
@@ -699,6 +883,36 @@ expression: schema
           "required": [
             "type"
           ]
+        }
+      ],
+      "required": [
+        "id",
+        "identity",
+        "tags"
+      ]
+    },
+    "ItemTag": {
+      "description": "Why an inventory row is marked without being a finding (finding policy\n5 in `docs/RULES.md`).",
+      "oneOf": [
+        {
+          "description": "A skill folder bundles script files.",
+          "type": "string",
+          "const": "bundled_scripts"
+        },
+        {
+          "description": "A hook runs a package runner (`npx prettier …`), so the code it runs\nis fetched at run time.",
+          "type": "string",
+          "const": "package_runner"
+        },
+        {
+          "description": "A plugin declares `monitors`: persistent background commands\n(RISK-011).",
+          "type": "string",
+          "const": "plugin_monitors"
+        },
+        {
+          "description": "A plugin adds a `bin/` folder to the Bash tool's `PATH` (RISK-011).",
+          "type": "string",
+          "const": "plugin_bin"
         }
       ]
     },
@@ -843,6 +1057,35 @@ expression: schema
         }
       ]
     },
+    "Location": {
+      "description": "Where something sits in a file.",
+      "type": "object",
+      "properties": {
+        "key_path": {
+          "description": "The key path inside the file, when the format has keys\n(`mcpServers.github.env.GITHUB_TOKEN`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "line": {
+          "description": "1-based line number, when the format gives one (shell profiles,\n`.env`, TOML).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "path": {
+          "description": "Absolute path of the file.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    },
     "McpServer": {
       "description": "An MCP server definition.",
       "type": "object",
@@ -875,9 +1118,22 @@ expression: schema
             "type": "string"
           }
         },
+        "key_path": {
+          "description": "The key path of the definition in its file (`mcpServers.github`).",
+          "type": "string"
+        },
         "launch": {
           "description": "How the server is started or reached.",
           "$ref": "#/$defs/Launch"
+        },
+        "line": {
+          "description": "1-based line of the definition, when the format records one (TOML).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
         },
         "name": {
           "description": "The server's name in its configuration.",
@@ -894,6 +1150,7 @@ expression: schema
         "env_keys",
         "header_keys",
         "env_header_keys",
+        "key_path",
         "source"
       ]
     },
@@ -1384,6 +1641,15 @@ expression: schema
           "description": "The key path in the file, with `.` between segments and quoted\nsegments for paths (`projects[\"/Users/you/proj\"].trust_level`).",
           "type": "string"
         },
+        "line": {
+          "description": "1-based line of the key, when the format records one (TOML, shell\nprofiles, `.env`).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
         "source": {
           "description": "Where the setting was read from.",
           "$ref": "#/$defs/ArtifactRef"
@@ -1397,6 +1663,31 @@ expression: schema
         "key_path",
         "value",
         "source"
+      ]
+    },
+    "Severity": {
+      "description": "How much a finding matters. Ordered from most to least severe, so\n`High < Low` in the `Ord` sense and lists sort High first. The four\nlevels are fixed by `docs/RULES.md`; the enum is still non-exhaustive\nlike every other public enum of the contract.",
+      "oneOf": [
+        {
+          "description": "Likely costs money, leaks a credential, or runs untrusted code.",
+          "type": "string",
+          "const": "high"
+        },
+        {
+          "description": "Risky default or exposure worth fixing soon.",
+          "type": "string",
+          "const": "medium"
+        },
+        {
+          "description": "Hygiene; worth knowing.",
+          "type": "string",
+          "const": "low"
+        },
+        {
+          "description": "Neutral inventory fact.",
+          "type": "string",
+          "const": "info"
+        }
       ]
     },
     "Skill": {

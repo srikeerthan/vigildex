@@ -18,9 +18,10 @@ use crate::home::HomeEnv;
 use crate::model::{
     Agent, ArtifactKind, ArtifactRef, Item, Plugin, PluginComponent, Scope, SkillKind,
 };
+use crate::observe::{observe, Field, Locator};
 use crate::parse::json::{join_key, str_at};
 use crate::parse::settings::{self, KeyRule};
-use crate::parse::{hooks, mcp};
+use crate::parse::{hooks, mcp, Context};
 
 /// The Claude Code adapter.
 #[derive(Debug, Default, Clone, Copy)]
@@ -61,6 +62,15 @@ const SETTINGS_RULES: &[KeyRule] = &[
     KeyRule::value("skillOverrides"),
     KeyRule::value("disableBundledSkills"),
     KeyRule::value("autoMode"),
+];
+
+/// Settings keys whose value is a command the agent runs. A key embedded in
+/// one (`echo sk-ant-…`) is a secret in a settings file (SEC-003).
+const COMMAND_KEYS: &[&str] = &[
+    "apiKeyHelper",
+    "awsAuthRefresh",
+    "awsCredentialExport",
+    "otelHeadersHelper",
 ];
 
 /// Keys of `~/.claude.json` at user scope. `oauthAccount` holds the account
@@ -135,9 +145,16 @@ impl ClaudeCode {
         };
         let mut items = Vec::new();
         let mut warnings = Vec::new();
+        let mut observations = Vec::new();
         settings::extract(&doc, "", APP_STATE_RULES, &art, &mut items);
         if let Some(map) = doc.get("mcpServers").and_then(Value::as_object) {
-            mcp::parse_server_map(map, &art, &mut items, &mut warnings);
+            let ctx = Context {
+                source: &art,
+                key_prefix: "mcpServers",
+                segments: &["mcpServers"],
+                line_of: &crate::parse::no_lines,
+            };
+            mcp::parse_server_map(map, &ctx, &mut items, &mut warnings, &mut observations);
         }
         if let Some(projects) = doc.get("projects").and_then(Value::as_object) {
             for (recorded, project) in projects {
@@ -146,16 +163,25 @@ impl ClaudeCode {
                 let prefix = join_key("projects", recorded);
                 settings::extract(project, &prefix, PROJECT_STATE_RULES, &local, &mut items);
                 if let Some(map) = project.get("mcpServers").and_then(Value::as_object) {
-                    mcp::parse_server_map(map, &local, &mut items, &mut warnings);
+                    let key_prefix = join_key(&prefix, "mcpServers");
+                    let ctx = Context {
+                        source: &local,
+                        key_prefix: &key_prefix,
+                        segments: &["projects", recorded, "mcpServers"],
+                        line_of: &crate::parse::no_lines,
+                    };
+                    mcp::parse_server_map(map, &ctx, &mut items, &mut warnings, &mut observations);
                 }
             }
         }
         out.extend(items);
         out.warnings_from(warnings);
+        out.observations_from(observations);
     }
 
-    /// Parses a settings file: security keys and hooks. When
-    /// `enabled_plugins` is given, `enabledPlugins` is collected into it.
+    /// Parses a settings file: security keys, the `env` block's values (for
+    /// the secret rules, never recorded) and hooks. When `enabled_plugins`
+    /// is given, `enabledPlugins` is collected into it.
     fn settings_file(
         scope: Scope,
         path: &Path,
@@ -168,9 +194,59 @@ impl ClaudeCode {
         };
         let mut items = Vec::new();
         let mut warnings = Vec::new();
+        let mut observations = Vec::new();
         settings::extract(&doc, "", SETTINGS_RULES, &art, &mut items);
+        let root = Context::root(&art);
+        for key in COMMAND_KEYS {
+            if let Some(command) = str_at(&doc, key) {
+                observations.push(observe(
+                    &art,
+                    root.location(&[key]),
+                    Field::SettingCommand,
+                    Some(key),
+                    Locator::Setting {
+                        key_path: (*key).to_owned(),
+                    },
+                    command,
+                ));
+            }
+        }
+        if let Some(command) = doc.get("statusLine").and_then(|s| str_at(s, "command")) {
+            observations.push(observe(
+                &art,
+                root.location(&["statusLine", "command"]),
+                Field::SettingCommand,
+                Some("statusLine.command"),
+                Locator::Setting {
+                    key_path: "statusLine.command".to_owned(),
+                },
+                command,
+            ));
+        }
+        if let Some(env) = doc.get("env").and_then(Value::as_object) {
+            for (name, value) in env {
+                if let Some(text) = value.as_str() {
+                    observations.push(observe(
+                        &art,
+                        root.location(&["env", name]),
+                        Field::SettingEnv,
+                        Some(name),
+                        Locator::Setting {
+                            key_path: "env".to_owned(),
+                        },
+                        text,
+                    ));
+                }
+            }
+        }
         if let Some(events) = doc.get("hooks") {
-            hooks::parse_event_map(events, &art, &mut items, &mut warnings);
+            let ctx = Context {
+                source: &art,
+                key_prefix: "hooks",
+                segments: &["hooks"],
+                line_of: &crate::parse::no_lines,
+            };
+            hooks::parse_event_map(events, &ctx, &mut items, &mut warnings, &mut observations);
         }
         if let Some(enabled) = enabled_plugins {
             if let Some(map) = doc.get("enabledPlugins").and_then(Value::as_object) {
@@ -183,6 +259,7 @@ impl ClaudeCode {
         }
         out.extend(items);
         out.warnings_from(warnings);
+        out.observations_from(observations);
     }
 
     fn mcp_file(scope: Scope, path: &Path, out: &mut Collector) {
@@ -197,13 +274,27 @@ impl ClaudeCode {
     fn servers_in(doc: &Value, art: &ArtifactRef, out: &mut Collector) {
         let mut items = Vec::new();
         let mut warnings = Vec::new();
+        let mut observations = Vec::new();
         match mcp::server_map(doc) {
-            Some(map) => mcp::parse_server_map(map, art, &mut items, &mut warnings),
+            Some((map, under)) => {
+                let segments: &[&str] = match under {
+                    Some(key) => &[key],
+                    None => &[],
+                };
+                let ctx = Context {
+                    source: art,
+                    key_prefix: under.unwrap_or_default(),
+                    segments,
+                    line_of: &crate::parse::no_lines,
+                };
+                mcp::parse_server_map(map, &ctx, &mut items, &mut warnings, &mut observations);
+            }
             None if doc.as_object().is_some_and(serde_json::Map::is_empty) => {}
             None => out.warn(AGENT, &art.path, "no mcpServers map found; skipped"),
         }
         out.extend(items);
         out.warnings_from(warnings);
+        out.observations_from(observations);
     }
 
     fn plugins(
@@ -394,16 +485,30 @@ impl ClaudeCode {
         };
         let mut items = Vec::new();
         let mut warnings = Vec::new();
+        let mut observations = Vec::new();
         if let Some(map) = manifest.get("mcpServers").and_then(Value::as_object) {
-            mcp::parse_server_map(map, art, &mut items, &mut warnings);
+            let ctx = Context {
+                source: art,
+                key_prefix: "mcpServers",
+                segments: &["mcpServers"],
+                line_of: &crate::parse::no_lines,
+            };
+            mcp::parse_server_map(map, &ctx, &mut items, &mut warnings, &mut observations);
         }
+        let hooks_ctx = Context {
+            source: art,
+            key_prefix: "hooks",
+            segments: &["hooks"],
+            line_of: &crate::parse::no_lines,
+        };
         match manifest.get("hooks") {
             Some(Value::Object(_)) => {
                 hooks::parse_event_map(
                     manifest.get("hooks").unwrap_or(&Value::Null),
-                    art,
+                    &hooks_ctx,
                     &mut items,
                     &mut warnings,
+                    &mut observations,
                 );
             }
             Some(Value::String(file)) => Self::manifest_hooks_file(scope, root, file, out),
@@ -411,7 +516,13 @@ impl ClaudeCode {
                 for entry in entries {
                     match entry {
                         Value::Object(_) => {
-                            hooks::parse_event_map(entry, art, &mut items, &mut warnings);
+                            hooks::parse_event_map(
+                                entry,
+                                &hooks_ctx,
+                                &mut items,
+                                &mut warnings,
+                                &mut observations,
+                            );
                         }
                         Value::String(file) => Self::manifest_hooks_file(scope, root, file, out),
                         _ => {}
@@ -422,6 +533,7 @@ impl ClaudeCode {
         }
         out.extend(items);
         out.warnings_from(warnings);
+        out.observations_from(observations);
     }
 
     /// A hooks file named by the manifest, which must stay inside the

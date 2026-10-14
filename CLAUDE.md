@@ -33,6 +33,7 @@ cargo insta review                  # review snapshot changes
 cargo deny check && cargo audit     # licences and advisories
 ./scripts/build-xcframework.sh      # macOS only; writes target/VigildexEngine.xcframework
 cargo run -p vigildex-cli -- scan --home fixtures/homes/basic --json
+cargo run -p vigildex-cli -- findings --home fixtures/homes/mockup-demo
 ```
 
 ## Conventions
@@ -55,7 +56,7 @@ crates/
   vigildex-cli/         `vigildex` binary (clap)
   vigildex-ffi/         UniFFI bindings for the macOS app
   vigildex-statusline/  tiny Claude status-line helper (Phase 1b)
-rules/                  secret rules (gitleaks-format TOML), host allowlists, known launchers
+rules/                  link to crates/vigildex-core/rules: secret rules (gitleaks-shape TOML), host allowlist
 fixtures/               redacted sample files per agent and a few fake home folders
 scripts/                build-xcframework.sh, update-prices.sh
 docs/                   handoff, architecture, data sources, rules, privacy, roadmap, research
