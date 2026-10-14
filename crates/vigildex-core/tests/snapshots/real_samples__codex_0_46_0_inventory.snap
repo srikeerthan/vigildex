@@ -12,6 +12,9 @@ expression: json
   "relocations": {},
   "items": [
     {
+      "id": "43eddedffe85549f",
+      "identity": "99171cb1fc82d95b",
+      "tags": [],
       "type": "credential",
       "path": "[HOME]/.claude/.credentials.json",
       "exists": false,
@@ -28,6 +31,9 @@ expression: json
       }
     },
     {
+      "id": "19fcfdf03e41851a",
+      "identity": "23d4db1585c627bd",
+      "tags": [],
       "type": "credential",
       "path": "[HOME]/.codex/auth.json",
       "exists": true,
@@ -61,12 +67,16 @@ expression: json
       }
     },
     {
+      "id": "9c01aeb6d7878486",
+      "identity": "e2aed0ec284a8d78",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/1\"].trust_level",
       "value": {
         "kind": "text",
         "value": "trusted"
       },
+      "line": 4,
       "source": {
         "agent": "codex",
         "scope": {
@@ -78,12 +88,16 @@ expression: json
       }
     },
     {
+      "id": "c89d049f2e24a62c",
+      "identity": "53e39d12af8f8711",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/2\"].trust_level",
       "value": {
         "kind": "text",
         "value": "trusted"
       },
+      "line": 7,
       "source": {
         "agent": "codex",
         "scope": {

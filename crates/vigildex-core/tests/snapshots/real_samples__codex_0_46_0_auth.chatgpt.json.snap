@@ -12,6 +12,9 @@ expression: json
   "relocations": {},
   "items": [
     {
+      "id": "43eddedffe85549f",
+      "identity": "99171cb1fc82d95b",
+      "tags": [],
       "type": "credential",
       "path": "[HOME]/.claude/.credentials.json",
       "exists": false,
@@ -28,6 +31,9 @@ expression: json
       }
     },
     {
+      "id": "19fcfdf03e41851a",
+      "identity": "23d4db1585c627bd",
+      "tags": [],
       "type": "credential",
       "path": "[HOME]/.codex/auth.json",
       "exists": true,

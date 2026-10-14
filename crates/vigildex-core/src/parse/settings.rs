@@ -50,8 +50,13 @@ impl KeyRule {
     }
 }
 
+/// Resolves the raw key segments of a match to a line number, for formats
+/// that have one (see [`crate::parse::toml::line_of`]).
+pub type LineResolver<'a> = &'a dyn Fn(&[&str]) -> Option<u32>;
+
 /// Applies `rules` to `root`, appending one [`Item::Setting`] per match.
 /// `prefix` is prepended to every key path (for a project sub-object).
+/// Lines are left unset; see [`extract_with_lines`].
 pub fn extract(
     root: &Value,
     prefix: &str,
@@ -59,19 +64,49 @@ pub fn extract(
     source: &ArtifactRef,
     items: &mut Vec<Item>,
 ) {
+    extract_with_lines(root, prefix, &[], rules, source, items, &|_| None);
+}
+
+/// [`extract`] with a line resolver. `prefix_segments` are the raw keys
+/// that `prefix` stands for, so the resolver gets the full segment list.
+pub fn extract_with_lines(
+    root: &Value,
+    prefix: &str,
+    prefix_segments: &[&str],
+    rules: &[KeyRule],
+    source: &ArtifactRef,
+    items: &mut Vec<Item>,
+    line_of: LineResolver<'_>,
+) {
     for rule in rules {
         let segments: Vec<&str> = rule.pattern.split('.').collect();
-        walk(root, prefix, &segments, rule.record, source, items);
+        let mut raw: Vec<&str> = prefix_segments.to_vec();
+        walk(
+            root,
+            prefix,
+            &mut raw,
+            &segments,
+            rule.record,
+            source,
+            items,
+            line_of,
+        );
     }
 }
 
-fn walk(
-    value: &Value,
+#[allow(
+    clippy::too_many_arguments,
+    reason = "a recursive walker over key paths; bundling the state would not make it clearer"
+)]
+fn walk<'a>(
+    value: &'a Value,
     key_path: &str,
+    raw: &mut Vec<&'a str>,
     segments: &[&str],
     record: Record,
     source: &ArtifactRef,
     items: &mut Vec<Item>,
+    line_of: LineResolver<'_>,
 ) {
     let Some((head, rest)) = segments.split_first() else {
         let redacted = match record {
@@ -81,6 +116,7 @@ fn walk(
         items.push(Item::Setting(Setting {
             key_path: key_path.to_owned(),
             value: redacted,
+            line: line_of(raw),
             source: source.clone(),
         }));
         return;
@@ -90,17 +126,32 @@ fn walk(
     };
     if *head == "*" {
         for (key, child) in map {
-            walk(child, &join_key(key_path, key), rest, record, source, items);
+            raw.push(key.as_str());
+            walk(
+                child,
+                &join_key(key_path, key),
+                raw,
+                rest,
+                record,
+                source,
+                items,
+                line_of,
+            );
+            raw.pop();
         }
-    } else if let Some(child) = map.get(*head) {
+    } else if let Some((key, child)) = map.get_key_value(*head) {
+        raw.push(key.as_str());
         walk(
             child,
             &join_key(key_path, head),
+            raw,
             rest,
             record,
             source,
             items,
+            line_of,
         );
+        raw.pop();
     }
 }
 
@@ -172,6 +223,28 @@ mod tests {
         let text = serde_json::to_string(&items).unwrap();
         assert!(!text.contains("sk-secret"));
         assert!(!text.contains("you@example.com"));
+    }
+
+    #[test]
+    fn line_resolver_sees_the_raw_segments() {
+        let root = json!({"model_providers": {"local": {"base_url": "http://localhost/v1"}}});
+        let mut items = Vec::new();
+        extract_with_lines(
+            &root,
+            "",
+            &[],
+            &[KeyRule::value("model_providers.*.base_url")],
+            &src(),
+            &mut items,
+            &|segs| {
+                assert_eq!(segs, ["model_providers", "local", "base_url"]);
+                Some(7)
+            },
+        );
+        let Item::Setting(setting) = &items[0] else {
+            panic!()
+        };
+        assert_eq!(setting.line, Some(7));
     }
 
     #[test]

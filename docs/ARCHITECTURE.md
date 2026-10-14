@@ -25,7 +25,7 @@ The engine runs **in-process**: inside the CLI for one-shot commands, and inside
 
 | Crate | Purpose | Key dependencies |
 |---|---|---|
-| `vigildex-core` | Everything that isn't I/O glue | `serde`, `serde_json`, `jsonc-parser`, `toml_edit` (spans and line numbers), `dotenvy` (or a small line parser), `regex`, `sha2`, `rusqlite` (bundled), `notify` + `notify-debouncer-full`, `sysinfo`, `schemars`, `thiserror`, `time` |
+| `vigildex-core` | Everything that isn't I/O glue | Now: `serde`, `serde_json`, `toml_edit` (spans and line numbers), `saphyr` (skill frontmatter), a small line parser for profiles and `.env`, `regex` (secret rules), `sha2`, `schemars`, `thiserror`; dates are formatted without a dependency until M3 needs one. Later: `jsonc-parser` (Cursor and VS Code files, M5), `rusqlite` (bundled), `notify` + `notify-debouncer-full`, `sysinfo` (M4) |
 | `vigildex-cli` | `vigildex` binary | `clap`, `anyhow`, `owo-colors` (or similar) |
 | `vigildex-ffi` | UniFFI proc-macro bindings; built as a static lib for an XCFramework | `uniffi` |
 | `vigildex-statusline` | Tiny binary for Phase 1b; no dependency on core beyond a shared `limits` module | `serde_json` |
@@ -86,9 +86,18 @@ struct PlanLimit { agent: Agent, window: LimitWindow /* five_hour, weekly */, us
 - Settings are selected by key-path patterns per adapter (`permissions.allow`, `model_providers.*.base_url`) and reduced to `RedactedValue`; objects become key lists, so an `env` block never leaks a value.
 - The adapter trait is two steps: `project_roots(home, dirs)` reads the roots the agent recorded, then `inventory(home, dirs, roots, collector)` parses files; a `Collector` hashes every file read, caps sizes and turns errors into warnings. `security_keys`, `hot_keys`, `sessions` and `usage_since` arrive with M3 and M4.
 
+**As implemented in M2** (`finding.rs`, `observe.rs`, `secrets.rs`, `hosts.rs`, `analyze/`):
+
+- Every inventory item is an `ItemEntry { id, identity, tags, item }`: `id` names this occurrence (type, agent, scope, home-relative source path, locator; a `#n` suffix on exact duplicates), `identity` names what runs (a server's name and masked launch, a hook's event and handler, a file's home-relative path), and `tags` are the inventory marks of finding policy 5 (`bundled_scripts`, `package_runner`, `plugin_monitors`, `plugin_bin`). Both hashes are computed from the masked model fields and are the same wherever the home sits. The item's own fields are flattened beside them, so none may be called `id`: a plugin's `name@marketplace` identifier is `plugin_id`, and a contract test deserialises every report from its own JSON.
+- Parsers call `observe::observe` with every raw value that could hold a credential. It classifies the value (literal, reference, dynamic, empty), runs the secret rules on it, keeps the field, name, class, URL origin and masked hit, and drops the text. `Collector` gathers the observations beside items, artifacts and warnings; the adapters never see a `SecretHit`'s input again.
+- `Finding` has `id` (rule plus home-relative key path), `rule`, `category`, `severity`, `title`, `why`, `location { path, line, key_path }`, masked `evidence`, `fingerprint` (always `null` until the store has a per-installation key), `fix { summary, steps }`, `agents`, `items` and `tags` (the rule IDs that lost the per-location tie, plus `repo_file`). The rule texts live in `analyze/catalogue.rs`; `analyze/policy.rs` applies finding policy 1 (one per location) and 3 (one per server identity across agents and files) and assigns ids.
+- Reports: `InventoryReport`, `ScanReport` (inventory plus findings) and `FindingsReport` (findings plus warnings), each with `scanned_at`; `schema_version` is 3. Rule-file load problems (`rules/secrets/*.toml`, `rules/hosts.toml`) are warnings with no agent or path.
+- `McpServer` and `Hook` carry their `key_path` (`hooks.PreToolUse[0].hooks[1]`) and, for TOML, a `line`; `Setting` carries a `line` too. `ArtifactView.sha256` is `null` for shell profiles and `.env` files.
+- The rule data files live in `crates/vigildex-core/rules/` (embedded with `include_str!`), with `rules/` at the root as a link to them.
+
 **Additions the app screens need** (from `vigildex-mac/docs/SCREENS.md`, reviewed 13 Oct 2026), each with the milestone that adds it:
 
-- M2: a stable `ItemId` on every item and an `identity` (hash of name plus normalised launch) so the same server across agents is one row with several badges; `Finding { why: String, items: Vec<ItemId>, fix: FixSteps { summary, steps } }`; `scanned_at` on every report (schema bump).
+- M2 (done): a stable `ItemId` on every item and an `identity` (hash of name plus normalised launch) so the same server across agents is one row with several badges; `Finding { why: String, items: Vec<ItemId>, fix: FixSteps { summary, steps } }`; `scanned_at` on every report (schema bump).
 - M3: a per-agent "reported by" grid with a tri-state (yes, partly, no) and the source field name; Copilot `premium_requests` on the usage rows; `SessionState { Working, NeedsInput, Idle, Done, Failed, Stopped }` and a session name.
 - M4: `alerts(unacknowledged_only)`, `acknowledge_alert(id)`, `needs_a_look()` (alerts, High findings and pending pre-flights, newest first); `Change.group_id` for "other files with the same change"; a `Baseline` change kind and `baseline_at`; `ProbableWriter.cwd`; the checklist store.
 - M6: `PreflightReport { trigger: Clone | Pull, reviewed_at, items }` and `mark_preflight_reviewed(dir)`.
@@ -180,7 +189,7 @@ Install and uninstall are **plans**, not writes: core returns `StatuslinePlan { 
 vigildex [--home DIR] <command>                      # --home (or VIGILDEX_HOME) on every command
 vigildex scan        [--json]                        # inventory + findings + sessions summary
 vigildex inventory   [--agent A] [--type T] [--json]
-vigildex findings    [--severity S] [--fail-on S] [--json]
+vigildex findings    [--severity S] [--fail-on S] [--json]   # --severity shows S and above; --fail-on is judged before the display filter
 vigildex changes     [--since 7d] [--json]
 vigildex watch                                       # foreground watcher printing change events
 vigildex sessions    [--json]

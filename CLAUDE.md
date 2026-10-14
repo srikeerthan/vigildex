@@ -18,7 +18,7 @@ The macOS app lives in the private repo `srikeerthan/vigildex-mac` and embeds th
 2. **Never read credential values.** That covers macOS Keychain items, the contents of `~/.claude/.credentials.json`, values in `~/.codex/auth.json`, Cursor's `state.vscdb`, Copilot's `config.json` token fields, and browser cookies. Existence, file mode and owner are allowed. For JSON credential files, read key *names* only.
 3. **No network.** The engine makes no network calls: no telemetry, no update checks and no live verification of found secrets. The price table is vendored at build time.
 4. **No undocumented vendor endpoints** and no reuse of the user's tokens or cookies.
-5. **Never keep or print a full secret.** Mask at the point of detection (`sk-ant-••••7Qa`: a short prefix plus the last three characters). Findings carry a salted fingerprint, never the value.
+5. **Never keep or print a full secret.** Mask at the point of detection (`sk-ant-••••7Qa`: a vendor prefix plus the last three characters for a recognised token; the last three only for an unknown shape; nothing for a password). Findings carry masked evidence only; a keyed fingerprint (HMAC under a per-installation key, never the value) arrives with the store in M4, and no digest of a secret is computed before then.
 6. **Transcripts.** Parse only usage and metadata fields from session logs. Never persist message content, tool output or prompts.
 7. **Vendor formats are internal and change without notice.** Every parser must tolerate unknown fields and missing keys, report "unknown" and keep going. A malformed file is a warning, never a panic.
 
@@ -33,6 +33,7 @@ cargo insta review                  # review snapshot changes
 cargo deny check && cargo audit     # licences and advisories
 ./scripts/build-xcframework.sh      # macOS only; writes target/VigildexEngine.xcframework
 cargo run -p vigildex-cli -- scan --home fixtures/homes/basic --json
+cargo run -p vigildex-cli -- findings --home fixtures/homes/mockup-demo
 ```
 
 ## Conventions
@@ -55,7 +56,7 @@ crates/
   vigildex-cli/         `vigildex` binary (clap)
   vigildex-ffi/         UniFFI bindings for the macOS app
   vigildex-statusline/  tiny Claude status-line helper (Phase 1b)
-rules/                  secret rules (gitleaks-format TOML), host allowlists, known launchers
+rules/                  link to crates/vigildex-core/rules: secret rules (gitleaks-shape TOML), host allowlist
 fixtures/               redacted sample files per agent and a few fake home folders
 scripts/                build-xcframework.sh, update-prices.sh
 docs/                   handoff, architecture, data sources, rules, privacy, roadmap, research

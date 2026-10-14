@@ -66,13 +66,24 @@
         "--rm",
         "ghcr.io/acme/mcp-tools@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
       ]
+    },
+    "acme-docs-token": {
+      "type": "http",
+      "url": "https://docs.acme.internal/mcp?token=FAKEQUERYTOKEN2"
+    },
+    "acme-helper": {
+      "type": "http",
+      "url": "https://api.acme.internal/mcp",
+      "headersHelper": "sh -c 'echo Authorization: Bearer ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a'"
     }
   },
   "projects": {
     "/Users/you/proj/acme-api": {
       "mcpServers": {},
       "enabledMcpjsonServers": [],
-      "disabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [
+        "legacy"
+      ],
       "hasTrustDialogAccepted": true
     },
     "/Users/you/proj/dotfiles-sync": {

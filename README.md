@@ -12,7 +12,7 @@ Vigildex is a local, read-only engine and CLI for Claude Code, OpenAI Codex, Cur
 
 It never sends anything off your machine, never reads credential values and never writes to your agents' files.
 
-> **Status:** pre-alpha. Nothing to install yet.
+> **Status:** pre-alpha. Nothing to install yet. The engine inventories Claude Code and Codex and reports secrets, billing traps and risky settings (`vigildex inventory`, `vigildex findings`); sessions, usage, change tracking, Cursor and Copilot are still to come.
 
 ## Planned usage
 

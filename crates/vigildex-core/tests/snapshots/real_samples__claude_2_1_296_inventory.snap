@@ -12,6 +12,9 @@ expression: json
   "relocations": {},
   "items": [
     {
+      "id": "8afc84ddb64e1567",
+      "identity": "6d972b08f54428c5",
+      "tags": [],
       "type": "hook",
       "event": "PreToolUse",
       "matcher": "WebSearch",
@@ -22,6 +25,8 @@ expression: json
         "timeout_secs": 5,
         "async": false
       },
+      "key_path": "hooks.PreToolUse[0].hooks[0]",
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -32,8 +37,11 @@ expression: json
       }
     },
     {
+      "id": "ea4fa6d3cd52c928",
+      "identity": "446d639aa1c4c003",
+      "tags": [],
       "type": "plugin",
-      "id": "claude-code-setup@claude-plugins-official",
+      "plugin_id": "claude-code-setup@claude-plugins-official",
       "name": "claude-code-setup",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -53,8 +61,11 @@ expression: json
       }
     },
     {
+      "id": "29a82345ea16c311",
+      "identity": "e65291e3ddf427cb",
+      "tags": [],
       "type": "plugin",
-      "id": "claude-md-management@claude-plugins-official",
+      "plugin_id": "claude-md-management@claude-plugins-official",
       "name": "claude-md-management",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -74,8 +85,11 @@ expression: json
       }
     },
     {
+      "id": "6d98004d98938205",
+      "identity": "62437d028169bcf0",
+      "tags": [],
       "type": "plugin",
-      "id": "code-review@claude-plugins-official",
+      "plugin_id": "code-review@claude-plugins-official",
       "name": "code-review",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -95,8 +109,11 @@ expression: json
       }
     },
     {
+      "id": "e94e3eec7791ea38",
+      "identity": "9d10b59d6e5e743d",
+      "tags": [],
       "type": "plugin",
-      "id": "code-simplifier@claude-plugins-official",
+      "plugin_id": "code-simplifier@claude-plugins-official",
       "name": "code-simplifier",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -116,8 +133,11 @@ expression: json
       }
     },
     {
+      "id": "e7f243ea70cae356",
+      "identity": "d810ef52c6ff2584",
+      "tags": [],
       "type": "plugin",
-      "id": "commit-commands@claude-plugins-official",
+      "plugin_id": "commit-commands@claude-plugins-official",
       "name": "commit-commands",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -137,8 +157,11 @@ expression: json
       }
     },
     {
+      "id": "7d26041f0ad8ee14",
+      "identity": "f2c9cc6065bc7c21",
+      "tags": [],
       "type": "plugin",
-      "id": "context7@claude-plugins-official",
+      "plugin_id": "context7@claude-plugins-official",
       "name": "context7",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -158,8 +181,11 @@ expression: json
       }
     },
     {
+      "id": "628054f9fc7d8460",
+      "identity": "3a0e8814405c8c23",
+      "tags": [],
       "type": "plugin",
-      "id": "explanatory-output-style@claude-plugins-official",
+      "plugin_id": "explanatory-output-style@claude-plugins-official",
       "name": "explanatory-output-style",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -181,8 +207,11 @@ expression: json
       }
     },
     {
+      "id": "6f044dfb9f9417ae",
+      "identity": "6c45d1c241ede8cf",
+      "tags": [],
       "type": "plugin",
-      "id": "feature-dev@claude-plugins-official",
+      "plugin_id": "feature-dev@claude-plugins-official",
       "name": "feature-dev",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -202,8 +231,11 @@ expression: json
       }
     },
     {
+      "id": "0c23e51d51d7ac70",
+      "identity": "486e8ce436e2e11f",
+      "tags": [],
       "type": "plugin",
-      "id": "frontend-design@claude-plugins-official",
+      "plugin_id": "frontend-design@claude-plugins-official",
       "name": "frontend-design",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -223,8 +255,11 @@ expression: json
       }
     },
     {
+      "id": "2ee0a301c5de5390",
+      "identity": "d42521f99c84f598",
+      "tags": [],
       "type": "plugin",
-      "id": "kotlin-lsp@claude-plugins-official",
+      "plugin_id": "kotlin-lsp@claude-plugins-official",
       "name": "kotlin-lsp",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -244,8 +279,11 @@ expression: json
       }
     },
     {
+      "id": "b74997083e35d7ad",
+      "identity": "bb73eca4aff15552",
+      "tags": [],
       "type": "plugin",
-      "id": "pr-review-toolkit@claude-plugins-official",
+      "plugin_id": "pr-review-toolkit@claude-plugins-official",
       "name": "pr-review-toolkit",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -265,8 +303,11 @@ expression: json
       }
     },
     {
+      "id": "77e792d87d5411ea",
+      "identity": "e7b49d20be845d4e",
+      "tags": [],
       "type": "plugin",
-      "id": "product-tracking-skills@claude-plugins-official",
+      "plugin_id": "product-tracking-skills@claude-plugins-official",
       "name": "product-tracking-skills",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -286,8 +327,11 @@ expression: json
       }
     },
     {
+      "id": "610bac4a77af995c",
+      "identity": "f939d10a25ddd816",
+      "tags": [],
       "type": "plugin",
-      "id": "pyright-lsp@claude-plugins-official",
+      "plugin_id": "pyright-lsp@claude-plugins-official",
       "name": "pyright-lsp",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -307,8 +351,11 @@ expression: json
       }
     },
     {
+      "id": "a4a3a9929e6508a5",
+      "identity": "b401c990da604c66",
+      "tags": [],
       "type": "plugin",
-      "id": "ralph-loop@claude-plugins-official",
+      "plugin_id": "ralph-loop@claude-plugins-official",
       "name": "ralph-loop",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -328,8 +375,11 @@ expression: json
       }
     },
     {
+      "id": "5ed203a8dc3bcc1e",
+      "identity": "726939cef2e19904",
+      "tags": [],
       "type": "plugin",
-      "id": "security-guidance@claude-plugins-official",
+      "plugin_id": "security-guidance@claude-plugins-official",
       "name": "security-guidance",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -349,8 +399,11 @@ expression: json
       }
     },
     {
+      "id": "89c362cea724b09e",
+      "identity": "9dd8dab4fb6021e3",
+      "tags": [],
       "type": "plugin",
-      "id": "skill-creator@claude-plugins-official",
+      "plugin_id": "skill-creator@claude-plugins-official",
       "name": "skill-creator",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -370,8 +423,11 @@ expression: json
       }
     },
     {
+      "id": "4ccd24cb7a7543d8",
+      "identity": "e8e2748dde6dfa4a",
+      "tags": [],
       "type": "plugin",
-      "id": "superpowers@claude-plugins-official",
+      "plugin_id": "superpowers@claude-plugins-official",
       "name": "superpowers",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -391,8 +447,11 @@ expression: json
       }
     },
     {
+      "id": "ae4f5ec66442686d",
+      "identity": "a15a981638e38d47",
+      "tags": [],
       "type": "plugin",
-      "id": "swift-lsp@claude-plugins-official",
+      "plugin_id": "swift-lsp@claude-plugins-official",
       "name": "swift-lsp",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -412,8 +471,11 @@ expression: json
       }
     },
     {
+      "id": "c9a1dfaa429f9719",
+      "identity": "673e977301acc01f",
+      "tags": [],
       "type": "plugin",
-      "id": "typescript-lsp@claude-plugins-official",
+      "plugin_id": "typescript-lsp@claude-plugins-official",
       "name": "typescript-lsp",
       "marketplace": "claude-plugins-official",
       "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -433,8 +495,11 @@ expression: json
       }
     },
     {
+      "id": "8f5da019415c22aa",
+      "identity": "cbf83be7edbc43c2",
+      "tags": [],
       "type": "plugin",
-      "id": "warp@marketplace-1",
+      "plugin_id": "warp@marketplace-1",
       "name": "warp",
       "marketplace": "marketplace-1",
       "marketplace_source": "github:you/example",
@@ -454,6 +519,9 @@ expression: json
       }
     },
     {
+      "id": "34065a486191284a",
+      "identity": "81d2637d259729d5",
+      "tags": [],
       "type": "setting",
       "key_path": "autoMode",
       "value": {
@@ -462,6 +530,7 @@ expression: json
           "environment"
         ]
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -472,12 +541,16 @@ expression: json
       }
     },
     {
+      "id": "f6b6b7a1fa0efb6f",
+      "identity": "7e6fdecc4241135b",
+      "tags": [],
       "type": "setting",
       "key_path": "disableBundledSkills",
       "value": {
         "kind": "bool",
         "value": true
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -488,6 +561,9 @@ expression: json
       }
     },
     {
+      "id": "198167a2036aef19",
+      "identity": "1b57705f04427898",
+      "tags": [],
       "type": "setting",
       "key_path": "extraKnownMarketplaces",
       "value": {
@@ -496,6 +572,7 @@ expression: json
           "marketplace-1"
         ]
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -506,12 +583,16 @@ expression: json
       }
     },
     {
+      "id": "e06e0e225064a74e",
+      "identity": "6b656f36d2a0bed9",
+      "tags": [],
       "type": "setting",
       "key_path": "hasAvailableSubscription",
       "value": {
         "kind": "bool",
         "value": false
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -522,6 +603,9 @@ expression: json
       }
     },
     {
+      "id": "08c42c53aa5859db",
+      "identity": "022d1ce2d95ab911",
+      "tags": [],
       "type": "setting",
       "key_path": "oauthAccount",
       "value": {
@@ -549,6 +633,7 @@ expression: json
           "workspaceRole"
         ]
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -559,6 +644,9 @@ expression: json
       }
     },
     {
+      "id": "ca9251e30d620908",
+      "identity": "b391cd998c325d21",
+      "tags": [],
       "type": "setting",
       "key_path": "permissions.allow",
       "value": {
@@ -581,6 +669,7 @@ expression: json
           "Read(//private/tmp/vjs-inspect/package/**)"
         ]
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -591,6 +680,9 @@ expression: json
       }
     },
     {
+      "id": "e74cde66446bfa07",
+      "identity": "bf7e9b3dd3738a9a",
+      "tags": [],
       "type": "setting",
       "key_path": "skillOverrides",
       "value": {
@@ -603,6 +695,7 @@ expression: json
           "ui-ux-pro-max"
         ]
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -613,6 +706,9 @@ expression: json
       }
     },
     {
+      "id": "43eddedffe85549f",
+      "identity": "99171cb1fc82d95b",
+      "tags": [],
       "type": "credential",
       "path": "[HOME]/.claude/.credentials.json",
       "exists": false,
@@ -629,12 +725,16 @@ expression: json
       }
     },
     {
+      "id": "67fd208f27b41232",
+      "identity": "69cc600a8fdbd4bb",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/16\"].allowedTools",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -646,12 +746,16 @@ expression: json
       }
     },
     {
+      "id": "cfe8fddb54a52998",
+      "identity": "6103d4a8976a65a8",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/16\"].disabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -663,12 +767,16 @@ expression: json
       }
     },
     {
+      "id": "3280a7d541a6b06e",
+      "identity": "660b8a50dcdbd810",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/16\"].enabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -680,12 +788,16 @@ expression: json
       }
     },
     {
+      "id": "6e3b406d0a82fd4d",
+      "identity": "1031438221d5a206",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/16\"].hasClaudeMdExternalIncludesApproved",
       "value": {
         "kind": "bool",
         "value": false
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -697,12 +809,16 @@ expression: json
       }
     },
     {
+      "id": "9395364ab602f251",
+      "identity": "86cdd1b44904394f",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/16\"].hasTrustDialogAccepted",
       "value": {
         "kind": "bool",
         "value": true
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -714,12 +830,16 @@ expression: json
       }
     },
     {
+      "id": "2cd13dd2fb712acc",
+      "identity": "92ab7e47486791d7",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/17\"].allowedTools",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -731,12 +851,16 @@ expression: json
       }
     },
     {
+      "id": "337fe2b11ea383d2",
+      "identity": "6b147fec3985a9ee",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/17\"].disabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -748,12 +872,16 @@ expression: json
       }
     },
     {
+      "id": "6acb7eb8d57b9b10",
+      "identity": "2acd33dcb481f743",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/17\"].enabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -765,12 +893,16 @@ expression: json
       }
     },
     {
+      "id": "1aa80c5321e1b029",
+      "identity": "3b1b2ec89531cd89",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/17\"].hasClaudeMdExternalIncludesApproved",
       "value": {
         "kind": "bool",
         "value": false
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -782,12 +914,16 @@ expression: json
       }
     },
     {
+      "id": "97cfa8af0fe56aab",
+      "identity": "91d870db202cb42a",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/17\"].hasTrustDialogAccepted",
       "value": {
         "kind": "bool",
         "value": true
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -799,12 +935,16 @@ expression: json
       }
     },
     {
+      "id": "f6ea1d2bb75bc0c5",
+      "identity": "02781e12fa46eee1",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/18\"].allowedTools",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -816,12 +956,16 @@ expression: json
       }
     },
     {
+      "id": "29c9099c9f20adb6",
+      "identity": "5421104bdc7ba07f",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/18\"].disabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -833,12 +977,16 @@ expression: json
       }
     },
     {
+      "id": "9335017c3364cde6",
+      "identity": "5cf07079e2956d8e",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/18\"].enabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -850,12 +998,16 @@ expression: json
       }
     },
     {
+      "id": "fa6e1cf960f4eddf",
+      "identity": "c39e0a4c043a80f5",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/18\"].hasClaudeMdExternalIncludesApproved",
       "value": {
         "kind": "bool",
         "value": false
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -867,12 +1019,16 @@ expression: json
       }
     },
     {
+      "id": "d6fc08beca19d423",
+      "identity": "6d387946dfb9011d",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/18\"].hasTrustDialogAccepted",
       "value": {
         "kind": "bool",
         "value": true
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -884,6 +1040,9 @@ expression: json
       }
     },
     {
+      "id": "2f3378a9221044c4",
+      "identity": "d16a8e38a4ae106e",
+      "tags": [],
       "type": "mcp_server",
       "name": "context7",
       "launch": {
@@ -898,6 +1057,8 @@ expression: json
       "header_keys": [],
       "env_header_keys": [],
       "enabled": null,
+      "key_path": "projects[\"/Users/you/proj/6\"].mcpServers.context7",
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -909,6 +1070,9 @@ expression: json
       }
     },
     {
+      "id": "abcb4c1c14df3b25",
+      "identity": "e09edc48a3112457",
+      "tags": [],
       "type": "mcp_server",
       "name": "playwright",
       "launch": {
@@ -924,6 +1088,8 @@ expression: json
       "header_keys": [],
       "env_header_keys": [],
       "enabled": null,
+      "key_path": "projects[\"/Users/you/proj/6\"].mcpServers.playwright",
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -935,12 +1101,16 @@ expression: json
       }
     },
     {
+      "id": "fd637757ed9979cc",
+      "identity": "d1866ae6b42a35a2",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/6\"].allowedTools",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -952,12 +1122,16 @@ expression: json
       }
     },
     {
+      "id": "d2ab75a17747009e",
+      "identity": "b756828cbb300c50",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/6\"].disabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -969,12 +1143,16 @@ expression: json
       }
     },
     {
+      "id": "a87a7539b5414441",
+      "identity": "8f0c064d22031d01",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/6\"].enabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -986,12 +1164,16 @@ expression: json
       }
     },
     {
+      "id": "d328f2ebb1dd2e08",
+      "identity": "969d06f92a9d963f",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/6\"].hasClaudeMdExternalIncludesApproved",
       "value": {
         "kind": "bool",
         "value": false
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -1003,12 +1185,16 @@ expression: json
       }
     },
     {
+      "id": "dea65766d1b6f685",
+      "identity": "9373188a0f6800c6",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you/proj/6\"].hasTrustDialogAccepted",
       "value": {
         "kind": "bool",
         "value": true
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -1020,12 +1206,16 @@ expression: json
       }
     },
     {
+      "id": "b674b7fb64345776",
+      "identity": "b1535e49ceb479e5",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you\"].allowedTools",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -1037,12 +1227,16 @@ expression: json
       }
     },
     {
+      "id": "9d9a7a183f2a93ed",
+      "identity": "fbcedca3c6116124",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you\"].disabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -1054,12 +1248,16 @@ expression: json
       }
     },
     {
+      "id": "1bae866b9cb71ce6",
+      "identity": "e30176649d5f2876",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you\"].enabledMcpjsonServers",
       "value": {
         "kind": "list",
         "values": []
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -1071,12 +1269,16 @@ expression: json
       }
     },
     {
+      "id": "781032c9b2e977ba",
+      "identity": "e6ba80be0f0a75db",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you\"].hasClaudeMdExternalIncludesApproved",
       "value": {
         "kind": "bool",
         "value": false
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -1088,12 +1290,16 @@ expression: json
       }
     },
     {
+      "id": "a7fd5036a8cff00a",
+      "identity": "6727087adf11b87a",
+      "tags": [],
       "type": "setting",
       "key_path": "projects[\"/Users/you\"].hasTrustDialogAccepted",
       "value": {
         "kind": "bool",
         "value": false
       },
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -1105,6 +1311,9 @@ expression: json
       }
     },
     {
+      "id": "192b505a4ce84dec",
+      "identity": "202ae011d3b31bf7",
+      "tags": [],
       "type": "hook",
       "event": "SessionStart",
       "matcher": null,
@@ -1115,6 +1324,8 @@ expression: json
         "timeout_secs": null,
         "async": false
       },
+      "key_path": "hooks.SessionStart[0].hooks[0]",
+      "line": null,
       "source": {
         "agent": "claude_code",
         "scope": {
@@ -1126,6 +1337,9 @@ expression: json
       }
     },
     {
+      "id": "19fcfdf03e41851a",
+      "identity": "23d4db1585c627bd",
+      "tags": [],
       "type": "credential",
       "path": "[HOME]/.codex/auth.json",
       "exists": false,

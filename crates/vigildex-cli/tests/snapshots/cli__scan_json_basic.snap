@@ -3,8 +3,9 @@ source: crates/vigildex-cli/tests/cli.rs
 expression: redact(&stdout(&output))
 ---
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "engine_version": "[VERSION]",
+  "scanned_at": "[TIME]",
   "home": {
     "root": "[REPO]/fixtures/homes/basic",
     "source": "override"
@@ -19,6 +20,9 @@ expression: redact(&stdout(&output))
     "relocations": {},
     "items": [
       {
+        "id": "ca9251e30d620908",
+        "identity": "b391cd998c325d21",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.allow",
         "value": {
@@ -27,6 +31,7 @@ expression: redact(&stdout(&output))
             "Bash(git status *)"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -37,6 +42,9 @@ expression: redact(&stdout(&output))
         }
       },
       {
+        "id": "43eddedffe85549f",
+        "identity": "99171cb1fc82d95b",
+        "tags": [],
         "type": "credential",
         "path": "[REPO]/fixtures/homes/basic/.claude/.credentials.json",
         "exists": false,
@@ -53,12 +61,16 @@ expression: redact(&stdout(&output))
         }
       },
       {
+        "id": "745dfc46cd77e76f",
+        "identity": "a0990f03d39ac079",
+        "tags": [],
         "type": "setting",
         "key_path": "approval_policy",
         "value": {
           "kind": "text",
           "value": "on-request"
         },
+        "line": 2,
         "source": {
           "agent": "codex",
           "scope": {
@@ -69,6 +81,9 @@ expression: redact(&stdout(&output))
         }
       },
       {
+        "id": "19fcfdf03e41851a",
+        "identity": "23d4db1585c627bd",
+        "tags": [],
         "type": "credential",
         "path": "[REPO]/fixtures/homes/basic/.codex/auth.json",
         "exists": false,
@@ -108,5 +123,6 @@ expression: redact(&stdout(&output))
       }
     ],
     "warnings": []
-  }
+  },
+  "findings": []
 }

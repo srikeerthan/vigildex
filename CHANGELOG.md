@@ -11,6 +11,33 @@ own **JSON contract** entry (CLAUDE.md § Conventions).
 
 ### Added
 
+- Findings (milestone M2): `vigildex findings [--severity S] [--fail-on S]
+  [--json]` reports plaintext secrets (SEC-001…006), billing traps
+  (BILL-001…007, BILL-009) and risky settings (RISK-001…009) from
+  `docs/RULES.md`, each with a list title, a "why" sentence, a masked
+  evidence string, fix steps, the agents and inventory items involved, and
+  the rule IDs that lost the per-location tie as tags. `vigildex scan`
+  includes the findings. `--fail-on` exits with status 1 and is judged
+  before `--severity` filters the display. `fixtures/homes/mockup-demo`
+  yields exactly the nine findings on the app's Findings screen, and
+  `fixtures/homes/messy` triggers every other implemented rule beside a
+  look-alike that must not fire.
+- Secret rules in the gitleaks TOML shape under `rules/secrets/` (vendor
+  tokens, credentials in URLs, name-keyed generic rules), embedded at build
+  time, with a vendor host allowlist in `rules/hosts.toml`. Values are
+  scanned at the point of detection and dropped: a finding keeps a masked
+  form only (vendor prefix plus the last three characters for recognised
+  tokens, the last three for unknown shapes, nothing for passwords). The
+  defaults of `${VAR:-default}` and the bodies of `$(…)` are scanned too.
+- Shell profiles (`.zshenv` … `.bashrc`, `.envrc`) and the `.env` at each
+  project root are read: agent-relevant variables become settings with line
+  numbers, every value goes through the secret rules, and the files are
+  listed without a content hash.
+- Every inventory item carries an `id` (this occurrence), an `identity`
+  (what runs, shared across agents and files) and `tags` (`bundled_scripts`,
+  `package_runner`, `plugin_monitors`, `plugin_bin`). MCP servers and hooks
+  carry their `key_path`; settings, servers and hooks from `config.toml`
+  carry their line number.
 - Inventory (milestone M1): the engine finds what Claude Code and Codex can
   run and `vigildex inventory [--agent A] [--type T] [--json]` lists it. Items
   are MCP servers (with launch classification: package runner and pin,
@@ -66,6 +93,17 @@ own **JSON contract** entry (CLAUDE.md § Conventions).
 
 ### Changed
 
+- Settings values that are strings are sanitised before they are recorded:
+  URLs lose user information and query strings, and a vendor token or
+  inline credential inside a command (`apiKeyHelper`, `statusLine.command`,
+  Codex `notify`, a `headersHelper`) is masked. The same masking applies to
+  hook commands and server arguments in the inventory.
+- TOML syntax warnings name the line, never the source text.
+- The rule data files moved to `crates/vigildex-core/rules/` so the crate
+  packages on its own; `rules/` at the repository root is a link to them.
+- `fixtures/homes/messy` gained triggers for the secret-location variants
+  (a token in a server URL query, in a `headersHelper` command, in a hook
+  header, in a hook command and in an `apiKeyHelper` command).
 - `fixtures/homes/mockup-demo` now matches the app screens: applying the
   rules catalogue to it yields exactly the nine findings on the Findings
   screen (`fixtures/README.md` maps each row to its rule and file), the stray key sits on
@@ -95,6 +133,19 @@ own **JSON contract** entry (CLAUDE.md § Conventions).
 
 ### JSON contract
 
+- `schema_version` 3: `scan --json`, `inventory --json` and the new
+  `findings --json` carry `scanned_at` (RFC 3339 UTC). `scan --json` gains
+  `findings`; `findings --json` returns `schema_version`, `engine_version`,
+  `scanned_at`, `home`, `findings` and `warnings`. Each inventory item is
+  wrapped with `id`, `identity` and `tags`; `mcp_server` and `hook` items
+  gain `key_path` and `line`, `setting` items gain `line`; the `plugin`
+  item's own identifier (`name@marketplace`) is `plugin_id`, so `id` is
+  always the entry id; `artifacts[].kind` gains `shell_profile` (profiles and `.envrc`) and
+  `env_file` (a project `.env`); `artifacts[].sha256` is nullable (those two
+  kinds are not hashed). A finding has `id`, `rule`, `category`, `severity`, `title`,
+  `why`, `location { path, line, key_path }`, `evidence`, `fingerprint`
+  (always `null` in this version), `fix { summary, steps }`, `agents`,
+  `items` and `tags`.
 - `schema_version` 2: `scan --json` and `inventory --json` return
   `schema_version`, `engine_version`, `home` and `inventory` (`scanned`,
   `project_roots`, `relocations`, `items`, `artifacts`, `warnings`). The

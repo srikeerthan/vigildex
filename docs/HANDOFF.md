@@ -77,6 +77,8 @@ Rough estimates for one developer. Each milestone ends with the CLI showing the 
 | M7 | FFI and XCFramework release; CLI 0.1 via `cargo-dist` and Homebrew | The app repo builds against a tagged engine release |
 | 1b | `vigildex-statusline` helper plus install/uninstall plan | The helper passes through any existing status line unchanged and records limits |
 
+**Milestone status (14 Oct 2026):** M0, M1 and M2 are done. `vigildex findings --home fixtures/homes/mockup-demo` yields the nine screen findings once the credential stand-ins are `0600` (the tests copy the home and set the modes), and `fixtures/homes/messy` triggers every other implemented rule beside its look-alikes. M3 (sessions and usage) is next.
+
 ## Do these first: verification spikes on a real Mac
 
 Run each agent for a day, then confirm the following. Save **redacted** samples into `fixtures/` and update `DATA_SOURCES.md`.
@@ -100,6 +102,7 @@ Run each agent for a day, then confirm the following. Save **redacted** samples 
 ## Open questions (product)
 
 - From the screens review of 13 Oct 2026 (`SCREENS.md` against the fixture and the rules): the What Can Run inspector example shows lint-helper running `node ~/.cache/.lh/index.js` (a hidden folder, RISK-008 High) while the Findings screen lists no such finding; in the fixture lint-helper runs `npx -y @acme/lint-helper@latest`, so the inspector example should show a floating-version server. The "41 items · 4 agents" counts need Cursor and Copilot (M5) and should be re-derived from the fixture then. The Cursor session row has no local data source. Copilot "38 premium" needs a premium-request feed (Copilot status line, 1b). The header tooltip "Nothing leaves this Mac" should allow for the app's signed update check (`PRIVACY.md`). `acknowledgeFinding` is marked "later" although "9 open" means "not acknowledged". The § 2 notification title "New MCP server added" should be the CHG-002 list title `New MCP server`.
+- Does Claude Code expand `${VAR}` references inside a settings `env` block? The engine treats such a value as not set (never as a secret) until this is confirmed on a real install (`docs/DATA_SOURCES.md`).
 - Do hooks still run in YOLO/bypass modes in Cursor and Copilot? (Phase 3 enforcement depends on it.)
 - Can a repository's `"disableAllHooks": true` switch off a user's hooks in Claude Code?
 - Apply for Apple's Endpoint Security entitlement early. There's no stated timeline, and one report says about 2 months.

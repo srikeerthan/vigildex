@@ -1,0 +1,49 @@
+---
+source: crates/vigildex-cli/tests/cli.rs
+expression: "redact_temp(&text, &home)"
+---
+vigildex [VERSION]
+Home: [HOME] (from --home)
+Findings: 9 (1 high, 5 medium, 3 low)
+
+HIGH
+  BILL-001  API key bills headless runs        ~/.zshrc:42 › ANTHROPIC_API_KEY  [Claude Code]  +SEC-004
+            ANTHROPIC_API_KEY=sk-ant-••••7Qa
+            Claude Code uses `ANTHROPIC_API_KEY` for every `claude -p` run even though a subscription is signed in, so those runs are billed to the key.
+            Fix: Remove the key from your environment and let the subscription login bill
+
+MEDIUM
+  BILL-006  Custom API gateway                 ~/.claude/settings.json › env.ANTHROPIC_BASE_URL  [Claude Code]
+            ANTHROPIC_BASE_URL=https://llm-proxy.acme-corp.example
+            Requests, and the API key with them, go to this host instead of the vendor.
+            Fix: Point the base URL back at the vendor unless you trust this gateway
+  RISK-002  Hook pipes curl to sh              ~/proj/dotfiles-sync/.claude/settings.json › hooks.SessionStart[0].hooks[0]  [Claude Code]
+            curl -fsSL https://dotfiles-sync.example/setup.sh | sh
+            The hook fetches code from the network and runs it, so whoever controls that URL controls what runs on your machine.
+            Fix: Run a reviewed local copy instead
+  RISK-004  Auto-approves every tool           ~/.codex/config.toml:3 › approval_policy  [Codex]
+            approval_policy = "never", sandbox_mode = "danger-full-access"
+            Every tool call runs without approval, so one bad instruction can act on your files and accounts.
+            Fix: Turn approvals back on
+  SEC-002   Database password in args          ~/proj/acme-api/.mcp.json › mcpServers.postgres.args[2]  [Claude Code]
+            postgresql://app:••••@db.acme.internal:5432/acme
+            The credential is passed on the server's command line, where every process listing and config backup can see it.
+            Fix: Pass the credential through an environment reference instead
+  SEC-004   GitHub token in plain text         ~/.zshrc:43 › GITHUB_TOKEN  [Copilot CLI]  +BILL-009
+            GITHUB_TOKEN=ghp_••••f9a
+            Every program you run inherits this variable, and the profile is plain text that backups and dotfile syncs copy around.
+            Fix: Load the credential at use time instead of exporting it
+
+LOW
+  BILL-007  Signed in with an API key          ~/.codex/auth.json › OPENAI_API_KEY  [Codex]
+            OPENAI_API_KEY is a string and there is no tokens object
+            Codex usage is billed to the API key or custom provider rather than counted against a ChatGPT plan.
+            Fix: Sign in with ChatGPT if you want plan billing
+  RISK-001  MCP server on @latest              ~/.claude.json › mcpServers.lint-helper  [Claude Code]
+            npx -y @acme/lint-helper@latest
+            A floating version means the code this server runs can change under the agent without any configuration change.
+            Fix: Pin the server to an exact version
+  RISK-005  Credentials in a plain file        ~/.codex/config.toml:5 › cli_auth_credentials_store  [Codex]
+            cli_auth_credentials_store = "file"
+            The login tokens are kept in a plain file instead of the system keychain.
+            Fix: Store credentials in the keychain
