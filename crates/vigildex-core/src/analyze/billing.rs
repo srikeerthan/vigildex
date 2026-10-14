@@ -65,6 +65,7 @@ fn candidate(
     let text = rule(id);
     Candidate {
         rule: id,
+        kind: observation.source.kind,
         severity: text.severity,
         title: title.to_owned(),
         why: text.why.to_owned(),
@@ -182,6 +183,7 @@ fn settings(analysis: &Analysis<'_>, out: &mut Vec<Candidate>) {
                 let text = rule("BILL-003");
                 out.push(Candidate {
                     rule: "BILL-003",
+                    kind: source.kind,
                     severity: text.severity,
                     title: "Key helper bills headless runs".to_owned(),
                     why: text.why.to_owned(),
@@ -236,20 +238,29 @@ fn codex_config(path: &Path, settings: &[(&Setting, &str)], out: &mut Vec<Candid
                 _ => None,
             })
     };
-    let provider = text_of("model_provider").unwrap_or("openai");
+    // The selected profile overrides the top-level `model_provider`.
+    let profile = text_of("profile").map(str::to_owned);
+    let profile_key = profile
+        .as_deref()
+        .map(|p| format!("profiles.{p}.model_provider"));
+    let provider_key_used = match profile_key.as_deref().and_then(text_of) {
+        Some(_) => profile_key.clone().unwrap_or_default(),
+        None => "model_provider".to_owned(),
+    };
+    let provider = text_of(&provider_key_used).unwrap_or("openai");
+    // Only the effective base URL counts: `openai_base_url` applies to the
+    // built-in provider and is inert once a custom provider is selected.
     let mut urls: Vec<(&str, &str)> = Vec::new();
-    for (key, vendor) in [
-        ("openai_base_url", "openai"),
-        ("chatgpt_base_url", "chatgpt"),
-    ] {
-        if let Some(url) = text_of(key) {
-            urls.push((key, vendor));
-            let _ = url;
-        }
-    }
     let provider_key = format!("model_providers.{provider}.base_url");
-    if provider != "openai" && text_of(&provider_key).is_some() {
+    if provider == "openai" {
+        if text_of("openai_base_url").is_some() {
+            urls.push(("openai_base_url", "openai"));
+        }
+    } else if text_of(&provider_key).is_some() {
         urls.push((provider_key.as_str(), "openai"));
+    }
+    if text_of("chatgpt_base_url").is_some() {
+        urls.push(("chatgpt_base_url", "chatgpt"));
     }
     for (key, vendor) in urls {
         let Some((setting, id)) = settings.iter().find(|(s, _)| s.key_path == key) else {
@@ -264,6 +275,7 @@ fn codex_config(path: &Path, settings: &[(&Setting, &str)], out: &mut Vec<Candid
         let text = rule("BILL-006");
         let mut finding = Candidate {
             rule: "BILL-006",
+            kind: ArtifactKind::Settings,
             severity: text.severity,
             title: String::new(),
             why: text.why.to_owned(),
@@ -282,16 +294,17 @@ fn codex_config(path: &Path, settings: &[(&Setting, &str)], out: &mut Vec<Candid
     if provider != "openai" {
         if let Some((setting, id)) = settings
             .iter()
-            .find(|(s, _)| s.key_path == "model_provider")
+            .find(|(s, _)| s.key_path == provider_key_used)
         {
             let text = rule("BILL-007");
             out.push(Candidate {
                 rule: "BILL-007",
+                kind: ArtifactKind::Settings,
                 severity: text.severity,
                 title: "Uses a custom provider".to_owned(),
                 why: text.why.to_owned(),
-                location: Location::key(path, "model_provider").at_line(setting.line),
-                evidence: Some(format!("model_provider = \"{provider}\"")),
+                location: Location::key(path, &provider_key_used).at_line(setting.line),
+                evidence: Some(format!("{provider_key_used} = \"{provider}\"")),
                 fingerprint: None,
                 fix: text.fix_steps(),
                 agents: vec![Agent::Codex],
@@ -328,6 +341,7 @@ fn codex_auth(analysis: &Analysis<'_>, out: &mut Vec<Candidate>) {
         let text = rule("BILL-007");
         out.push(Candidate {
             rule: "BILL-007",
+            kind: entry.source().kind,
             severity: text.severity,
             title: "Signed in with an API key".to_owned(),
             why: text.why.to_owned(),

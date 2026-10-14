@@ -406,10 +406,8 @@ fn messy_triggers_every_other_rule_and_no_look_alike() {
     // .codex
     not("RISK-004 | ~/.codex/config.toml:3 › approval_policy");
     not("RISK-005 | ~/.codex/config.toml:5 › cli_auth_credentials_store");
-    titled(
-        "BILL-006 | ~/.codex/config.toml:7 › openai_base_url",
-        "Custom API gateway",
-    );
+    // `openai_base_url` is inert once a custom provider is selected.
+    not("BILL-006 | ~/.codex/config.toml:7 › openai_base_url");
     titled(
         "BILL-007 | ~/.codex/config.toml:8 › model_provider",
         "Uses a custom provider",
@@ -430,6 +428,20 @@ fn messy_triggers_every_other_rule_and_no_look_alike() {
     titled(
         "SEC-001 | ~/.codex/config.toml:31 › mcp_servers.github.http_headers.Authorization",
         "GitHub token in an MCP config",
+    );
+    // Two keys of one inline table share a line but are two locations.
+    titled(
+        "SEC-001 | ~/.codex/config.toml:31 › mcp_servers.github.http_headers.X-Api-Key",
+        "API key in an MCP config",
+    );
+    // Policy 4: a disabled server is skipped by every rule, token included.
+    assert!(
+        !findings.iter().any(|f| f
+            .location
+            .key_path
+            .as_deref()
+            .is_some_and(|k| k.starts_with("mcp_servers.off"))),
+        "the disabled server must not fire"
     );
     titled(
         "RISK-001 | ~/.codex/config.toml:33 › mcp_servers.fetch",
@@ -456,6 +468,17 @@ fn messy_triggers_every_other_rule_and_no_look_alike() {
     not("SEC-001 | ~/proj/acme-api/.mcp.json › mcpServers.safe-ref.headers.Authorization");
     not("SEC-002 | ~/proj/acme-api/.mcp.json › mcpServers.postgres-ref.args[2]");
     not("SEC-002 | ~/proj/acme-api/.mcp.json › mcpServers.postgres-nopw.args[2]");
+    // Policy 4: a project server listed in `disabledMcpjsonServers` is off.
+    assert!(
+        !findings.iter().any(|f| f
+            .location
+            .key_path
+            .as_deref()
+            .is_some_and(|k| k.starts_with("mcpServers.legacy"))),
+        "the disabled project server must not fire"
+    );
+    // A repository's own `.claude/hooks` folder is not a hidden folder.
+    not("RISK-008 | ~/proj/acme-api/.claude/settings.json › hooks.PostToolUse[0].hooks[0]");
     titled(
         "BILL-003 | ~/proj/acme-api/.claude/settings.json › apiKeyHelper",
         "Key helper bills headless runs",
@@ -628,6 +651,28 @@ fn no_fixture_secret_reaches_any_report() {
         assert!(!text.contains("acme_FAKE"), "{text}");
         assert!(!text.contains("adk_FAKE"), "{text}");
     }
+    let _ = fs::remove_dir_all(&home);
+}
+
+/// A Codex profile that selects a custom provider decides BILL-006 and
+/// BILL-007, like the top-level `model_provider` would.
+#[test]
+fn codex_profile_selects_the_provider() {
+    let home = temp_home("basic", &[]);
+    fs::write(
+        home.join(".codex/config.toml"),
+        "profile = \"work\"\nopenai_base_url = \"https://inert.example/v1\"\n\n[profiles.work]\nmodel_provider = \"proxy\"\n\n[model_providers.proxy]\nbase_url = \"https://gw.example/v1\"\n",
+    )
+    .unwrap();
+    let findings = findings_of(&home);
+    let got: Vec<String> = findings.iter().map(|f| summary(f, &home)).collect();
+    assert_eq!(
+        got,
+        vec![
+            "BILL-006 | ~/.codex/config.toml:8 › model_providers.proxy.base_url".to_owned(),
+            "BILL-007 | ~/.codex/config.toml:5 › profiles.work.model_provider".to_owned(),
+        ]
+    );
     let _ = fs::remove_dir_all(&home);
 }
 

@@ -80,11 +80,14 @@ the CLI `findings` and `scan` tests) copy the home to a temporary directory
 and set their mode to `0600` before scanning. On a checkout, `vigildex
 findings --home fixtures/homes/mockup-demo` shows the same nine plus a
 SEC-006 for each stand-in whose mode the umask left world-readable. Everything else in the home is inventory
-without a finding, or a look-alike that must not fire: a `${LINT_HELPER_TOKEN}` reference, a pinned playwright
+without a finding, or a look-alike that must not fire: a `${LINT_HELPER_TOKEN}` reference, a `Bearer ${GITHUB_TOKEN}`
+MCP header and a `Bearer $HOOK_TOKEN` hook header (a reference inside a
+header never counts as a secret, whatever its length), a pinned playwright
 server, a disabled floating `fetch` server, a localhost provider that no
-`model_provider` selects, an HTTP hook to a loopback URL, skills with
-restricted tools, and the `acme-deploy` plugin with `bin/` and a monitor
-(inventory tags). `proj/demo-repo` holds the pre-flight sheet's sample files
+`model_provider` selects, an HTTP hook to a loopback URL, hook and server
+commands under `~/.claude` and `~/.codex` (an agent's own directory is not a
+hidden folder), skills with restricted tools, and the `acme-deploy` plugin
+with `bin/` and a monitor (inventory tags). `proj/demo-repo` holds the pre-flight sheet's sample files
 and is recorded by no agent, so only `preflight` (M6) reads it. Sessions and
 usage data for the Sessions and Usage screens arrive with M3.
 
@@ -106,7 +109,9 @@ and the other `0600` as the look-alike.
   (BILL-009 by name; its value is resolved at use time, so it is a SEC-004
   look-alike); look-alikes: a switch set to `0`, two commented-out keys, and
   a `$(security …)` value.
-- `.claude.json`: lint-helper with a plaintext token (SEC-001) on `@latest`
+- `.claude.json`: `disabledMcpjsonServers: ["legacy"]` for `acme-api`, so the
+  `legacy` server in that project's `.mcp.json` (a token on `@latest`) is
+  skipped by every rule (policy 4); lint-helper with a plaintext token (SEC-001) on `@latest`
   (RISK-001, one finding shared with the Codex copy), `playwright@latest`
   (RISK-001), a `--privileged --network host` Docker server on a floating tag
   (RISK-009, with RISK-001 as a tag), a digest-pinned unprivileged Docker
@@ -138,17 +143,21 @@ and the other `0600` as the look-alike.
   `model_providers.proxy.base_url`) beside an `openai_base_url` that is inert
   once the custom provider is selected (must not fire), a localhost provider
   (must not fire), a token in `shell_environment_policy.set` (SEC-003),
-  lint-helper with a plaintext token, a plaintext `Authorization` header
-  (SEC-001), floating `fetch` (RISK-001 `MCP server unpinned`) and a pinned
-  server; a `curl | sh` hook in `hooks.json`; a ChatGPT-mode `auth.json` (must
-  not fire BILL-007). Every finding from this file carries its line number.
+  lint-helper with a plaintext token, a plaintext `Authorization` header and
+  an `X-Api-Key` header in the same inline table (two SEC-001 findings on one
+  line: policy 1 groups a TOML file by key, a profile by line), floating
+  `fetch` (RISK-001 `MCP server unpinned`), a pinned server and a disabled
+  server with a token (must not fire anything, policy 4); a `curl | sh` hook
+  in `hooks.json`; a ChatGPT-mode `auth.json` (must not fire BILL-007). Every
+  finding from this file carries its line number.
 - `proj/acme-api`: the postgres password in `.mcp.json` (SEC-002) beside a
   `${DATABASE_URL}` reference and a password-free URL (look-alikes), a
   plaintext bearer header beside a `${GITHUB_TOKEN}` reference (SEC-001 and
   its look-alike), `apiKeyHelper`, `DATABASE_URL` and a non-vendor
   `ANTHROPIC_BASE_URL` in project settings (BILL-003, SEC-003, BILL-006),
-  `enableAllProjectMcpServers: false` and a project-scope `bypassPermissions`
-  (both must not fire), secrets in `.env` (SEC-005, BILL-006), Cursor rules
+  `enableAllProjectMcpServers: false`, a project-scope `bypassPermissions`
+  and a hook under the repository's own `.claude/hooks/` (none must fire),
+  secrets in `.env` (SEC-005, BILL-006), Cursor rules
   with `alwaysApply` true and false (RISK-012 and its look-alike, M5), and a
   project `.codex/config.toml` with `approval_policy = "never"` plus
   `danger-full-access` (RISK-004 at project scope) and an `openai_base_url`

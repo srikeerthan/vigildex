@@ -17,7 +17,7 @@ use std::path::{Path, PathBuf};
 use crate::finding::{Finding, FixSteps, Severity};
 use crate::home::HomeEnv;
 use crate::inventory::Scanned;
-use crate::model::{Agent, ArtifactRef, Item, ItemEntry, RedactedValue, Scope};
+use crate::model::{Agent, ArtifactKind, ArtifactRef, Item, ItemEntry, RedactedValue, Scope};
 use crate::observe::{Location, Locator, Observation};
 
 /// A finding before the policy has been applied.
@@ -25,6 +25,9 @@ use crate::observe::{Location, Locator, Observation};
 pub struct Candidate {
     /// The rule ID.
     pub rule: &'static str,
+    /// The kind of file the finding is in, which decides how locations are
+    /// grouped (policy 1: by line in a profile or `.env`, by key elsewhere).
+    pub kind: ArtifactKind,
     /// The severity to report.
     pub severity: Severity,
     /// The list title.
@@ -67,6 +70,10 @@ pub struct Analysis<'a> {
     pub project_agents: BTreeMap<PathBuf, BTreeSet<Agent>>,
     /// Item ids by source path and locator.
     item_index: BTreeMap<(PathBuf, String), String>,
+    /// Servers every rule skips (policy 4): `enabled = false`, or a project
+    /// `.mcp.json` server the user switched off with
+    /// `disabledMcpjsonServers`. Keyed by source path and locator.
+    disabled_servers: BTreeSet<(PathBuf, String)>,
 }
 
 impl<'a> Analysis<'a> {
@@ -76,11 +83,36 @@ impl<'a> Analysis<'a> {
         let mut claude_billing_account = false;
         let mut project_agents: BTreeMap<PathBuf, BTreeSet<Agent>> = BTreeMap::new();
         let mut item_index = BTreeMap::new();
+        let mut disabled_servers = BTreeSet::new();
+        // `disabledMcpjsonServers` lists per project root, from
+        // `~/.claude.json` and from the project's settings files.
+        let mut disabled_mcpjson: BTreeMap<PathBuf, BTreeSet<String>> = BTreeMap::new();
         for entry in &scanned.inventory.items {
             let source = entry.source();
             item_index
                 .entry((source.path.clone(), entry.item.locator()))
                 .or_insert_with(|| entry.id.clone());
+            match &entry.item {
+                Item::McpServer(server) if server.enabled == Some(false) => {
+                    disabled_servers.insert((source.path.clone(), entry.item.locator()));
+                }
+                Item::Setting(setting)
+                    if setting.key_path.ends_with("disabledMcpjsonServers")
+                        && source.agent == Agent::ClaudeCode =>
+                {
+                    if let (
+                        RedactedValue::List { values },
+                        Scope::Project { root } | Scope::Local { root },
+                    ) = (&setting.value, &source.scope)
+                    {
+                        disabled_mcpjson
+                            .entry(root.clone())
+                            .or_default()
+                            .extend(values.iter().cloned());
+                    }
+                }
+                _ => {}
+            }
             match &source.scope {
                 Scope::Project { root } | Scope::Local { root }
                     if source.agent != Agent::Shared =>
@@ -114,6 +146,23 @@ impl<'a> Analysis<'a> {
                 _ => {}
             }
         }
+        // A project `.mcp.json` server the user switched off.
+        for entry in &scanned.inventory.items {
+            let source = entry.source();
+            let Item::McpServer(server) = &entry.item else {
+                continue;
+            };
+            let Scope::Project { root } = &source.scope else {
+                continue;
+            };
+            if source.kind == ArtifactKind::McpConfig
+                && disabled_mcpjson
+                    .get(root)
+                    .is_some_and(|names| names.contains(&server.name))
+            {
+                disabled_servers.insert((source.path.clone(), entry.item.locator()));
+            }
+        }
         Self {
             scanned,
             home,
@@ -121,6 +170,7 @@ impl<'a> Analysis<'a> {
             claude_subscription: claude_subscription_flag && claude_billing_account,
             project_agents,
             item_index,
+            disabled_servers,
         }
     }
 
@@ -134,33 +184,35 @@ impl<'a> Analysis<'a> {
         }
     }
 
-    /// The inventory entries rules may report on.
+    /// Whether a server is switched off (policy 4).
+    #[must_use]
+    pub fn server_disabled(&self, path: &Path, locator: &str) -> bool {
+        self.disabled_servers
+            .contains(&(path.to_path_buf(), locator.to_owned()))
+    }
+
+    /// The inventory entries rules may report on: not in a disabled plugin,
+    /// not a disabled server.
     pub fn entries(&self) -> impl Iterator<Item = &'a ItemEntry> + '_ {
-        self.scanned
-            .inventory
-            .items
-            .iter()
-            .filter(move |e| self.active(e.source()))
+        self.scanned.inventory.items.iter().filter(move |e| {
+            self.active(e.source()) && !self.server_disabled(&e.source().path, &e.item.locator())
+        })
     }
 
     /// The observations rules may report on.
     pub fn observations(&self) -> impl Iterator<Item = &'a Observation> + '_ {
-        self.scanned
-            .observations
-            .iter()
-            .filter(move |o| self.active(&o.source))
+        self.scanned.observations.iter().filter(move |o| {
+            self.active(&o.source)
+                && !locator_text(&o.locator)
+                    .is_some_and(|loc| self.server_disabled(&o.source.path, &loc))
+        })
     }
 
     /// The id of the item an observation belongs to.
     #[must_use]
     pub fn item_of(&self, observation: &Observation) -> Vec<String> {
-        let locator = match &observation.locator {
-            Locator::McpServer { name } => format!("mcp:{name}"),
-            Locator::Hook { event, matcher } => {
-                format!("hook:{event}:{}", matcher.as_deref().unwrap_or_default())
-            }
-            Locator::Setting { key_path } => format!("setting:{key_path}"),
-            Locator::None => return Vec::new(),
+        let Some(locator) = locator_text(&observation.locator) else {
+            return Vec::new();
         };
         self.item_index
             .get(&(observation.source.path.clone(), locator))
@@ -197,6 +249,16 @@ impl<'a> Analysis<'a> {
     #[must_use]
     pub fn relative(&self, path: &Path) -> String {
         self.home.relative(path)
+    }
+}
+
+/// The item locator an observation points at, in [`Item::locator`] form.
+fn locator_text(locator: &Locator) -> Option<String> {
+    match locator {
+        Locator::McpServer { key_path } => Some(format!("mcp:{key_path}")),
+        Locator::Hook { key_path } => Some(format!("hook:{key_path}")),
+        Locator::Setting { key_path } => Some(format!("setting:{key_path}")),
+        Locator::None => None,
     }
 }
 

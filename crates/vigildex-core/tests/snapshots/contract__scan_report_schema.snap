@@ -1187,10 +1187,6 @@ expression: schema
             "null"
           ]
         },
-        "id": {
-          "description": "The identifier as the agent writes it (`name@marketplace`).",
-          "type": "string"
-        },
         "install_path": {
           "description": "The install folder, as located under the scanned home.",
           "type": "string"
@@ -1224,6 +1220,10 @@ expression: schema
           "description": "The plugin name.",
           "type": "string"
         },
+        "plugin_id": {
+          "description": "The identifier as the agent writes it (`name@marketplace`). Serialised\nas `plugin_id`: `id` is the entry's stable identifier.",
+          "type": "string"
+        },
         "source": {
           "description": "Where the plugin was read from (the install registry).",
           "$ref": "#/$defs/ArtifactRef"
@@ -1237,7 +1237,7 @@ expression: schema
         }
       },
       "required": [
-        "id",
+        "plugin_id",
         "name",
         "install_path",
         "installed",

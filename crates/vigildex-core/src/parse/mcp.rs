@@ -69,17 +69,17 @@ pub fn parse_server(
 /// Runs the secret rules over every value a server definition can carry.
 fn observe_values(name: &str, cfg: &Value, ctx: &Context<'_>, observations: &mut Vec<Observation>) {
     let locator = Locator::McpServer {
-        name: name.to_owned(),
+        key_path: ctx.key_path(&[name]),
     };
-    let mut record = |segments: &[&str], field: Field, var: Option<&str>, value: &str| {
-        observations.push(observe(
+    let record = |segments: &[&str], field: Field, var: Option<&str>, value: &str| {
+        observe(
             ctx.source,
             ctx.location(segments),
             field,
             var,
             locator.clone(),
             value,
-        ));
+        )
     };
     for (key, field) in [
         ("env", Field::McpEnv),
@@ -89,28 +89,42 @@ fn observe_values(name: &str, cfg: &Value, ctx: &Context<'_>, observations: &mut
         if let Some(map) = cfg.get(key).and_then(Value::as_object) {
             for (var, value) in map {
                 if let Some(text) = value.as_str() {
-                    record(&[name, key, var], field, Some(var), text);
+                    observations.push(record(&[name, key, var], field, Some(var), text));
                 }
             }
         }
     }
     if let Some(args) = cfg.get("args").and_then(Value::as_array) {
+        let before = observations.len();
         for (index, arg) in args.iter().enumerate() {
             if let Some(text) = arg.as_str() {
                 let index = index.to_string();
-                record(&[name, "args", &index], Field::McpArg, None, text);
+                observations.push(record(&[name, "args", &index], Field::McpArg, None, text));
+            }
+        }
+        // `--api-key X`, `--token=…` and an inline `sh -c "TOKEN=… npx …"`
+        // body only show up when the arguments are read as one command
+        // line; one more observation covers them when no single argument
+        // was a hit of its own.
+        let per_arg_hit = observations[before..].iter().any(|o| o.secret.is_some());
+        let joined: Vec<&str> = args.iter().filter_map(Value::as_str).collect();
+        if !per_arg_hit && !joined.is_empty() {
+            let joined = joined.join(" ");
+            let obs = record(&[name, "args"], Field::McpCommand, None, &joined);
+            if obs.secret.is_some() {
+                observations.push(obs);
             }
         }
     }
     if let Some(url) = str_at(cfg, "url") {
-        record(&[name, "url"], Field::McpUrl, None, url);
+        observations.push(record(&[name, "url"], Field::McpUrl, None, url));
     }
     if let Some(command) = str_at(cfg, "command") {
-        record(&[name, "command"], Field::McpCommand, None, command);
+        observations.push(record(&[name, "command"], Field::McpCommand, None, command));
     }
     for key in ["headersHelper", "http_headers_helper"] {
         if let Some(command) = str_at(cfg, key) {
-            record(&[name, key], Field::McpCommand, None, command);
+            observations.push(record(&[name, key], Field::McpCommand, None, command));
         }
     }
 }
@@ -246,6 +260,12 @@ mod tests {
         );
         // env ×2, args ×2, command: the token is the only hit.
         assert_eq!(observations.len(), 5);
+        assert_eq!(
+            observations[0].locator,
+            Locator::McpServer {
+                key_path: "mcpServers.lint-helper".into()
+            }
+        );
         let hits: Vec<&Observation> = observations.iter().filter(|o| o.secret.is_some()).collect();
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].field, Field::McpEnv);
@@ -330,6 +350,31 @@ mod tests {
         assert_eq!(server_map(&bare).unwrap().1, None);
         assert!(server_map(&settings).is_none());
         assert!(server_map(&json!({})).is_none());
+    }
+
+    #[test]
+    fn credential_flags_and_inline_bodies_in_args_are_found() {
+        let source = src();
+        let cfg = json!({"command": "server", "args": ["--api-key", "adk_FAKEFAKEFAKEFAKEFAKEFAKEFAKE", "--port", "1"]});
+        let mut observations = Vec::new();
+        let server = parse_server("flag", &cfg, &ctx(&source), &mut observations);
+        let hits: Vec<&Observation> = observations.iter().filter(|o| o.secret.is_some()).collect();
+        assert_eq!(hits.len(), 1);
+        assert_eq!(
+            hits[0].location.key_path.as_deref(),
+            Some("mcpServers.flag.args")
+        );
+        assert_eq!(hits[0].secret.as_ref().unwrap().kind, "API key");
+        let text = serde_json::to_string(&server).unwrap();
+        assert!(!text.contains("adk_FAKE"), "{text}");
+
+        let cfg =
+            json!({"command": "sh", "args": ["-c", "API_TOKEN=acme_FAKEFAKEFAKEFAKEFAKE npx x"]});
+        let mut observations = Vec::new();
+        let server = parse_server("inline", &cfg, &ctx(&source), &mut observations);
+        assert!(observations.iter().any(|o| o.secret.is_some()));
+        let text = serde_json::to_string(&server).unwrap();
+        assert!(!text.contains("acme_FAKE"), "{text}");
     }
 
     #[test]

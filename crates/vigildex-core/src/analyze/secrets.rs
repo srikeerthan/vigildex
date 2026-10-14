@@ -39,6 +39,7 @@ pub fn run(analysis: &Analysis<'_>, out: &mut Vec<Candidate>) {
         };
         out.push(Candidate {
             rule: id,
+            kind: observation.source.kind,
             severity: text.severity,
             title: format!("{} {place}", hit.kind),
             why: text.why.to_owned(),
@@ -83,6 +84,7 @@ fn credential_files(analysis: &Analysis<'_>, out: &mut Vec<Candidate>) {
         let mode = credential.mode.clone().unwrap_or_default();
         out.push(Candidate {
             rule: "SEC-006",
+            kind: entry.source().kind,
             severity: text.severity,
             title: "Credential file readable by others".to_owned(),
             why: text.why.to_owned(),

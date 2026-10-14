@@ -81,7 +81,9 @@
     "/Users/you/proj/acme-api": {
       "mcpServers": {},
       "enabledMcpjsonServers": [],
-      "disabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [
+        "legacy"
+      ],
       "hasTrustDialogAccepted": true
     },
     "/Users/you/proj/dotfiles-sync": {

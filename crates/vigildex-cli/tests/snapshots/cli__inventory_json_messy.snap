@@ -23,7 +23,7 @@ expression: redact(&text)
     "relocations": {},
     "items": [
       {
-        "id": "b1bd58aeb1efa1e5",
+        "id": "11eb87a1968c8826",
         "identity": "22cd1fe7874bd169",
         "tags": [],
         "type": "mcp_server",
@@ -52,7 +52,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "77d18f206cd96149",
+        "id": "996bd29bfff24966",
         "identity": "030404d75866e01b",
         "tags": [],
         "type": "mcp_server",
@@ -82,7 +82,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "679563aca0569ede",
+        "id": "7605a0a28df21789",
         "identity": "9e038ca1fd3dcf0b",
         "tags": [],
         "type": "mcp_server",
@@ -115,7 +115,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "8fc6e5df9ace338c",
+        "id": "87d02606ddd17318",
         "identity": "66268edfe1efd72d",
         "tags": [],
         "type": "mcp_server",
@@ -146,7 +146,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "785171efac47c488",
+        "id": "a1d331f71ffb7b77",
         "identity": "e09edc48a3112457",
         "tags": [],
         "type": "mcp_server",
@@ -176,7 +176,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "2c8b8b7807b555ec",
+        "id": "1f94120e8b5f150b",
         "identity": "f36e03076265a198",
         "tags": [],
         "type": "mcp_server",
@@ -214,7 +214,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "6b25ccf93b985b58",
+        "id": "2c7a14282ac68b42",
         "identity": "2465172802a172df",
         "tags": [],
         "type": "mcp_server",
@@ -247,7 +247,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "9651555c6e63b51f",
+        "id": "ab5c8f849653f581",
         "identity": "8dcc6eb3031237f7",
         "tags": [],
         "type": "hook",
@@ -276,7 +276,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "18da93374db92feb",
+        "id": "1a2b9bcd1c12eff4",
         "identity": "93df3707e0fadb08",
         "tags": [],
         "type": "hook",
@@ -303,7 +303,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "339bb462873504e0",
+        "id": "2f83b05eb9fdb53c",
         "identity": "b607c967a63e2b84",
         "tags": [],
         "type": "hook",
@@ -328,7 +328,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "cde30a71b9b8d13f",
+        "id": "e7134cc85d0cb4d9",
         "identity": "1bf6de511a701ddb",
         "tags": [],
         "type": "hook",
@@ -353,7 +353,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "0cf507006001b602",
+        "id": "2a1e5df8329f1f8f",
         "identity": "fa4e9cd25000cb02",
         "tags": [],
         "type": "hook",
@@ -378,7 +378,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "55bc363ddb6da7d5",
+        "id": "a7b34370af2b9f49",
         "identity": "7d98e203607502ea",
         "tags": [],
         "type": "hook",
@@ -403,15 +403,15 @@ expression: redact(&text)
         }
       },
       {
-        "id": "d9774da7087433b3",
-        "identity": "dda53d31296cf782",
+        "id": "64ca07eec9181a0a",
+        "identity": "daa242f83db1ab52",
         "tags": [],
         "type": "hook",
         "event": "Stop",
         "matcher": null,
         "handler": {
           "kind": "command",
-          "command": "ACME_TOKEN=acme_••••AKE ./notify.sh",
+          "command": "ACME_TOKEN=••••AKE ./notify.sh",
           "args": [],
           "timeout_secs": null,
           "async": false
@@ -492,7 +492,7 @@ expression: redact(&text)
           "plugin_bin"
         ],
         "type": "plugin",
-        "id": "acme-deploy@acme-tools",
+        "plugin_id": "acme-deploy@acme-tools",
         "name": "acme-deploy",
         "marketplace": "acme-tools",
         "marketplace_source": "github:acme-corp/claude-plugins",
@@ -694,7 +694,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "9995e641cee9ddd6",
+        "id": "34db7bf31cfae70e",
         "identity": "4aa1ca5ad0fea1ca",
         "tags": [],
         "type": "mcp_server",
@@ -726,7 +726,41 @@ expression: redact(&text)
         }
       },
       {
-        "id": "340112704c3eb103",
+        "id": "0644e2341a33c9f3",
+        "identity": "ae798b50b4eb915b",
+        "tags": [],
+        "type": "mcp_server",
+        "name": "legacy",
+        "launch": {
+          "kind": "package",
+          "runner": "npx",
+          "spec": "@acme/legacy@latest",
+          "pin": "floating",
+          "args": [
+            "-y",
+            "@acme/legacy@latest"
+          ]
+        },
+        "env_keys": [
+          "LEGACY_TOKEN"
+        ],
+        "header_keys": [],
+        "env_header_keys": [],
+        "enabled": null,
+        "key_path": "mcpServers.legacy",
+        "line": null,
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "project",
+            "root": "[REPO]/fixtures/homes/messy/proj/acme-api"
+          },
+          "kind": "mcp_config",
+          "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.mcp.json"
+        }
+      },
+      {
+        "id": "822b58f4ad48c83b",
         "identity": "f6a07a9f753fbd46",
         "tags": [],
         "type": "mcp_server",
@@ -759,7 +793,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "47ce6514b95995b9",
+        "id": "77293036f6c98121",
         "identity": "6d9676340aa233d9",
         "tags": [],
         "type": "mcp_server",
@@ -792,7 +826,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "c38521e4696deca6",
+        "id": "927d68084a23253f",
         "identity": "e3c235d2b540dc23",
         "tags": [],
         "type": "mcp_server",
@@ -825,7 +859,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "8ac13d72d26c8632",
+        "id": "47d9b0f6b104d012",
         "identity": "d98d2a0a350d4555",
         "tags": [],
         "type": "mcp_server",
@@ -854,6 +888,32 @@ expression: redact(&text)
           },
           "kind": "mcp_config",
           "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.mcp.json"
+        }
+      },
+      {
+        "id": "a339b1dc7895209b",
+        "identity": "028c51e375809ec3",
+        "tags": [],
+        "type": "hook",
+        "event": "PostToolUse",
+        "matcher": "Write",
+        "handler": {
+          "kind": "command",
+          "command": "./.claude/hooks/fmt.sh",
+          "args": [],
+          "timeout_secs": null,
+          "async": false
+        },
+        "key_path": "hooks.PostToolUse[0].hooks[0]",
+        "line": null,
+        "source": {
+          "agent": "claude_code",
+          "scope": {
+            "kind": "project",
+            "root": "[REPO]/fixtures/homes/messy/proj/acme-api"
+          },
+          "kind": "settings",
+          "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.claude/settings.json"
         }
       },
       {
@@ -962,7 +1022,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "b38bc585708c54a3",
+        "id": "c63e4658c9b096fe",
         "identity": "ef3990dc0f2b373c",
         "tags": [],
         "type": "mcp_server",
@@ -991,7 +1051,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "65291e84819c3464",
+        "id": "639e08a24c522016",
         "identity": "52f185c973fdc76d",
         "tags": [],
         "type": "mcp_server",
@@ -1018,7 +1078,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "ec3f2ab50363e013",
+        "id": "1212941d2c516fbb",
         "identity": "ea2026485fd45701",
         "tags": [],
         "type": "hook",
@@ -1111,7 +1171,9 @@ expression: redact(&text)
         "key_path": "projects[\"/Users/you/proj/acme-api\"].disabledMcpjsonServers",
         "value": {
           "kind": "list",
-          "values": []
+          "values": [
+            "legacy"
+          ]
         },
         "line": null,
         "source": {
@@ -1304,7 +1366,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "1b778fbf8fbac3ca",
+        "id": "648737960e6e8c12",
         "identity": "7196834ab17042a8",
         "tags": [],
         "type": "hook",
@@ -1357,7 +1419,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "c279255636728a66",
+        "id": "9399bd1270fd0985",
         "identity": "fbbe3194e37bfccc",
         "tags": [],
         "type": "mcp_server",
@@ -1387,7 +1449,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "e9d29e79e4dd9768",
+        "id": "e2005de4de96662c",
         "identity": "4aa1ca5ad0fea1ca",
         "tags": [],
         "type": "mcp_server",
@@ -1402,7 +1464,8 @@ expression: redact(&text)
         },
         "env_keys": [],
         "header_keys": [
-          "Authorization"
+          "Authorization",
+          "X-Api-Key"
         ],
         "env_header_keys": [],
         "enabled": null,
@@ -1418,7 +1481,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "3d4d86fad6ad8577",
+        "id": "56e8f9c2c0ff2028",
         "identity": "9e038ca1fd3dcf0b",
         "tags": [],
         "type": "mcp_server",
@@ -1451,7 +1514,40 @@ expression: redact(&text)
         }
       },
       {
-        "id": "2d2c073da04f13cb",
+        "id": "c4e064873cf0a08d",
+        "identity": "6b0c886e5f013cff",
+        "tags": [],
+        "type": "mcp_server",
+        "name": "off",
+        "launch": {
+          "kind": "package",
+          "runner": "npx",
+          "spec": "@acme/off@latest",
+          "pin": "floating",
+          "args": [
+            "-y",
+            "@acme/off@latest"
+          ]
+        },
+        "env_keys": [
+          "OFF_TOKEN"
+        ],
+        "header_keys": [],
+        "env_header_keys": [],
+        "enabled": false,
+        "key_path": "mcp_servers.off",
+        "line": 49,
+        "source": {
+          "agent": "codex",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "settings",
+          "path": "[REPO]/fixtures/homes/messy/.codex/config.toml"
+        }
+      },
+      {
+        "id": "195c04d9407366b0",
         "identity": "6671d862eb8b648f",
         "tags": [],
         "type": "mcp_server",
@@ -1481,7 +1577,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "0cef227890153479",
+        "id": "83837103f536e929",
         "identity": "94e24f3572eb7a2d",
         "tags": [],
         "type": "hook",
@@ -2216,8 +2312,8 @@ expression: redact(&text)
         },
         "kind": "app_state",
         "path": "[REPO]/fixtures/homes/messy/.claude.json",
-        "bytes": 2417,
-        "sha256": "49549a19efb407e0a7cdc92b5001eaa0957a37f2275613ac204b3b088376f72b"
+        "bytes": 2441,
+        "sha256": "dc58d38855c01e51aa76192029442251f444e4455a8f1de5b14e06807adf312d"
       },
       {
         "agent": "codex",
@@ -2226,8 +2322,8 @@ expression: redact(&text)
         },
         "kind": "settings",
         "path": "[REPO]/fixtures/homes/messy/.codex/config.toml",
-        "bytes": 1297,
-        "sha256": "04ffcebcb1cab2e711ad394c222c3c0d62dc11db58ab4209fd1d67f92381e1d1"
+        "bytes": 1601,
+        "sha256": "40898cf2044a852e6acc65babe5386d1e5bec7f129eafa9fece4970536b0a312"
       },
       {
         "agent": "codex",
@@ -2257,8 +2353,8 @@ expression: redact(&text)
         },
         "kind": "settings",
         "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.claude/settings.json",
-        "bytes": 330,
-        "sha256": "b4c4e8e5ba01588355eff659f58b177d5a3150fb178a30c18cdb7ab32d009470"
+        "bytes": 551,
+        "sha256": "9a02c107545550f4415d80d300e6583cdf0a629e5953727615660f5a65fc6b0b"
       },
       {
         "agent": "codex",
@@ -2290,8 +2386,8 @@ expression: redact(&text)
         },
         "kind": "mcp_config",
         "path": "[REPO]/fixtures/homes/messy/proj/acme-api/.mcp.json",
-        "bytes": 1053,
-        "sha256": "6474c6da566c6aca3f25bd10a2a2d416d88fa1d1902e4d8af5f7a8affcb93a05"
+        "bytes": 1273,
+        "sha256": "ee9f808c2b4409b139baa40d6ee84e5fe09c461cc4bb922774ca8202f1676be7"
       },
       {
         "agent": "claude_code",

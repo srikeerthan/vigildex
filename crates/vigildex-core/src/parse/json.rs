@@ -2,7 +2,7 @@
 
 use serde_json::Value;
 
-use crate::launch::{mask_text, sanitize_url};
+use crate::launch::{mask_args, mask_text, sanitize_url};
 use crate::model::RedactedValue;
 
 /// The string at `key`, when the value is an object with a string there.
@@ -92,10 +92,17 @@ pub fn redact(value: &Value) -> RedactedValue {
             value: safe_text(s),
         },
         Value::Array(items) => RedactedValue::List {
-            values: items
-                .iter()
-                .map(|v| scalar_text(v).map_or_else(|| "<object>".to_owned(), |t| safe_text(&t)))
-                .collect(),
+            // A list may be a command line (`notify = ["script", "--token", …]`):
+            // mask it as one, then sanitise each URL.
+            values: mask_args(
+                &items
+                    .iter()
+                    .map(|v| scalar_text(v).unwrap_or_else(|| "<object>".to_owned()))
+                    .collect::<Vec<_>>(),
+            )
+            .iter()
+            .map(|t| sanitize_url(t))
+            .collect(),
         },
         Value::Object(map) => RedactedValue::Keys {
             keys: map.keys().cloned().collect(),
@@ -192,7 +199,7 @@ mod tests {
         assert_eq!(
             redact(&json!("sh -c 'API_TOKEN=acme_FAKEFAKEFAKEFAKE echo'")),
             RedactedValue::Text {
-                value: "sh -c 'API_TOKEN=acme_••••AKE echo'".into()
+                value: "sh -c 'API_TOKEN=••••AKE echo'".into()
             }
         );
     }

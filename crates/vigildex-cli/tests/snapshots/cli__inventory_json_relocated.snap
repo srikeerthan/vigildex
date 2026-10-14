@@ -23,7 +23,7 @@ expression: redact(&text)
     },
     "items": [
       {
-        "id": "07b4ea24586409d1",
+        "id": "661b86f1da69115f",
         "identity": "1a071e0db202afe1",
         "tags": [],
         "type": "mcp_server",
@@ -137,7 +137,7 @@ expression: redact(&text)
         }
       },
       {
-        "id": "e825d34b40c208cb",
+        "id": "08683b157681aca9",
         "identity": "6c06607ef9d7ff30",
         "tags": [],
         "type": "mcp_server",

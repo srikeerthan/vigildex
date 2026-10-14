@@ -23,7 +23,7 @@ expression: "redact_temp(&text, &home)"
     "relocations": {},
     "items": [
       {
-        "id": "ffdfa70ffde8ea73",
+        "id": "dd79a6a6d8c0ceeb",
         "identity": "d16a8e38a4ae106e",
         "tags": [],
         "type": "mcp_server",
@@ -52,7 +52,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "679563aca0569ede",
+        "id": "7605a0a28df21789",
         "identity": "9e038ca1fd3dcf0b",
         "tags": [],
         "type": "mcp_server",
@@ -86,7 +86,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "7a1a63d2a4d13582",
+        "id": "153ddad71d3fbd19",
         "identity": "40af27189bb9c03a",
         "tags": [],
         "type": "mcp_server",
@@ -117,7 +117,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "be8050901b03d306",
+        "id": "32447bff38bdae74",
         "identity": "90badc209798d262",
         "tags": [],
         "type": "hook",
@@ -146,7 +146,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "27c139de8ff08a0d",
+        "id": "90398180974d1d5d",
         "identity": "a18c1a7c3d934674",
         "tags": [
           "package_runner"
@@ -173,7 +173,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "b9f66f6f0699319e",
+        "id": "ab09e84dbd8c53ee",
         "identity": "f15ef6374290fb1f",
         "tags": [],
         "type": "hook",
@@ -198,7 +198,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "1223e078f91fe4d2",
+        "id": "f27ed3a15818bef9",
         "identity": "e924b01181fafad9",
         "tags": [],
         "type": "hook",
@@ -349,7 +349,7 @@ expression: "redact_temp(&text, &home)"
           "plugin_bin"
         ],
         "type": "plugin",
-        "id": "acme-deploy@acme-tools",
+        "plugin_id": "acme-deploy@acme-tools",
         "name": "acme-deploy",
         "marketplace": "acme-tools",
         "marketplace_source": "github:acme-corp/claude-plugins",
@@ -379,7 +379,7 @@ expression: "redact_temp(&text, &home)"
         "identity": "5b0cc23b0fc95db6",
         "tags": [],
         "type": "plugin",
-        "id": "context7@claude-plugins-official",
+        "plugin_id": "context7@claude-plugins-official",
         "name": "context7",
         "marketplace": "claude-plugins-official",
         "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -405,7 +405,7 @@ expression: "redact_temp(&text, &home)"
         "identity": "3a0e8814405c8c23",
         "tags": [],
         "type": "plugin",
-        "id": "explanatory-output-style@claude-plugins-official",
+        "plugin_id": "explanatory-output-style@claude-plugins-official",
         "name": "explanatory-output-style",
         "marketplace": "claude-plugins-official",
         "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -431,7 +431,7 @@ expression: "redact_temp(&text, &home)"
         "identity": "e8e2748dde6dfa4a",
         "tags": [],
         "type": "plugin",
-        "id": "superpowers@claude-plugins-official",
+        "plugin_id": "superpowers@claude-plugins-official",
         "name": "superpowers",
         "marketplace": "claude-plugins-official",
         "marketplace_source": "github:anthropics/claude-plugins-official",
@@ -776,7 +776,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "b5aebe420ce75a95",
+        "id": "535b77549c12981c",
         "identity": "d7588bbe738d9446",
         "tags": [],
         "type": "mcp_server",
@@ -807,7 +807,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "9995e641cee9ddd6",
+        "id": "34db7bf31cfae70e",
         "identity": "4aa1ca5ad0fea1ca",
         "tags": [],
         "type": "mcp_server",
@@ -839,7 +839,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "340112704c3eb103",
+        "id": "822b58f4ad48c83b",
         "identity": "f6a07a9f753fbd46",
         "tags": [],
         "type": "mcp_server",
@@ -872,7 +872,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "211721f97ee4ddd7",
+        "id": "cb82c97153244159",
         "identity": "3da6e1b2a7139ee1",
         "tags": [],
         "type": "hook",
@@ -898,7 +898,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "b74faccd664973af",
+        "id": "e6c4906b92870715",
         "identity": "3824a5b811b8d40f",
         "tags": [],
         "type": "hook",
@@ -1104,7 +1104,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "ec3f2ab50363e013",
+        "id": "1212941d2c516fbb",
         "identity": "ea2026485fd45701",
         "tags": [],
         "type": "hook",
@@ -1232,7 +1232,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "380f9754366b6eb3",
+        "id": "c7d30986afea7706",
         "identity": "abb7158fb7534c16",
         "tags": [],
         "type": "mcp_server",
@@ -1534,7 +1534,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "1b778fbf8fbac3ca",
+        "id": "648737960e6e8c12",
         "identity": "7196834ab17042a8",
         "tags": [],
         "type": "hook",
@@ -1587,7 +1587,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "17a49ea7ebd93596",
+        "id": "0fb2917d87c129c8",
         "identity": "d16a8e38a4ae106e",
         "tags": [],
         "type": "mcp_server",
@@ -1617,7 +1617,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "5b6f88e9bd9a0621",
+        "id": "192b505a4ce84dec",
         "identity": "202ae011d3b31bf7",
         "tags": [],
         "type": "hook",
@@ -1643,7 +1643,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "c279255636728a66",
+        "id": "9399bd1270fd0985",
         "identity": "fbbe3194e37bfccc",
         "tags": [],
         "type": "mcp_server",
@@ -1673,7 +1673,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "e9d29e79e4dd9768",
+        "id": "e2005de4de96662c",
         "identity": "4aa1ca5ad0fea1ca",
         "tags": [],
         "type": "mcp_server",
@@ -1703,7 +1703,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "9e172cf4d3a79dcb",
+        "id": "feb4cecfe1ff5264",
         "identity": "11139cc047660ebc",
         "tags": [],
         "type": "hook",
@@ -1728,7 +1728,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "c6142f63e199d0b2",
+        "id": "6a4de8cd3a9cd87a",
         "identity": "96c8ff6c0744e562",
         "tags": [],
         "type": "hook",
@@ -1753,7 +1753,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "a3ec575e0fc459fd",
+        "id": "280480a95ad71a49",
         "identity": "8532d91c51fbbff8",
         "tags": [],
         "type": "hook",
@@ -2072,7 +2072,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "61ba799506ff7992",
+        "id": "c97100ce3c218ca6",
         "identity": "cb3b049d1faf1a94",
         "tags": [],
         "type": "mcp_server",
@@ -2103,7 +2103,7 @@ expression: "redact_temp(&text, &home)"
         }
       },
       {
-        "id": "f623d284ce4b05bc",
+        "id": "b48448087ee043b5",
         "identity": "ba838895535ea890",
         "tags": [],
         "type": "hook",
@@ -2822,7 +2822,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "ec3f2ab50363e013"
+        "1212941d2c516fbb"
       ],
       "tags": []
     },
@@ -2882,7 +2882,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "340112704c3eb103"
+        "822b58f4ad48c83b"
       ],
       "tags": []
     },
@@ -2972,7 +2972,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "679563aca0569ede"
+        "7605a0a28df21789"
       ],
       "tags": []
     },

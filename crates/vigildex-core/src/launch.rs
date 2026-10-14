@@ -229,6 +229,8 @@ pub fn is_interpreter(base_name: &str) -> bool {
 pub fn classify(command: &str, args: &[String]) -> Launch {
     let base = base_name(command);
     let args: Vec<String> = mask_args(args);
+    // A command written as one string can carry a credential too.
+    let command = &mask_text(command);
 
     for rule in RUNNERS {
         if rule.command != base {
@@ -471,15 +473,16 @@ pub fn mask_secret_short(value: &str) -> String {
 #[must_use]
 pub fn mask_args(args: &[String]) -> Vec<String> {
     let mut out = Vec::with_capacity(args.len());
-    let mut mask_next = false;
+    let mut mask_next: Option<&str> = None;
     for arg in args {
-        if mask_next {
-            out.push(mask_secret(arg));
-            mask_next = false;
-            continue;
+        if let Some(flag) = mask_next.take() {
+            if !arg.starts_with('-') && !is_reference(arg) {
+                out.push(mask_value(flag, arg));
+                continue;
+            }
         }
         if arg.starts_with('-') && !arg.contains('=') && names_a_credential(arg) {
-            mask_next = true;
+            mask_next = Some(arg);
             out.push(arg.clone());
             continue;
         }
@@ -488,31 +491,62 @@ pub fn mask_args(args: &[String]) -> Vec<String> {
     out
 }
 
+/// The mask for a value named by `name` (a flag or variable): nothing for a
+/// password, the last three characters for anything else. Vendor tokens are
+/// masked by the secret rules before this runs.
+fn mask_value(name: &str, value: &str) -> String {
+    // Already masked by a secret rule (`ghp_••••f9a`): keep the vendor mask.
+    if value.contains("••••") {
+        return value.to_owned();
+    }
+    let lower = name.to_ascii_lowercase();
+    if lower.contains("pass") || lower.contains("pwd") {
+        "••••".to_owned()
+    } else {
+        mask_secret_short(value)
+    }
+}
+
 /// Masks the credentials inside one string: every token a vendor or URL
 /// secret rule recognises, URL passwords, and `NAME=value` words whose name
 /// says it is a credential.
 #[must_use]
 pub fn mask_text(text: &str) -> String {
     let text = crate::secrets::mask_in_text(text);
-    if !text.contains("://") && !text.contains('=') {
+    if !text.contains("://") && !text.contains('=') && !text.contains('-') {
         return text;
     }
-    let mut changed = false;
-    let words: Vec<String> = text
-        .split(' ')
-        .map(|word| {
-            let masked = mask_word(word);
-            if masked != word {
-                changed = true;
+    // Words and the whitespace between them, kept as written.
+    let mut out = String::with_capacity(text.len());
+    let mut pending_flag: Option<String> = None;
+    let mut rest = text.as_str();
+    while !rest.is_empty() {
+        let word_end = rest.find(char::is_whitespace).unwrap_or(rest.len());
+        let (word, after) = rest.split_at(word_end);
+        let space_end = after
+            .find(|c: char| !c.is_whitespace())
+            .unwrap_or(after.len());
+        let (space, tail) = after.split_at(space_end);
+        if word.is_empty() {
+            out.push_str(space);
+            rest = tail;
+            continue;
+        }
+        let bare = word.trim_matches(['"', '\'']);
+        let masked = match pending_flag.take() {
+            Some(flag) if !bare.starts_with('-') && !is_reference(bare) && !bare.is_empty() => {
+                word.replacen(bare, &mask_value(&flag, bare), 1)
             }
-            masked
-        })
-        .collect();
-    if changed {
-        words.join(" ")
-    } else {
-        text
+            _ => mask_word(word),
+        };
+        if bare.starts_with('-') && !bare.contains('=') && names_a_credential(bare) {
+            pending_flag = Some(bare.to_owned());
+        }
+        out.push_str(&masked);
+        out.push_str(space);
+        rest = tail;
     }
+    out
 }
 
 /// Masks one whitespace-separated word, looking through a surrounding
@@ -549,7 +583,7 @@ fn mask_bare_word(word: &str) -> String {
             return format!(
                 "{}={}",
                 &word[..word.len() - value.len() - 1],
-                mask_secret(value)
+                mask_value(name, value)
             );
         }
     }
@@ -588,7 +622,14 @@ fn c_len(text: &str, i: usize) -> usize {
 /// Where a URL that starts at `from` ends: the first whitespace, quote or
 /// closing brace/bracket/parenthesis, so a URL inside `${X:-…}` or `"…"`
 /// keeps the wrapper.
-fn url_end(text: &str, from: usize) -> usize {
+fn url_end(text: &str, scheme_start: usize, from: usize) -> usize {
+    // A URL that is the whole text ends at its end: a password may hold
+    // `)` or `'`. One embedded in other text (`${X:-https://…}`, `"…"`)
+    // ends at the first whitespace, quote or closing bracket, so the
+    // wrapper is kept.
+    if scheme_start == 0 && !text.contains(char::is_whitespace) {
+        return text.len();
+    }
     text[from..]
         .find(|c: char| c.is_whitespace() || matches!(c, '"' | '\'' | '}' | ')' | ']' | '`' | '>'))
         .map_or(text.len(), |i| from + i)
@@ -598,7 +639,7 @@ fn url_end(text: &str, from: usize) -> usize {
 /// URL may be embedded in other text.
 pub(crate) fn mask_url_password(word: &str) -> Option<String> {
     let (scheme_start, sep) = url_start(word)?;
-    let end = url_end(word, sep + 3);
+    let end = url_end(word, scheme_start, sep + 3);
     let rest = &word[sep + 3..end];
     let authority_end = rest.find(['/', '?', '#']).unwrap_or(rest.len());
     let authority = &rest[..authority_end];
@@ -620,10 +661,10 @@ pub(crate) fn mask_url_password(word: &str) -> Option<String> {
 /// as written. Not a URL: returned unchanged.
 #[must_use]
 pub(crate) fn strip_query(url: &str) -> String {
-    let Some((_, sep)) = url_start(url) else {
+    let Some((scheme_start, sep)) = url_start(url) else {
         return url.to_owned();
     };
-    let end = url_end(url, sep + 3);
+    let end = url_end(url, scheme_start, sep + 3);
     let rest = &url[sep + 3..end];
     let cut = rest.find(['?', '#']).map_or(end, |i| sep + 3 + i);
     format!("{}{}", &url[..cut], &url[end..])
@@ -639,7 +680,7 @@ pub fn sanitize_url(url: &str) -> String {
     let Some((scheme_start, sep)) = url_start(url) else {
         return url.to_owned();
     };
-    let end = url_end(url, sep + 3);
+    let end = url_end(url, scheme_start, sep + 3);
     let rest = &url[sep + 3..end];
     let authority_end = rest.find(['/', '?', '#']).unwrap_or(rest.len());
     let authority = &rest[..authority_end];
@@ -832,10 +873,14 @@ mod tests {
 
     #[test]
     fn credential_flags_are_masked_with_and_without_equals() {
+        // A recognised vendor token keeps its prefix; a value of unknown
+        // shape (here a 28-character `ghp_` that is not a GitHub token, and
+        // a short `sk-proj-`) keeps only its last three characters.
         let masked = mask_args(&args(&[
-            "--token=ghp_FAKEFAKEFAKEFAKEFAKEFAKE3f9a",
+            "--token=ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a",
             "--api-key",
             "sk-proj-FAKEFAKEFAKEFAKEFAKE123",
+            "--token=ghp_FAKEFAKEFAKEFAKEFAKEFAKE3f9a",
             "--port=8080",
         ]));
         assert_eq!(
@@ -843,8 +888,28 @@ mod tests {
             args(&[
                 "--token=ghp_••••f9a",
                 "--api-key",
-                "sk-proj-••••123",
+                "••••123",
+                "--token=••••f9a",
                 "--port=8080"
+            ])
+        );
+        // Unknown shapes keep the last three characters; passwords nothing.
+        assert_eq!(
+            mask_args(&args(&[
+                "--token",
+                "LEAK30-LEAK30-x",
+                "--password",
+                "hunter2-rocks!",
+                "--token",
+                "${T}"
+            ])),
+            args(&[
+                "--token",
+                "••••0-x",
+                "--password",
+                "••••",
+                "--token",
+                "${T}"
             ])
         );
     }
@@ -852,8 +917,13 @@ mod tests {
     #[test]
     fn inline_assignments_are_masked_but_references_are_kept() {
         assert_eq!(
-            mask_text("GITHUB_TOKEN=ghp_FAKEFAKEFAKEFAKEFAKEFAKE3f9a npx server"),
+            mask_text("GITHUB_TOKEN=ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a npx server"),
             "GITHUB_TOKEN=ghp_••••f9a npx server"
+        );
+        assert_eq!(
+            mask_text("GITHUB_TOKEN=ghp_FAKEFAKEFAKEFAKEFAKEFAKE3f9a npx server"),
+            "GITHUB_TOKEN=••••f9a npx server",
+            "not a GitHub token shape: no prefix is kept"
         );
         assert_eq!(
             mask_text("GITHUB_TOKEN=${GITHUB_TOKEN} npx server"),
@@ -865,9 +935,31 @@ mod tests {
         );
         assert_eq!(
             mask_text("sh -c 'API_TOKEN=acme_FAKEFAKEFAKEFAKE npx x'"),
-            "sh -c 'API_TOKEN=acme_••••AKE npx x'"
+            "sh -c 'API_TOKEN=••••AKE npx x'"
         );
-        assert_eq!(mask_text("--token 'abc'"), "--token 'abc'");
+        assert_eq!(
+            mask_text("--token 'abc'"),
+            "--token '••••'",
+            "a short value named by a credential flag is masked whole"
+        );
+        // Flags with a separate value, across any whitespace, and in-place
+        // formatting that keeps newlines and tabs.
+        assert_eq!(
+            mask_text("fetch-key --api-key adk_LEAK22LEAK22LEAK22LEAK22 --port 1"),
+            "fetch-key --api-key ••••K22 --port 1"
+        );
+        assert_eq!(
+            mask_text("cd /x\nAPI_TOKEN=acme_LEAK28LEAK28LEAK28 ./run"),
+            "cd /x\nAPI_TOKEN=••••K28 ./run"
+        );
+        assert_eq!(
+            mask_text("a\tTOKEN=LEAKTOK9LEAKTOK9 b"),
+            "a\tTOKEN=••••OK9 b"
+        );
+        assert_eq!(
+            mask_text("notify --password hunter2-LEAK11x"),
+            "notify --password ••••"
+        );
         // A bare vendor token anywhere in the text is masked too.
         assert_eq!(
             mask_text("echo sk-ant-api03-FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE7Qa"),
@@ -902,6 +994,14 @@ mod tests {
         assert_eq!(
             strip_query("${X:-https://h.example/x?token=FAKE}/y"),
             "${X:-https://h.example/x}/y"
+        );
+        assert_eq!(
+            sanitize_url("https://user:LEAK18)pw@mcp.example/x"),
+            "https://mcp.example/x"
+        );
+        assert_eq!(
+            mask_url_password("https://user:LEAK18)pw@mcp.example/x").as_deref(),
+            Some("https://user:••••@mcp.example/x")
         );
         assert_eq!(
             strip_query("https://h.example/x?token=FAKE#f"),

@@ -255,17 +255,13 @@ impl Item {
     }
 
     /// A short locator within the source file, used to link findings to
-    /// items: `mcp:<name>`, `hook:<event>:<matcher>`, `setting:<key_path>`,
+    /// items: `mcp:<key path>`, `hook:<key path>`, `setting:<key path>`,
     /// `skill:<name>`, `plugin:<id>`, `instruction`, `credential`.
     #[must_use]
     pub fn locator(&self) -> String {
         match self {
-            Self::McpServer(it) => format!("mcp:{}", it.name),
-            Self::Hook(it) => format!(
-                "hook:{}:{}",
-                it.event,
-                it.matcher.as_deref().unwrap_or_default()
-            ),
+            Self::McpServer(it) => format!("mcp:{}", it.key_path),
+            Self::Hook(it) => format!("hook:{}", it.key_path),
             Self::Skill(it) => format!("skill:{}", it.name),
             Self::Plugin(it) => format!("plugin:{}", it.id),
             Self::Instruction(_) => "instruction".to_owned(),
@@ -701,7 +697,9 @@ pub enum PluginComponent {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[non_exhaustive]
 pub struct Plugin {
-    /// The identifier as the agent writes it (`name@marketplace`).
+    /// The identifier as the agent writes it (`name@marketplace`). Serialised
+    /// as `plugin_id`: `id` is the entry's stable identifier.
+    #[serde(rename = "plugin_id")]
     pub id: String,
     /// The plugin name.
     pub name: String,

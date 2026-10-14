@@ -84,8 +84,7 @@ pub fn parse_event_map(
             };
             for (segments, handler) in handlers {
                 let locator = Locator::Hook {
-                    event: event.clone(),
-                    matcher: matcher.clone(),
+                    key_path: ctx.key_path(&segments),
                 };
                 observe_handler(handler, &segments, ctx, &locator, observations);
                 items.push(Item::Hook(Hook {
@@ -124,7 +123,14 @@ fn observe_handler(
         ));
     };
     if let Some(command) = str_at(handler, "command") {
-        record(&["command"], Field::HookCommand, None, command);
+        // Exec-form `args` are part of the command line.
+        let args = string_list_at(handler, "args");
+        if args.is_empty() {
+            record(&["command"], Field::HookCommand, None, command);
+        } else {
+            let line = format!("{command} {}", args.join(" "));
+            record(&["command"], Field::HookCommand, None, &line);
+        }
     }
     if let Some(url) = str_at(handler, "url") {
         record(&["url"], Field::HookUrl, None, url);

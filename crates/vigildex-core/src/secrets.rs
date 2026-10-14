@@ -315,17 +315,28 @@ pub fn classify(value: &str) -> ValueClass {
 /// field name.
 #[must_use]
 pub fn scan_value(name: Option<&str>, value: &str) -> Option<SecretHit> {
+    scan_value_at(name, value, 0)
+}
+
+/// How far the scanners look into nested `${…}` and `$(…)` constructs. A
+/// credential sits at most a level or two deep; the cap keeps a
+/// pathological line from costing a stack frame and a copy per level.
+const MAX_NESTING: usize = 8;
+
+fn scan_value_at(name: Option<&str>, value: &str, depth: usize) -> Option<SecretHit> {
     match classify(value) {
         ValueClass::Literal => rules()
             .rules()
             .iter()
             .filter(|rule| rule.accepts_name(name))
             .find_map(|rule| rule.apply(value)),
-        ValueClass::Reference | ValueClass::Dynamic => embedded_literals(value)
-            .into_iter()
-            .filter(|piece| piece != value)
-            .find_map(|piece| scan_value(name, &piece)),
-        ValueClass::Empty => None,
+        ValueClass::Reference | ValueClass::Dynamic if depth < MAX_NESTING => {
+            embedded_literals(value)
+                .into_iter()
+                .filter(|piece| piece != value)
+                .find_map(|piece| scan_value_at(name, &piece, depth + 1))
+        }
+        ValueClass::Reference | ValueClass::Dynamic | ValueClass::Empty => None,
     }
 }
 
@@ -352,7 +363,10 @@ pub fn embedded_literals(value: &str) -> Vec<String> {
                 }
                 j += 1;
             }
-            let inner = &value[start..j.saturating_sub(1).max(start)];
+            // The closing brace is ASCII, so `j - 1` is a char boundary
+            // when one was consumed; an unterminated `${` runs to the end.
+            let end = if depth == 0 { j - 1 } else { j };
+            let inner = &value[start..end.max(start)];
             // `NAME:-default`, `NAME:=default`, `NAME-default`, `NAME:+alt`.
             let name_end = inner
                 .find(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
@@ -384,7 +398,8 @@ pub fn embedded_literals(value: &str) -> Vec<String> {
                 }
                 j += 1;
             }
-            let body = &value[start..j.saturating_sub(1).max(start)];
+            let end = if depth == 0 { j - 1 } else { j };
+            let body = &value[start..end.max(start)];
             if !body.is_empty() {
                 pieces.push(body.to_owned());
             }
@@ -420,6 +435,10 @@ pub fn embedded_literals(value: &str) -> Vec<String> {
 /// `--flag=value` and `--flag value` word whose name says it is a credential.
 #[must_use]
 pub fn scan_text(text: &str) -> Option<SecretHit> {
+    scan_text_at(text, 0)
+}
+
+fn scan_text_at(text: &str, depth: usize) -> Option<SecretHit> {
     if let Some(hit) = rules()
         .rules()
         .iter()
@@ -428,11 +447,11 @@ pub fn scan_text(text: &str) -> Option<SecretHit> {
     {
         return Some(hit);
     }
-    if text.contains("$(") || text.contains('`') {
+    if depth < MAX_NESTING && (text.contains("$(") || text.contains('`')) {
         if let Some(hit) = embedded_literals(text)
             .into_iter()
             .filter(|piece| piece != text)
-            .find_map(|piece| scan_text(&piece))
+            .find_map(|piece| scan_text_at(&piece, depth + 1))
         {
             return Some(hit);
         }
@@ -443,7 +462,7 @@ pub fn scan_text(text: &str) -> Option<SecretHit> {
         if let Some((name, value)) = word.split_once('=') {
             let name = name.trim_start_matches('-');
             if is_identifier(name) {
-                if let Some(hit) = scan_named(name, value) {
+                if let Some(hit) = scan_named(name, value, depth) {
                     return Some(hit);
                 }
             }
@@ -453,7 +472,7 @@ pub fn scan_text(text: &str) -> Option<SecretHit> {
             let name = word.trim_start_matches('-');
             if let Some(next) = iter.peek() {
                 if is_identifier(name) && !next.starts_with('-') {
-                    if let Some(hit) = scan_named(name, next) {
+                    if let Some(hit) = scan_named(name, next, depth) {
                         return Some(hit);
                     }
                 }
@@ -464,18 +483,20 @@ pub fn scan_text(text: &str) -> Option<SecretHit> {
 }
 
 /// Name-keyed rules only, for the words of a command line.
-fn scan_named(name: &str, value: &str) -> Option<SecretHit> {
+fn scan_named(name: &str, value: &str, depth: usize) -> Option<SecretHit> {
     match classify(value) {
         ValueClass::Literal => rules()
             .rules()
             .iter()
             .filter(|rule| rule.name_keyed() && rule.accepts_name(Some(name)))
             .find_map(|rule| rule.apply(value)),
-        ValueClass::Reference | ValueClass::Dynamic => embedded_literals(value)
-            .into_iter()
-            .filter(|piece| piece != value)
-            .find_map(|piece| scan_named(name, &piece)),
-        ValueClass::Empty => None,
+        ValueClass::Reference | ValueClass::Dynamic if depth < MAX_NESTING => {
+            embedded_literals(value)
+                .into_iter()
+                .filter(|piece| piece != value)
+                .find_map(|piece| scan_named(name, &piece, depth + 1))
+        }
+        ValueClass::Reference | ValueClass::Dynamic | ValueClass::Empty => None,
     }
 }
 
@@ -593,10 +614,35 @@ mod tests {
             vec!["one", "two", "three", "four"]
         );
         assert_eq!(embedded_literals("${A:-${B:-deep}}"), vec!["${B:-deep}"]);
+        // Unterminated constructs ending in a multibyte character are a
+        // malformed line, never a panic (hard rule 7).
+        assert_eq!(embedded_literals("${é"), Vec::<String>::new());
+        assert!(scan_value(Some("X"), "${é").is_none());
+        assert!(scan_value(Some("GITHUB_TOKEN"), "$(é").is_none());
+        assert!(scan_text("echo $(é").is_none());
+        assert!(scan_text("echo `é").is_none());
+        assert_eq!(embedded_literals("${X:-é"), vec!["é"]);
+        assert_eq!(embedded_literals("$(é"), vec!["é"]);
         assert_eq!(
             scan_text(&format!("eval \"$(echo {GITHUB})\""))
                 .unwrap()
                 .kind,
+            "GitHub token"
+        );
+    }
+
+    #[test]
+    fn nesting_is_bounded_in_time_and_stack() {
+        // Pathological nesting neither overflows the stack nor takes a copy
+        // per level without end; the token is still found when it sits
+        // within the first levels.
+        let deep = format!("{}x{}", "${A:-".repeat(20_000), "}".repeat(20_000));
+        assert!(scan_value(Some("GITHUB_TOKEN"), &deep).is_none());
+        let deep = format!("echo {}x{}", "$(".repeat(20_000), ")".repeat(20_000));
+        assert!(scan_text(&deep).is_none());
+        let shallow = format!("${{A:-${{B:-${{C:-{GITHUB}}}}}}}");
+        assert_eq!(
+            scan_value(Some("GITHUB_TOKEN"), &shallow).unwrap().kind,
             "GitHub token"
         );
     }
@@ -699,6 +745,9 @@ mod tests {
         assert!(scan_value(Some("LINT_HELPER_TOKEN"), "${env:LINT_HELPER_TOKEN}").is_none());
         assert!(scan_value(Some("Authorization"), "Bearer ${GITHUB_TOKEN}").is_none());
         assert!(scan_value(Some("Authorization"), "Bearer $HOOK_TOKEN").is_none());
+        // Excluded by the reference allowlist, not by length.
+        assert!(scan_value(Some("Authorization"), "Bearer $HOOK_TOKEN_LONG_ENOUGH").is_none());
+        assert!(scan_value(Some("Authorization"), "Bearer ${HOOK_TOKEN_LONG_ENOUGH}").is_none());
         assert!(scan_value(
             Some("GITHUB_TOKEN"),
             "$(op read 'op://Private/GitHub/token')"

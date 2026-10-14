@@ -25,6 +25,8 @@ pub struct Assignment {
 #[must_use]
 pub fn assignments(text: &str) -> Vec<Assignment> {
     let mut out = Vec::new();
+    // A byte-order mark from a Windows editor would hide the first line.
+    let text = text.strip_prefix('\u{feff}').unwrap_or(text);
     for (index, raw) in text.lines().enumerate() {
         let Some(assignment) = parse_line(raw, u32::try_from(index + 1).unwrap_or(u32::MAX)) else {
             continue;
@@ -184,6 +186,17 @@ mod tests {
         assert!(!found[3].exported);
         assert_eq!(found[4].name, "PATH");
         assert_eq!(found[4].line, 9);
+    }
+
+    #[test]
+    fn a_byte_order_mark_does_not_hide_the_first_line() {
+        assert_eq!(
+            names("\u{feff}export GITHUB_TOKEN=x\nB=y\n"),
+            vec![
+                ("GITHUB_TOKEN".to_owned(), 1, true),
+                ("B".to_owned(), 2, false)
+            ]
+        );
     }
 
     #[test]

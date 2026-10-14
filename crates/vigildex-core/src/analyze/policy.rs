@@ -19,6 +19,7 @@ use super::Candidate;
 use crate::finding::{Category, Finding};
 use crate::home::HomeEnv;
 use crate::inventory::short_hash;
+use crate::model::ArtifactKind;
 use crate::observe::Location;
 
 /// Applies the policy and builds the findings.
@@ -76,13 +77,15 @@ pub fn resolve(candidates: Vec<Candidate>, home: &HomeEnv) -> Vec<Finding> {
     findings
 }
 
-/// The grouping key of policy 1: the file plus the line (when the format
-/// has lines) or the key path.
-fn location_key(location: &Location) -> (String, String) {
-    let place = match (location.line, &location.key_path) {
-        (Some(line), _) => format!("line:{line}"),
-        (None, Some(key)) => format!("key:{key}"),
-        (None, None) => String::new(),
+/// The grouping key of policy 1: the file plus the line for a profile or
+/// `.env` (one assignment per line), else the key path (an inline TOML
+/// table puts several keys on one line), else the line.
+fn location_key(kind: ArtifactKind, location: &Location) -> (String, String) {
+    let line_based = matches!(kind, ArtifactKind::ShellProfile | ArtifactKind::EnvFile);
+    let place = match (line_based, location.line, &location.key_path) {
+        (true, Some(line), _) | (false, Some(line), None) => format!("line:{line}"),
+        (_, _, Some(key)) => format!("key:{key}"),
+        (_, None, None) => String::new(),
     };
     (location.path.to_string_lossy().into_owned(), place)
 }
@@ -92,7 +95,7 @@ fn one_per_location(candidates: Vec<Candidate>) -> Vec<Candidate> {
     let mut groups: BTreeMap<(String, String), Vec<Candidate>> = BTreeMap::new();
     for candidate in candidates {
         groups
-            .entry(location_key(&candidate.location))
+            .entry(location_key(candidate.kind, &candidate.location))
             .or_default()
             .push(candidate);
     }
@@ -196,8 +199,14 @@ mod tests {
     use std::path::PathBuf;
 
     fn cand(rule: &'static str, severity: Severity, location: Location, agent: Agent) -> Candidate {
+        let kind = if location.path.to_string_lossy().ends_with(".zshrc") {
+            ArtifactKind::ShellProfile
+        } else {
+            ArtifactKind::Settings
+        };
         Candidate {
             rule,
+            kind,
             severity,
             title: rule.to_owned(),
             why: String::new(),
@@ -342,5 +351,40 @@ mod tests {
             &home(),
         );
         assert_eq!(a[0].id, b[0].id);
+    }
+
+    #[test]
+    fn keyed_formats_group_by_key_even_on_one_line() {
+        // Two headers in one inline TOML table share a line but not a key.
+        let mut a = Location::key(
+            "/h/.codex/config.toml",
+            "mcp_servers.api.http_headers.Authorization",
+        );
+        a.line = Some(31);
+        let mut b = Location::key(
+            "/h/.codex/config.toml",
+            "mcp_servers.api.http_headers.X-Api-Key",
+        );
+        b.line = Some(31);
+        let findings = resolve(
+            vec![
+                cand("SEC-001", Severity::High, a, Agent::Codex),
+                cand("SEC-001", Severity::High, b, Agent::Codex),
+            ],
+            &home(),
+        );
+        assert_eq!(findings.len(), 2);
+        // A profile exports one variable per line: the line is the location.
+        let mut c = Location::line("/h/.zshrc", 5);
+        c.key_path = Some("ANTHROPIC_AUTH_TOKEN".into());
+        let findings = resolve(
+            vec![
+                cand("BILL-002", Severity::High, c.clone(), Agent::ClaudeCode),
+                cand("SEC-004", Severity::Medium, c, Agent::Shared),
+            ],
+            &home(),
+        );
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].tags, vec!["SEC-004"]);
     }
 }

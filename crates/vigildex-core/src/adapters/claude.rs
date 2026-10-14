@@ -19,7 +19,7 @@ use crate::model::{
     Agent, ArtifactKind, ArtifactRef, Item, Plugin, PluginComponent, Scope, SkillKind,
 };
 use crate::observe::{observe, Field, Locator};
-use crate::parse::json::{join_key, str_at};
+use crate::parse::json::{join_key, safe_text, str_at};
 use crate::parse::settings::{self, KeyRule};
 use crate::parse::{hooks, mcp, Context};
 
@@ -147,14 +147,18 @@ impl ClaudeCode {
         let mut warnings = Vec::new();
         let mut observations = Vec::new();
         settings::extract(&doc, "", APP_STATE_RULES, &art, &mut items);
-        if let Some(map) = doc.get("mcpServers").and_then(Value::as_object) {
-            let ctx = Context {
-                source: &art,
-                key_prefix: "mcpServers",
-                segments: &["mcpServers"],
-                line_of: &crate::parse::no_lines,
-            };
-            mcp::parse_server_map(map, &ctx, &mut items, &mut warnings, &mut observations);
+        match doc.get("mcpServers") {
+            Some(Value::Object(map)) => {
+                let ctx = Context {
+                    source: &art,
+                    key_prefix: "mcpServers",
+                    segments: &["mcpServers"],
+                    line_of: &crate::parse::no_lines,
+                };
+                mcp::parse_server_map(map, &ctx, &mut items, &mut warnings, &mut observations);
+            }
+            Some(_) => out.warn(AGENT, path, "mcpServers is not an object; skipped"),
+            None => {}
         }
         if let Some(projects) = doc.get("projects").and_then(Value::as_object) {
             for (recorded, project) in projects {
@@ -162,15 +166,29 @@ impl ClaudeCode {
                 let local = artifact(AGENT, Scope::Local { root }, ArtifactKind::AppState, path);
                 let prefix = join_key("projects", recorded);
                 settings::extract(project, &prefix, PROJECT_STATE_RULES, &local, &mut items);
-                if let Some(map) = project.get("mcpServers").and_then(Value::as_object) {
-                    let key_prefix = join_key(&prefix, "mcpServers");
-                    let ctx = Context {
-                        source: &local,
-                        key_prefix: &key_prefix,
-                        segments: &["projects", recorded, "mcpServers"],
-                        line_of: &crate::parse::no_lines,
-                    };
-                    mcp::parse_server_map(map, &ctx, &mut items, &mut warnings, &mut observations);
+                let key_prefix = join_key(&prefix, "mcpServers");
+                match project.get("mcpServers") {
+                    Some(Value::Object(map)) => {
+                        let ctx = Context {
+                            source: &local,
+                            key_prefix: &key_prefix,
+                            segments: &["projects", recorded, "mcpServers"],
+                            line_of: &crate::parse::no_lines,
+                        };
+                        mcp::parse_server_map(
+                            map,
+                            &ctx,
+                            &mut items,
+                            &mut warnings,
+                            &mut observations,
+                        );
+                    }
+                    Some(_) => out.warn(
+                        AGENT,
+                        path,
+                        format!("{key_prefix} is not an object; skipped"),
+                    ),
+                    None => {}
                 }
             }
         }
@@ -410,7 +428,7 @@ impl ClaudeCode {
                 .or_else(|| str_at(source, "url"))
                 .or_else(|| str_at(source, "path"))
                 .unwrap_or("");
-            out_map.insert(name.clone(), format!("{kind}:{target}"));
+            out_map.insert(name.clone(), format!("{kind}:{}", safe_text(target)));
         }
         out_map
     }

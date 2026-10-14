@@ -131,7 +131,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "b38bc585708c54a3"
+        "c63e4658c9b096fe"
       ],
       "tags": []
     },
@@ -160,7 +160,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "65291e84819c3464"
+        "639e08a24c522016"
       ],
       "tags": []
     },
@@ -220,7 +220,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "679563aca0569ede"
+        "7605a0a28df21789"
       ],
       "tags": []
     },
@@ -250,7 +250,7 @@ expression: "redact_temp(&text, &home)"
         "codex"
       ],
       "items": [
-        "3d4d86fad6ad8577"
+        "56e8f9c2c0ff2028"
       ],
       "tags": []
     },
@@ -280,7 +280,37 @@ expression: "redact_temp(&text, &home)"
         "codex"
       ],
       "items": [
-        "e9d29e79e4dd9768"
+        "e2005de4de96662c"
+      ],
+      "tags": []
+    },
+    {
+      "id": "1126847433941e07",
+      "rule": "SEC-001",
+      "category": "secret",
+      "severity": "high",
+      "title": "API key in an MCP config",
+      "why": "Anyone who can read this file can use the token, and the agent starts the server with it in every session.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 31,
+        "key_path": "mcp_servers.github.http_headers.X-Api-Key"
+      },
+      "evidence": "••••AKE",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Replace the value with an environment reference, then rotate the token",
+        "steps": [
+          "Rotate the token at the provider.",
+          "Put the new token in your shell environment or a secret manager, not in the file.",
+          "Reference it from the config: `${VAR}` in Claude Code, `${env:VAR}` in Cursor, `bearer_token_env_var` or `env_http_headers` in Codex."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "e2005de4de96662c"
       ],
       "tags": []
     },
@@ -310,7 +340,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "9995e641cee9ddd6"
+        "34db7bf31cfae70e"
       ],
       "tags": []
     },
@@ -368,7 +398,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "9651555c6e63b51f"
+        "ab5c8f849653f581"
       ],
       "tags": []
     },
@@ -397,7 +427,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "18da93374db92feb"
+        "1a2b9bcd1c12eff4"
       ],
       "tags": []
     },
@@ -426,7 +456,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "d9774da7087433b3"
+        "64ca07eec9181a0a"
       ],
       "tags": []
     },
@@ -668,36 +698,6 @@ expression: "redact_temp(&text, &home)"
       "tags": []
     },
     {
-      "id": "f3ebcdcf2dbd8817",
-      "rule": "BILL-006",
-      "category": "billing",
-      "severity": "medium",
-      "title": "Custom API gateway",
-      "why": "Requests, and the API key with them, go to this host instead of the vendor.",
-      "location": {
-        "path": "[HOME]/.codex/config.toml",
-        "line": 7,
-        "key_path": "openai_base_url"
-      },
-      "evidence": "openai_base_url = \"https://llm-proxy.acme-corp.example/v1\"",
-      "fingerprint": null,
-      "fix": {
-        "summary": "Point the base URL back at the vendor unless you trust this gateway",
-        "steps": [
-          "Check who runs the host and why the base URL was set.",
-          "Remove the override, or keep it only for the shell or project that needs it.",
-          "If a repository set it, rotate the API key that was used while it applied."
-        ]
-      },
-      "agents": [
-        "codex"
-      ],
-      "items": [
-        "03e4925b20ba53e4"
-      ],
-      "tags": []
-    },
-    {
       "id": "d59c51afdd024d64",
       "rule": "BILL-006",
       "category": "billing",
@@ -752,7 +752,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "339bb462873504e0"
+        "2f83b05eb9fdb53c"
       ],
       "tags": []
     },
@@ -781,7 +781,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "0cf507006001b602"
+        "2a1e5df8329f1f8f"
       ],
       "tags": []
     },
@@ -810,7 +810,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "cde30a71b9b8d13f"
+        "e7134cc85d0cb4d9"
       ],
       "tags": []
     },
@@ -839,7 +839,7 @@ expression: "redact_temp(&text, &home)"
         "codex"
       ],
       "items": [
-        "0cef227890153479"
+        "83837103f536e929"
       ],
       "tags": []
     },
@@ -868,7 +868,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "ec3f2ab50363e013"
+        "1212941d2c516fbb"
       ],
       "tags": []
     },
@@ -897,7 +897,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "9651555c6e63b51f"
+        "ab5c8f849653f581"
       ],
       "tags": []
     },
@@ -926,7 +926,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "18da93374db92feb"
+        "1a2b9bcd1c12eff4"
       ],
       "tags": []
     },
@@ -1070,7 +1070,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "2c8b8b7807b555ec"
+        "1f94120e8b5f150b"
       ],
       "tags": [
         "RISK-001"
@@ -1102,7 +1102,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "b1bd58aeb1efa1e5"
+        "11eb87a1968c8826"
       ],
       "tags": []
     },
@@ -1132,7 +1132,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "77d18f206cd96149"
+        "996bd29bfff24966"
       ],
       "tags": []
     },
@@ -1162,7 +1162,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "340112704c3eb103"
+        "822b58f4ad48c83b"
       ],
       "tags": []
     },
@@ -1402,8 +1402,8 @@ expression: "redact_temp(&text, &home)"
         "codex"
       ],
       "items": [
-        "679563aca0569ede",
-        "3d4d86fad6ad8577"
+        "7605a0a28df21789",
+        "56e8f9c2c0ff2028"
       ],
       "tags": []
     },
@@ -1432,7 +1432,7 @@ expression: "redact_temp(&text, &home)"
         "claude_code"
       ],
       "items": [
-        "785171efac47c488"
+        "a1d331f71ffb7b77"
       ],
       "tags": []
     },
@@ -1461,7 +1461,7 @@ expression: "redact_temp(&text, &home)"
         "codex"
       ],
       "items": [
-        "c279255636728a66"
+        "9399bd1270fd0985"
       ],
       "tags": []
     },

@@ -7,5 +7,18 @@
   "permissions": {
     "defaultMode": "bypassPermissions"
   },
-  "enableAllProjectMcpServers": false
+  "enableAllProjectMcpServers": false,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/fmt.sh"
+          }
+        ]
+      }
+    ]
+  }
 }

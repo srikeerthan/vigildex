@@ -138,9 +138,11 @@ own **JSON contract** entry (CLAUDE.md § Conventions).
   `findings`; `findings --json` returns `schema_version`, `engine_version`,
   `scanned_at`, `home`, `findings` and `warnings`. Each inventory item is
   wrapped with `id`, `identity` and `tags`; `mcp_server` and `hook` items
-  gain `key_path` and `line`, `setting` items gain `line`;
-  `artifacts[].sha256` is nullable (shell profiles and `.env` files are not
-  hashed). A finding has `id`, `rule`, `category`, `severity`, `title`,
+  gain `key_path` and `line`, `setting` items gain `line`; the `plugin`
+  item's own identifier (`name@marketplace`) is `plugin_id`, so `id` is
+  always the entry id; `artifacts[].kind` gains `shell_profile` (profiles and `.envrc`) and
+  `env_file` (a project `.env`); `artifacts[].sha256` is nullable (those two
+  kinds are not hashed). A finding has `id`, `rule`, `category`, `severity`, `title`,
   `why`, `location { path, line, key_path }`, `evidence`, `fingerprint`
   (always `null` in this version), `fix { summary, steps }`, `agents`,
   `items` and `tags`.

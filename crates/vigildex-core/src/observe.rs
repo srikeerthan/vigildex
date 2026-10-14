@@ -109,17 +109,17 @@ pub enum Field {
 /// Which inventory item a value belongs to, so a finding can cite it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Locator {
-    /// An MCP server by name, in the same source file.
+    /// An MCP server, by its key path in the same source file
+    /// (`mcpServers.github`).
     McpServer {
-        /// The server name.
-        name: String,
+        /// The server's key path.
+        key_path: String,
     },
-    /// A hook by event and matcher, in the same source file.
+    /// A hook handler, by its key path in the same source file
+    /// (`hooks.PreToolUse[0].hooks[1]`).
     Hook {
-        /// The event name.
-        event: String,
-        /// The matcher, when the group has one.
-        matcher: Option<String>,
+        /// The handler's key path.
+        key_path: String,
     },
     /// A setting by key path, in the same source file.
     Setting {
@@ -317,8 +317,7 @@ mod tests {
             Field::HookCommand,
             None,
             Locator::Hook {
-                event: "SessionStart".into(),
-                matcher: None,
+                key_path: "hooks.SessionStart[0].hooks[0]".into(),
             },
             "GITHUB_TOKEN=ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a ./notify.sh",
         );
