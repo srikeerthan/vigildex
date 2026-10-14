@@ -375,6 +375,25 @@ mod tests {
         assert!(observations.iter().any(|o| o.secret.is_some()));
         let text = serde_json::to_string(&server).unwrap();
         assert!(!text.contains("acme_FAKE"), "{text}");
+
+        // A password named by a component word (`DB_PASS`, `--pass`) is
+        // found by the scanner and masked in full in the recorded server.
+        for cfg in [
+            json!({"command": "sh", "args": ["-c", "DB_PASS=LEAKPASS2hunter2 ./run"]}),
+            json!({"command": "mysql", "args": ["--pass", "LEAKPASS3hunter2", "-e", "x"]}),
+            json!({"command": "sh -c 'DB_PWD=LEAKPWD4hunter2 ./run'"}),
+        ] {
+            let mut observations = Vec::new();
+            let server = parse_server("pw", &cfg, &ctx(&source), &mut observations);
+            let hit = observations
+                .iter()
+                .find(|o| o.secret.is_some())
+                .expect("a hit");
+            assert_eq!(hit.secret.as_ref().unwrap().kind, "Password");
+            assert_eq!(hit.secret.as_ref().unwrap().masked, "••••");
+            let text = serde_json::to_string(&server).unwrap();
+            assert!(!text.contains("hunter2"), "{text}");
+        }
     }
 
     #[test]

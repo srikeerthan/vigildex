@@ -431,6 +431,11 @@ const CREDENTIAL_WORDS: &[&str] = &[
 pub fn names_a_credential(name: &str) -> bool {
     let lower = name.to_ascii_lowercase();
     CREDENTIAL_WORDS.iter().any(|w| lower.contains(w))
+        // `--pass`, `DB_PWD`: the component words the `named-password`
+        // secret rule accepts, so whatever the scanner flags is masked too.
+        || lower
+            .split(['_', '-'])
+            .any(|part| part == "pass" || part == "pwd")
 }
 
 /// Masks a secret the way the UI shows it: a short prefix, `••••`, and the
@@ -912,6 +917,37 @@ mod tests {
                 "${T}"
             ])
         );
+    }
+
+    #[test]
+    fn password_component_names_are_masked_in_full() {
+        // The `named-password` rule accepts `pass` and `pwd` as name
+        // components; the inventory mask must agree, or a finding's masked
+        // evidence would sit beside the value in the inventory.
+        assert_eq!(
+            mask_args(&args(&[
+                "--pass",
+                "LEAKPASS1hunter2",
+                "--pwd=LEAKPWD2hunter2"
+            ])),
+            args(&["--pass", "••••", "--pwd=••••"])
+        );
+        assert_eq!(
+            mask_text("mysql --pass LEAKPASS5hunter2 -e x"),
+            "mysql --pass •••• -e x"
+        );
+        assert_eq!(
+            mask_text("DB_PWD=LEAKPWD3hunter2 ./backup"),
+            "DB_PWD=•••• ./backup"
+        );
+        assert_eq!(
+            mask_text("sh -c 'DB_PASS=LEAKPASS4hunter2 ./run'"),
+            "sh -c 'DB_PASS=•••• ./run'"
+        );
+        assert!(names_a_credential("DB_PASS"));
+        assert!(names_a_credential("--pwd"));
+        assert!(!names_a_credential("bypass"));
+        assert!(!names_a_credential("passage"));
     }
 
     #[test]
