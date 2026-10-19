@@ -122,7 +122,7 @@ jobs:
         # versions that auto-install and on those that don't.
         run: rustup show active-toolchain || rustup toolchain install
       - name: Install cargo-deny
-        uses: taiki-e/install-action@ab6895351a88b908e96a4697860d4ffea5e57dbe # v2.87.27
+        uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
         with:
           # The version comes from the manifest bundled at the pinned action
           # commit (cargo-deny 0.20.2 at v2.87.25), so a Dependabot bump of
@@ -150,7 +150,7 @@ jobs:
         # versions that auto-install and on those that don't.
         run: rustup show active-toolchain || rustup toolchain install
       - name: Install cargo-audit
-        uses: taiki-e/install-action@ab6895351a88b908e96a4697860d4ffea5e57dbe # v2.87.27
+        uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
         with:
           # See the cargo-deny step: cargo-audit 0.22.2 at v2.87.25.
           tool: cargo-audit
