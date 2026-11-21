@@ -13,14 +13,14 @@ Claude Code
     mcp_server  lint-helper                    npx @acme/lint-helper@latest (floating)  env: LINT_HELPER_LOG, LINT_HELPER_TOKEN
     mcp_server  playwright                     npx @playwright/mcp@0.0.41 (pinned)
     hook        Notification                   http: http://127.0.0.1:8787/claude
-    hook        PostToolUse [Write|Edit]       command: npx prettier --write "$CLAUDE_FILE_PATHS"
+    hook        PostToolUse [Write|Edit]       command: npx prettier --write "$CLAUDE_FILE_PATHS"  [package_runner]
     hook        PreToolUse [Bash]              command: ./scripts/preflight.sh
     hook        PreToolUse [WebSearch]         command: python3 "$HOME/.claude/hooks/add-year.py"  [~/.claude/settings.local.json]
     skill       browser-tester                 subagent ~/.claude/agents/browser-tester.md  tools: Read, Grep, Bash(npm test *)
-    skill       deploy                         skill ~/.claude/skills/deploy  tools: Bash(./scripts/deploy.py *), Bash(./scripts/preflight.sh)  scripts: 2  hooks: 1
+    skill       deploy                         skill ~/.claude/skills/deploy  tools: Bash(./scripts/deploy.py *), Bash(./scripts/preflight.sh)  scripts: 2  hooks: 1  [bundled_scripts]
     skill       fix-issue                      command ~/.claude/commands/fix-issue.md  tools: Bash(gh issue view *), Bash(gh pr create *)
-    skill       release-notes                  skill ~/.claude/skills/release-notes  tools: Bash(git log *), Bash(git tag *), Read  scripts: 1
-    plugin      acme-deploy@acme-tools         0.3.1  enabled  [skills, hooks, mcpservers, monitors, bin]
+    skill       release-notes                  skill ~/.claude/skills/release-notes  tools: Bash(git log *), Bash(git tag *), Read  scripts: 1  [bundled_scripts]
+    plugin      acme-deploy@acme-tools         0.3.1  enabled  [skills, hooks, mcpservers, monitors, bin]  [plugin_monitors, plugin_bin]
     plugin      context7@claude-plugins-official b8e53f1c05df  enabled  [mcpservers]
     plugin      explanatory-output-style@claude-plugins-official 1.0.0  disabled  [hooks]
     plugin      superpowers@claude-plugins-official 6.4.1  enabled  NOT INSTALLED
@@ -45,7 +45,7 @@ Claude Code
     mcp_server  postgres                       npx @modelcontextprotocol/server-postgres@0.6.2 (pinned)
     hook        PreToolUse [Bash]              command: "$CLAUDE_PROJECT_DIR"/scripts/guard.sh
     hook        Stop                           mcp_tool: acme-docs/log_session
-    skill       db-migrate                     skill ~/proj/acme-api/.claude/skills/db-migrate  tools: Bash(./scripts/migrate.sh *), Read, Edit  scripts: 1
+    skill       db-migrate                     skill ~/proj/acme-api/.claude/skills/db-migrate  tools: Bash(./scripts/migrate.sh *), Read, Edit  scripts: 1  [bundled_scripts]
     instruction ~/proj/acme-api/.claude/rules/api.md 7 lines  (path-scoped)
     instruction ~/proj/acme-api/.claude/rules/testing.md 3 lines
     instruction ~/proj/acme-api/CLAUDE.md      5 lines
@@ -120,5 +120,7 @@ Codex
 Shared
   user
     skill       changelog                      skill ~/.agents/skills/changelog
+    setting     ANTHROPIC_API_KEY              = (present)
+    setting     GITHUB_TOKEN                   = (present)
   project ~/proj/acme-api
-    skill       openapi-lint                   skill ~/proj/acme-api/.agents/skills/openapi-lint  scripts: 1
+    skill       openapi-lint                   skill ~/proj/acme-api/.agents/skills/openapi-lint  scripts: 1  [bundled_scripts]

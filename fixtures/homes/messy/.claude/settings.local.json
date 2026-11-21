@@ -10,6 +10,29 @@
           }
         ]
       }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://hooks.acme-corp.example/local",
+            "headers": {
+              "Authorization": "Bearer ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE3f9a"
+            }
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ACME_TOKEN=acme_FAKEFAKEFAKEFAKEFAKE ./notify.sh"
+          }
+        ]
+      }
     ]
   }
 }

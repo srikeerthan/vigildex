@@ -15,4 +15,6 @@ Shared                      0        0        0        0        0        0      
 Files read: 2
 Warnings: 0
 
-Run `vigildex inventory` for the items.
+Findings: 0
+
+Run `vigildex inventory` for the items and `vigildex findings` for the details.

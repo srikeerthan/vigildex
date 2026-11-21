@@ -13,10 +13,16 @@
     reason = "test helpers may panic; a panic here is a test failure"
 )]
 
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
 const BOGUS_HOME: &str = "/nonexistent/vigildex-tests-must-not-read-the-real-home";
+
+/// The two credential stand-ins every fixture home carries. Git keeps no
+/// `0600` mode, so tests that report findings copy the home and set the
+/// modes explicitly (finding policy 7).
+const CREDENTIAL_FILES: [&str; 2] = [".claude/.credentials.json", ".codex/auth.json"];
 
 /// The repository root, with symlinks resolved.
 fn repo_root() -> PathBuf {
@@ -29,6 +35,46 @@ fn repo_root() -> PathBuf {
 fn fixture_home(name: &str) -> PathBuf {
     repo_root().join("fixtures/homes").join(name)
 }
+
+/// A copy of a fixture home in a fresh temporary directory, with the
+/// credential stand-ins set to `modes` (in `CREDENTIAL_FILES` order).
+fn temp_home(name: &str, modes: [u32; 2]) -> PathBuf {
+    // Tests run in parallel inside one process: each copy gets its own
+    // directory.
+    static NEXT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+    let n = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let dir = std::env::temp_dir().join(format!("vigildex-cli-{}-{n}-{name}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    copy_tree(&fixture_home(name), &dir);
+    for (rel, mode) in CREDENTIAL_FILES.iter().zip(modes) {
+        set_mode(&dir.join(rel), mode);
+    }
+    dir
+}
+
+fn copy_tree(from: &Path, to: &Path) {
+    fs::create_dir_all(to).expect("target dir created");
+    for entry in fs::read_dir(from).expect("source dir readable") {
+        let entry = entry.expect("dir entry");
+        let target = to.join(entry.file_name());
+        if entry.file_type().expect("file type").is_dir() {
+            copy_tree(&entry.path(), &target);
+        } else {
+            fs::copy(entry.path(), &target).expect("file copied");
+        }
+    }
+}
+
+#[cfg(unix)]
+fn set_mode(path: &Path, mode: u32) {
+    use std::os::unix::fs::PermissionsExt;
+    if path.is_file() {
+        fs::set_permissions(path, fs::Permissions::from_mode(mode)).expect("mode set");
+    }
+}
+
+#[cfg(not(unix))]
+fn set_mode(_path: &Path, _mode: u32) {}
 
 /// A hermetic `vigildex` command, run from the repository root.
 fn vigildex() -> Command {
@@ -51,9 +97,9 @@ fn stderr(output: &Output) -> String {
     String::from_utf8(output.stderr.clone()).expect("stderr is UTF-8")
 }
 
-/// Replaces the machine-specific repository path, the crate version and
-/// file permission bits (which depend on the umask at checkout) so
-/// snapshots are portable and survive a version bump.
+/// Replaces the machine-specific repository path, the crate version, the
+/// scan time and file permission bits (which depend on the umask at
+/// checkout) so snapshots are portable and survive a version bump.
 fn redact(text: &str) -> String {
     let root = repo_root();
     let text = text
@@ -67,7 +113,31 @@ fn redact(text: &str) -> String {
             "\"readable_by_others\": false",
             "\"readable_by_others\": \"[UMASK]\"",
         );
-    redact_modes(&text)
+    redact_modes(&redact_time(&text))
+}
+
+/// The same, for a temporary copy of a fixture home: its path becomes
+/// `[HOME]` and the modes are left as the test set them.
+fn redact_temp(text: &str, home: &Path) -> String {
+    let text = text
+        .replace(home.to_str().expect("the temp path is UTF-8"), "[HOME]")
+        .replace(env!("CARGO_PKG_VERSION"), "[VERSION]");
+    redact_time(&text)
+}
+
+/// `"scanned_at": "2026-10-14T00:00:00Z"` → `"scanned_at": "[TIME]"`.
+fn redact_time(text: &str) -> String {
+    const KEY: &str = "\"scanned_at\": \"";
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(pos) = rest.find(KEY) {
+        let (head, tail) = rest.split_at(pos + KEY.len());
+        out.push_str(head);
+        out.push_str("[TIME]");
+        rest = tail.find('"').map_or("", |end| &tail[end..]);
+    }
+    out.push_str(rest);
+    out
 }
 
 /// `"mode": "0644"` → `"mode": "[MODE]"` and `mode 0644` → `mode [MODE]`.
@@ -156,7 +226,7 @@ fn scan_json_carries_the_schema_version() {
         .arg(fixture_home("basic")));
     assert_exit(&output, 0);
     let report: serde_json::Value = serde_json::from_str(&stdout(&output)).expect("stdout is JSON");
-    assert_eq!(report["schema_version"], 2);
+    assert_eq!(report["schema_version"], 3);
     assert_eq!(report["engine_version"], env!("CARGO_PKG_VERSION"));
     assert_eq!(report["home"]["source"], "override");
     assert_eq!(
@@ -177,26 +247,175 @@ fn scan_text_on_the_basic_fixture_home() {
 
 #[test]
 fn scan_json_on_the_mockup_demo_fixture_home() {
-    let output = run(vigildex()
-        .args(["scan", "--json", "--home"])
-        .arg(fixture_home("mockup-demo")));
+    let home = temp_home("mockup-demo", [0o600, 0o600]);
+    let output = run(vigildex().args(["scan", "--json", "--home"]).arg(&home));
     assert_exit(&output, 0);
     assert_eq!(stderr(&output), "");
     let text = stdout(&output);
     assert_no_secret_values(&text);
-    insta::assert_snapshot!("scan_json_mockup_demo", redact(&text));
+    let report: serde_json::Value = serde_json::from_str(&text).expect("stdout is JSON");
+    assert_eq!(report["findings"].as_array().expect("findings").len(), 9);
+    insta::assert_snapshot!("scan_json_mockup_demo", redact_temp(&text, &home));
+    let _ = fs::remove_dir_all(&home);
 }
 
 #[test]
 fn scan_text_on_the_mockup_demo_fixture_home() {
-    let output = run(vigildex()
-        .args(["scan", "--home"])
-        .arg(fixture_home("mockup-demo")));
+    let home = temp_home("mockup-demo", [0o600, 0o600]);
+    let output = run(vigildex().args(["scan", "--home"]).arg(&home));
     assert_exit(&output, 0);
     assert_eq!(stderr(&output), "");
     let text = stdout(&output);
     assert_no_secret_values(&text);
-    insta::assert_snapshot!("scan_text_mockup_demo", redact(&text));
+    assert!(
+        text.contains("Findings: 9 (1 high, 5 medium, 3 low)"),
+        "{text}"
+    );
+    insta::assert_snapshot!("scan_text_mockup_demo", redact_temp(&text, &home));
+    let _ = fs::remove_dir_all(&home);
+}
+
+#[test]
+fn findings_text_on_the_mockup_demo_fixture_home() {
+    let home = temp_home("mockup-demo", [0o600, 0o600]);
+    let output = run(vigildex().args(["findings", "--home"]).arg(&home));
+    assert_exit(&output, 0);
+    assert_eq!(stderr(&output), "");
+    let text = stdout(&output);
+    assert_no_secret_values(&text);
+    for title in [
+        "API key bills headless runs",
+        "Custom API gateway",
+        "Signed in with an API key",
+        "GitHub token in plain text",
+        "Database password in args",
+        "Hook pipes curl to sh",
+        "Auto-approves every tool",
+        "MCP server on @latest",
+        "Credentials in a plain file",
+    ] {
+        assert!(text.contains(title), "{title} missing:\n{text}");
+    }
+    insta::assert_snapshot!("findings_text_mockup_demo", redact_temp(&text, &home));
+    let _ = fs::remove_dir_all(&home);
+}
+
+#[test]
+fn findings_json_on_the_mockup_demo_fixture_home() {
+    let home = temp_home("mockup-demo", [0o600, 0o600]);
+    let output = run(vigildex().args(["findings", "--json", "--home"]).arg(&home));
+    assert_exit(&output, 0);
+    assert_eq!(stderr(&output), "");
+    let text = stdout(&output);
+    assert_no_secret_values(&text);
+    let report: serde_json::Value = serde_json::from_str(&text).expect("stdout is JSON");
+    assert_eq!(report["schema_version"], 3);
+    let findings = report["findings"].as_array().expect("findings");
+    assert_eq!(findings.len(), 9);
+    let rules: Vec<&str> = findings.iter().filter_map(|f| f["rule"].as_str()).collect();
+    assert_eq!(
+        rules,
+        vec![
+            "BILL-001", "BILL-006", "RISK-002", "RISK-004", "SEC-002", "SEC-004", "BILL-007",
+            "RISK-001", "RISK-005"
+        ]
+    );
+    insta::assert_snapshot!("findings_json_mockup_demo", redact_temp(&text, &home));
+    let _ = fs::remove_dir_all(&home);
+}
+
+#[test]
+fn findings_severity_filter_and_fail_on_exit_code() {
+    let home = temp_home("mockup-demo", [0o600, 0o600]);
+    // Only High and Medium, and High is present, so --fail-on high fails.
+    let output = run(vigildex()
+        .args([
+            "findings",
+            "--json",
+            "--severity",
+            "medium",
+            "--fail-on",
+            "high",
+            "--home",
+        ])
+        .arg(&home));
+    assert_exit(&output, 1);
+    let report: serde_json::Value = serde_json::from_str(&stdout(&output)).expect("stdout is JSON");
+    let findings = report["findings"].as_array().expect("findings");
+    assert_eq!(findings.len(), 6);
+    assert!(findings.iter().all(|f| f["severity"] != "low"));
+
+    // The gate is judged before the display filter: hiding High findings
+    // with --severity low... cannot pass --fail-on high.
+    let output = run(vigildex()
+        .args([
+            "findings",
+            "--severity",
+            "info",
+            "--fail-on",
+            "high",
+            "--home",
+        ])
+        .arg(&home));
+    assert_exit(&output, 1);
+
+    // Nothing at Info or above Info... every finding is Low or higher, so
+    // --fail-on info fails too; a home without findings passes.
+    let output = run(vigildex()
+        .args(["findings", "--fail-on", "info", "--home"])
+        .arg(&home));
+    assert_exit(&output, 1);
+    let output = run(vigildex()
+        .args(["findings", "--fail-on", "high", "--home"])
+        .arg(fixture_home("basic")));
+    assert_exit(&output, 0);
+    assert!(
+        stdout(&output).contains("Findings: 0"),
+        "{}",
+        stdout(&output)
+    );
+    let _ = fs::remove_dir_all(&home);
+}
+
+#[test]
+fn findings_json_on_the_messy_fixture_home() {
+    let home = temp_home("messy", [0o644, 0o600]);
+    let output = run(vigildex().args(["findings", "--json", "--home"]).arg(&home));
+    assert_exit(&output, 0);
+    assert_eq!(stderr(&output), "");
+    let text = stdout(&output);
+    assert_no_secret_values(&text);
+    assert!(!text.contains("lh_FAKE") && !text.contains("adk_FAKE") && !text.contains("acme_FAKE"));
+    let report: serde_json::Value = serde_json::from_str(&text).expect("stdout is JSON");
+    let findings = report["findings"].as_array().expect("findings");
+    // One credential stand-in readable by others, the other not.
+    let sec006: Vec<&str> = findings
+        .iter()
+        .filter(|f| f["rule"] == "SEC-006")
+        .filter_map(|f| f["location"]["path"].as_str())
+        .collect();
+    assert_eq!(sec006.len(), 1);
+    assert!(sec006[0].ends_with(".claude/.credentials.json"));
+    insta::assert_snapshot!("findings_json_messy", redact_temp(&text, &home));
+    let _ = fs::remove_dir_all(&home);
+}
+
+#[test]
+fn findings_on_a_checkout_report_the_checkout_modes_honestly() {
+    // No temp copy: the stand-ins have whatever mode the umask gave them,
+    // so SEC-006 may or may not fire, but nothing else changes.
+    let output = run(vigildex()
+        .args(["findings", "--json", "--home"])
+        .arg(fixture_home("mockup-demo")));
+    assert_exit(&output, 0);
+    let report: serde_json::Value = serde_json::from_str(&stdout(&output)).expect("stdout is JSON");
+    let others = report["findings"]
+        .as_array()
+        .expect("findings")
+        .iter()
+        .filter(|f| f["rule"] != "SEC-006")
+        .count();
+    assert_eq!(others, 9);
 }
 
 #[test]
@@ -209,7 +428,7 @@ fn inventory_json_on_the_mockup_demo_fixture_home() {
     let text = stdout(&output);
     assert_no_secret_values(&text);
     let report: serde_json::Value = serde_json::from_str(&text).expect("stdout is JSON");
-    assert_eq!(report["schema_version"], 2);
+    assert_eq!(report["schema_version"], 3);
     let items = report["inventory"]["items"].as_array().expect("items");
     for type_name in [
         "mcp_server",
@@ -462,6 +681,15 @@ fn unknown_agent_is_a_usage_error() {
         .arg(fixture_home("basic")));
     assert_exit(&output, 2);
     assert_eq!(stdout(&output), "");
+}
+
+#[test]
+fn time_redaction_handles_json() {
+    assert_eq!(
+        redact_time(r#"{"scanned_at": "2026-10-14T11:59:59Z", "home": {}}"#),
+        r#"{"scanned_at": "[TIME]", "home": {}}"#
+    );
+    assert_eq!(redact_time("no time here"), "no time here");
 }
 
 #[test]

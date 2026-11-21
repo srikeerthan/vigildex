@@ -3,8 +3,9 @@ source: crates/vigildex-cli/tests/cli.rs
 expression: redact(&text)
 ---
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "engine_version": "[VERSION]",
+  "scanned_at": "[TIME]",
   "home": {
     "root": "[REPO]/fixtures/homes/relocated",
     "source": "override"
@@ -22,6 +23,9 @@ expression: redact(&text)
     },
     "items": [
       {
+        "id": "661b86f1da69115f",
+        "identity": "1a071e0db202afe1",
+        "tags": [],
         "type": "mcp_server",
         "name": "work-docs",
         "launch": {
@@ -36,6 +40,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcpServers.work-docs",
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -46,12 +52,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "d43ecb4af024a1d3",
+        "identity": "697b3f16444a75b5",
+        "tags": [],
         "type": "setting",
         "key_path": "hasAvailableSubscription",
         "value": {
           "kind": "bool",
           "value": true
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -62,6 +72,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "2a09101525b5676c",
+        "identity": "ecfb084a02c47aba",
+        "tags": [],
         "type": "setting",
         "key_path": "oauthAccount",
         "value": {
@@ -74,6 +87,7 @@ expression: redact(&text)
             "organizationUuid"
           ]
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -84,12 +98,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "6328ba76bba6695d",
+        "identity": "81c3a9d2fb649985",
+        "tags": [],
         "type": "setting",
         "key_path": "permissions.defaultMode",
         "value": {
           "kind": "text",
           "value": "plan"
         },
+        "line": null,
         "source": {
           "agent": "claude_code",
           "scope": {
@@ -100,6 +118,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "ded9fb1f3d4f0dc5",
+        "identity": "330fe0472dad4fd3",
+        "tags": [],
         "type": "credential",
         "path": "[REPO]/fixtures/homes/relocated/.claude-work/.credentials.json",
         "exists": false,
@@ -116,6 +137,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "08683b157681aca9",
+        "identity": "6c06607ef9d7ff30",
+        "tags": [],
         "type": "mcp_server",
         "name": "work-fetch",
         "launch": {
@@ -131,6 +155,8 @@ expression: redact(&text)
         "header_keys": [],
         "env_header_keys": [],
         "enabled": null,
+        "key_path": "mcp_servers.work-fetch",
+        "line": 3,
         "source": {
           "agent": "codex",
           "scope": {
@@ -141,12 +167,16 @@ expression: redact(&text)
         }
       },
       {
+        "id": "4d751d18947e4d7e",
+        "identity": "fba1cb447d43c533",
+        "tags": [],
         "type": "setting",
         "key_path": "approval_policy",
         "value": {
           "kind": "text",
           "value": "on-request"
         },
+        "line": 1,
         "source": {
           "agent": "codex",
           "scope": {
@@ -157,6 +187,9 @@ expression: redact(&text)
         }
       },
       {
+        "id": "745c2156525d6175",
+        "identity": "e77b8d6c57cae456",
+        "tags": [],
         "type": "credential",
         "path": "[REPO]/fixtures/homes/relocated/.codex-work/auth.json",
         "exists": false,
@@ -170,6 +203,45 @@ expression: redact(&text)
           },
           "kind": "credential",
           "path": "[REPO]/fixtures/homes/relocated/.codex-work/auth.json"
+        }
+      },
+      {
+        "id": "a96a8fa557fa3011",
+        "identity": "37cc368f0a70b0aa",
+        "tags": [],
+        "type": "setting",
+        "key_path": "CLAUDE_CONFIG_DIR",
+        "value": {
+          "kind": "present"
+        },
+        "line": 2,
+        "source": {
+          "agent": "shared",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "shell_profile",
+          "path": "[REPO]/fixtures/homes/relocated/.zshenv"
+        }
+      },
+      {
+        "id": "737aa86c2d94eb5a",
+        "identity": "1e6b9f9cb75594fd",
+        "tags": [],
+        "type": "setting",
+        "key_path": "CODEX_HOME",
+        "value": {
+          "kind": "text",
+          "value": "~/.codex-work"
+        },
+        "line": 3,
+        "source": {
+          "agent": "shared",
+          "scope": {
+            "kind": "user"
+          },
+          "kind": "shell_profile",
+          "path": "[REPO]/fixtures/homes/relocated/.zshenv"
         }
       }
     ],
@@ -203,6 +275,16 @@ expression: redact(&text)
         "path": "[REPO]/fixtures/homes/relocated/.codex-work/config.toml",
         "bytes": 111,
         "sha256": "ec27386b43f066a9480b1b7e7f0728e5366e832cf6daee1735b431e1d627e7c6"
+      },
+      {
+        "agent": "shared",
+        "scope": {
+          "kind": "user"
+        },
+        "kind": "shell_profile",
+        "path": "[REPO]/fixtures/homes/relocated/.zshenv",
+        "bytes": 158,
+        "sha256": null
       }
     ],
     "warnings": [

@@ -20,6 +20,10 @@ expression: schema
       "description": "The inventory.",
       "$ref": "#/$defs/Inventory"
     },
+    "scanned_at": {
+      "description": "When the scan ran, as RFC 3339 UTC.",
+      "type": "string"
+    },
     "schema_version": {
       "description": "Version of this JSON contract; see [`SCHEMA_VERSION`].",
       "type": "integer",
@@ -30,6 +34,7 @@ expression: schema
   "required": [
     "schema_version",
     "engine_version",
+    "scanned_at",
     "home",
     "inventory"
   ],
@@ -111,6 +116,16 @@ expression: schema
           "description": "A credential file. Only metadata and key names are ever read.",
           "type": "string",
           "const": "credential"
+        },
+        {
+          "description": "A shell profile (`.zshrc`, `.bashrc`, `.envrc`): exports are read for\nagent-relevant variables and secrets.",
+          "type": "string",
+          "const": "shell_profile"
+        },
+        {
+          "description": "A dotenv file (`.env`) at a project root.",
+          "type": "string",
+          "const": "env_file"
         }
       ]
     },
@@ -169,8 +184,11 @@ expression: schema
           "$ref": "#/$defs/Scope"
         },
         "sha256": {
-          "description": "Lower-case hex SHA-256 of the file contents.",
-          "type": "string"
+          "description": "Lower-case hex SHA-256 of the file contents. `None` for shell\nprofiles and `.env` files, whose few lines of `NAME=value` would make\nthe hash a checkable digest of the secrets they hold.",
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
@@ -178,8 +196,7 @@ expression: schema
         "scope",
         "kind",
         "path",
-        "bytes",
-        "sha256"
+        "bytes"
       ]
     },
     "Credential": {
@@ -295,6 +312,19 @@ expression: schema
           "description": "What runs.",
           "$ref": "#/$defs/HookHandler"
         },
+        "key_path": {
+          "description": "The key path of the handler in its file\n(`hooks.PreToolUse[0].hooks[0]`).",
+          "type": "string"
+        },
+        "line": {
+          "description": "1-based line of the handler, when the format records one (TOML).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
         "matcher": {
           "description": "The matcher as written, when the group has one.",
           "type": [
@@ -310,6 +340,7 @@ expression: schema
       "required": [
         "event",
         "handler",
+        "key_path",
         "source"
       ]
     },
@@ -555,10 +586,10 @@ expression: schema
           }
         },
         "items": {
-          "description": "The items, sorted by agent, scope, type and name.",
+          "description": "The items, sorted by agent, scope, type and name, each with its\nidentifiers and tags.",
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Item"
+            "$ref": "#/$defs/ItemEntry"
           }
         },
         "project_roots": {
@@ -599,8 +630,26 @@ expression: schema
         "warnings"
       ]
     },
-    "Item": {
-      "description": "One thing an agent can run or load, normalised across agents.",
+    "ItemEntry": {
+      "description": "An inventory item with the identifiers reports and findings refer to.\n\n`id` names this one occurrence (this file, this agent, this scope) and is\nstable across scans and machines because paths are taken relative to the\nhome. `identity` names *what runs*: the same MCP server configured for\ntwo agents has two entries with one identity, which is how the app shows\nit as one row with two agent badges.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Stable identifier of this occurrence (16 hex characters).",
+          "type": "string"
+        },
+        "identity": {
+          "description": "Identifier of what the item runs or loads, shared across agents and\nfiles (16 hex characters).",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Why the row is marked, when it is.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ItemTag"
+          }
+        }
+      },
       "oneOf": [
         {
           "description": "An MCP server the agent can start or connect to.",
@@ -699,6 +748,36 @@ expression: schema
           "required": [
             "type"
           ]
+        }
+      ],
+      "required": [
+        "id",
+        "identity",
+        "tags"
+      ]
+    },
+    "ItemTag": {
+      "description": "Why an inventory row is marked without being a finding (finding policy\n5 in `docs/RULES.md`).",
+      "oneOf": [
+        {
+          "description": "A skill folder bundles script files.",
+          "type": "string",
+          "const": "bundled_scripts"
+        },
+        {
+          "description": "A hook runs a package runner (`npx prettier …`), so the code it runs\nis fetched at run time.",
+          "type": "string",
+          "const": "package_runner"
+        },
+        {
+          "description": "A plugin declares `monitors`: persistent background commands\n(RISK-011).",
+          "type": "string",
+          "const": "plugin_monitors"
+        },
+        {
+          "description": "A plugin adds a `bin/` folder to the Bash tool's `PATH` (RISK-011).",
+          "type": "string",
+          "const": "plugin_bin"
         }
       ]
     },
@@ -875,9 +954,22 @@ expression: schema
             "type": "string"
           }
         },
+        "key_path": {
+          "description": "The key path of the definition in its file (`mcpServers.github`).",
+          "type": "string"
+        },
         "launch": {
           "description": "How the server is started or reached.",
           "$ref": "#/$defs/Launch"
+        },
+        "line": {
+          "description": "1-based line of the definition, when the format records one (TOML).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
         },
         "name": {
           "description": "The server's name in its configuration.",
@@ -894,6 +986,7 @@ expression: schema
         "env_keys",
         "header_keys",
         "env_header_keys",
+        "key_path",
         "source"
       ]
     },
@@ -930,10 +1023,6 @@ expression: schema
             "null"
           ]
         },
-        "id": {
-          "description": "The identifier as the agent writes it (`name@marketplace`).",
-          "type": "string"
-        },
         "install_path": {
           "description": "The install folder, as located under the scanned home.",
           "type": "string"
@@ -967,6 +1056,10 @@ expression: schema
           "description": "The plugin name.",
           "type": "string"
         },
+        "plugin_id": {
+          "description": "The identifier as the agent writes it (`name@marketplace`). Serialised\nas `plugin_id`: `id` is the entry's stable identifier.",
+          "type": "string"
+        },
         "source": {
           "description": "Where the plugin was read from (the install registry).",
           "$ref": "#/$defs/ArtifactRef"
@@ -980,7 +1073,7 @@ expression: schema
         }
       },
       "required": [
-        "id",
+        "plugin_id",
         "name",
         "install_path",
         "installed",
@@ -1383,6 +1476,15 @@ expression: schema
         "key_path": {
           "description": "The key path in the file, with `.` between segments and quoted\nsegments for paths (`projects[\"/Users/you/proj\"].trust_level`).",
           "type": "string"
+        },
+        "line": {
+          "description": "1-based line of the key, when the format records one (TOML, shell\nprofiles, `.env`).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
         },
         "source": {
           "description": "Where the setting was read from.",

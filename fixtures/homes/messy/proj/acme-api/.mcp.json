@@ -40,6 +40,17 @@
         "@modelcontextprotocol/server-postgres@0.6.2",
         "postgresql://app@db.acme.internal:5432/acme"
       ]
+    },
+    "legacy": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@acme/legacy@latest"
+      ],
+      "env": {
+        "LEGACY_TOKEN": "lg_FAKEFAKEFAKEFAKEFAKEFAKEFAKE"
+      }
     }
   }
 }

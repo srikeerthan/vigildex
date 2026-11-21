@@ -1,0 +1,284 @@
+---
+source: crates/vigildex-cli/tests/cli.rs
+expression: "redact_temp(&text, &home)"
+---
+{
+  "schema_version": 3,
+  "engine_version": "[VERSION]",
+  "scanned_at": "[TIME]",
+  "home": {
+    "root": "[HOME]",
+    "source": "override"
+  },
+  "findings": [
+    {
+      "id": "a854cbc7b6c5c6f6",
+      "rule": "BILL-001",
+      "category": "billing",
+      "severity": "high",
+      "title": "API key bills headless runs",
+      "why": "Claude Code uses `ANTHROPIC_API_KEY` for every `claude -p` run even though a subscription is signed in, so those runs are billed to the key.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 42,
+        "key_path": "ANTHROPIC_API_KEY"
+      },
+      "evidence": "ANTHROPIC_API_KEY=sk-ant-••••7Qa",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Remove the key from your environment and let the subscription login bill",
+        "steps": [
+          "Delete the export from the profile (or scope it to the one script that needs it).",
+          "Start a new shell and check `env | grep ANTHROPIC` shows nothing."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "3c6cd19254ea05dc"
+      ],
+      "tags": [
+        "SEC-004"
+      ]
+    },
+    {
+      "id": "0854c66a81d7d0e9",
+      "rule": "BILL-006",
+      "category": "billing",
+      "severity": "medium",
+      "title": "Custom API gateway",
+      "why": "Requests, and the API key with them, go to this host instead of the vendor.",
+      "location": {
+        "path": "[HOME]/.claude/settings.json",
+        "line": null,
+        "key_path": "env.ANTHROPIC_BASE_URL"
+      },
+      "evidence": "ANTHROPIC_BASE_URL=https://llm-proxy.acme-corp.example",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Point the base URL back at the vendor unless you trust this gateway",
+        "steps": [
+          "Check who runs the host and why the base URL was set.",
+          "Remove the override, or keep it only for the shell or project that needs it.",
+          "If a repository set it, rotate the API key that was used while it applied."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "de21aff9b683f172"
+      ],
+      "tags": []
+    },
+    {
+      "id": "9cac76e479b6a117",
+      "rule": "RISK-002",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Hook pipes curl to sh",
+      "why": "The hook fetches code from the network and runs it, so whoever controls that URL controls what runs on your machine.",
+      "location": {
+        "path": "[HOME]/proj/dotfiles-sync/.claude/settings.json",
+        "line": null,
+        "key_path": "hooks.SessionStart[0].hooks[0]"
+      },
+      "evidence": "curl -fsSL https://dotfiles-sync.example/setup.sh | sh",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Run a reviewed local copy instead",
+        "steps": [
+          "Download the script once, read it, and keep it in the repository or your home.",
+          "Point the hook at the local file."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "1212941d2c516fbb"
+      ],
+      "tags": []
+    },
+    {
+      "id": "8bf5fa10c6a8063b",
+      "rule": "RISK-004",
+      "category": "risk",
+      "severity": "medium",
+      "title": "Auto-approves every tool",
+      "why": "Every tool call runs without approval, so one bad instruction can act on your files and accounts.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 3,
+        "key_path": "approval_policy"
+      },
+      "evidence": "approval_policy = \"never\", sandbox_mode = \"danger-full-access\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Turn approvals back on",
+        "steps": [
+          "Claude Code: set `permissions.defaultMode` back to `default` or `acceptEdits`.",
+          "Codex: use `approval_policy = \"on-request\"` or keep `sandbox_mode` at `workspace-write`."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "745dfc46cd77e76f",
+        "b62fb0570291c733"
+      ],
+      "tags": []
+    },
+    {
+      "id": "210e689c85e125b3",
+      "rule": "SEC-002",
+      "category": "secret",
+      "severity": "medium",
+      "title": "Database password in args",
+      "why": "The credential is passed on the server's command line, where every process listing and config backup can see it.",
+      "location": {
+        "path": "[HOME]/proj/acme-api/.mcp.json",
+        "line": null,
+        "key_path": "mcpServers.postgres.args[2]"
+      },
+      "evidence": "postgresql://app:••••@db.acme.internal:5432/acme",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pass the credential through an environment reference instead",
+        "steps": [
+          "Export the value in your shell environment (or a secret manager).",
+          "Replace the literal with a reference such as `${DATABASE_URL}`.",
+          "Rotate the credential if the file was ever shared or committed."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "822b58f4ad48c83b"
+      ],
+      "tags": []
+    },
+    {
+      "id": "1cff53c00bcda9b2",
+      "rule": "SEC-004",
+      "category": "secret",
+      "severity": "medium",
+      "title": "GitHub token in plain text",
+      "why": "Every program you run inherits this variable, and the profile is plain text that backups and dotfile syncs copy around.",
+      "location": {
+        "path": "[HOME]/.zshrc",
+        "line": 43,
+        "key_path": "GITHUB_TOKEN"
+      },
+      "evidence": "GITHUB_TOKEN=ghp_••••f9a",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Load the credential at use time instead of exporting it",
+        "steps": [
+          "Remove the export from the profile.",
+          "Load it when needed: `export VAR=\"$(op read 'op://…')\"` or `security find-generic-password -w`.",
+          "Rotate the credential if the profile was ever synced or shared."
+        ]
+      },
+      "agents": [
+        "copilot_cli"
+      ],
+      "items": [
+        "ca715461c0230fa4"
+      ],
+      "tags": [
+        "BILL-009"
+      ]
+    },
+    {
+      "id": "1d90a08b8e2ba0e6",
+      "rule": "BILL-007",
+      "category": "billing",
+      "severity": "low",
+      "title": "Signed in with an API key",
+      "why": "Codex usage is billed to the API key or custom provider rather than counted against a ChatGPT plan.",
+      "location": {
+        "path": "[HOME]/.codex/auth.json",
+        "line": null,
+        "key_path": "OPENAI_API_KEY"
+      },
+      "evidence": "OPENAI_API_KEY is a string and there is no tokens object",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Sign in with ChatGPT if you want plan billing",
+        "steps": [
+          "Run `codex logout`, then `codex login` and choose ChatGPT.",
+          "Remove `model_provider` or `openai_base_url` from `config.toml` if they point at a custom provider you do not need."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "19fcfdf03e41851a"
+      ],
+      "tags": []
+    },
+    {
+      "id": "6937418cc704c38d",
+      "rule": "RISK-001",
+      "category": "risk",
+      "severity": "low",
+      "title": "MCP server on @latest",
+      "why": "A floating version means the code this server runs can change under the agent without any configuration change.",
+      "location": {
+        "path": "[HOME]/.claude.json",
+        "line": null,
+        "key_path": "mcpServers.lint-helper"
+      },
+      "evidence": "npx -y @acme/lint-helper@latest",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Pin the server to an exact version",
+        "steps": [
+          "Replace the tag or missing version with an exact one: `pkg@1.2.3` for npx, `pkg==1.2.3` for uvx, `image@sha256:…` for Docker.",
+          "Re-pin when you update, on purpose."
+        ]
+      },
+      "agents": [
+        "claude_code"
+      ],
+      "items": [
+        "7605a0a28df21789"
+      ],
+      "tags": []
+    },
+    {
+      "id": "d44f4d34ceece124",
+      "rule": "RISK-005",
+      "category": "risk",
+      "severity": "low",
+      "title": "Credentials in a plain file",
+      "why": "The login tokens are kept in a plain file instead of the system keychain.",
+      "location": {
+        "path": "[HOME]/.codex/config.toml",
+        "line": 5,
+        "key_path": "cli_auth_credentials_store"
+      },
+      "evidence": "cli_auth_credentials_store = \"file\"",
+      "fingerprint": null,
+      "fix": {
+        "summary": "Store credentials in the keychain",
+        "steps": [
+          "Codex: set `cli_auth_credentials_store = \"keyring\"` (or `auto`) and sign in again."
+        ]
+      },
+      "agents": [
+        "codex"
+      ],
+      "items": [
+        "ba9c82b6f4d90032"
+      ],
+      "tags": []
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,28 @@
+# Vendor API hosts (BILL-006). A base URL whose host is neither loopback nor
+# listed for its vendor points at a custom gateway. `*.example.com` matches
+# every sub-domain of example.com, not example.com itself. Loopback
+# (`localhost`, `127.0.0.0/8`, `::1`, `0.0.0.0`, `*.localhost`) is built into
+# the engine and never flagged.
+#
+# Which variable or key belongs to which vendor is decided by the billing
+# analyzer (`ANTHROPIC_BASE_URL` → anthropic, `openai_base_url` and
+# `model_providers.*.base_url` → openai, `chatgpt_base_url` → chatgpt,
+# `COPILOT_PROVIDER_BASE_URL` → copilot_provider).
+
+[anthropic]
+hosts = ["api.anthropic.com", "*.anthropic.com"]
+
+[openai]
+hosts = ["api.openai.com", "*.openai.com", "*.openai.azure.com"]
+
+[chatgpt]
+hosts = ["chatgpt.com", "*.chatgpt.com"]
+
+# Copilot's own API hosts, for a future `GITHUB_COPILOT_*` override.
+[copilot]
+hosts = ["api.githubcopilot.com", "*.githubcopilot.com", "github.com", "*.github.com"]
+
+# `COPILOT_PROVIDER_BASE_URL` is bring-your-own-key by definition: every host
+# is a custom provider.
+[copilot_provider]
+hosts = []

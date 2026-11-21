@@ -10,7 +10,7 @@
 //! the differences are noted on the types that diverge.
 
 use std::fmt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -114,6 +114,11 @@ pub enum ArtifactKind {
     Instructions,
     /// A credential file. Only metadata and key names are ever read.
     Credential,
+    /// A shell profile (`.zshrc`, `.bashrc`, `.envrc`): exports are read for
+    /// agent-relevant variables and secrets.
+    ShellProfile,
+    /// A dotenv file (`.env`) at a project root.
+    EnvFile,
 }
 
 /// A file the engine read, and where it sits in the agent's configuration.
@@ -146,8 +151,10 @@ pub struct ArtifactView {
     pub path: PathBuf,
     /// Size of the file in bytes.
     pub bytes: u64,
-    /// Lower-case hex SHA-256 of the file contents.
-    pub sha256: String,
+    /// Lower-case hex SHA-256 of the file contents. `None` for shell
+    /// profiles and `.env` files, whose few lines of `NAME=value` would make
+    /// the hash a checkable digest of the secrets they hold.
+    pub sha256: Option<String>,
 }
 
 /// One thing an agent can run or load, normalised across agents.
@@ -246,6 +253,136 @@ impl Item {
             source.path.clone(),
         )
     }
+
+    /// A short locator within the source file, used to link findings to
+    /// items: `mcp:<key path>`, `hook:<key path>`, `setting:<key path>`,
+    /// `skill:<name>`, `plugin:<id>`, `instruction`, `credential`.
+    #[must_use]
+    pub fn locator(&self) -> String {
+        match self {
+            Self::McpServer(it) => format!("mcp:{}", it.key_path),
+            Self::Hook(it) => format!("hook:{}", it.key_path),
+            Self::Skill(it) => format!("skill:{}", it.name),
+            Self::Plugin(it) => format!("plugin:{}", it.id),
+            Self::Instruction(_) => "instruction".to_owned(),
+            Self::Setting(it) => format!("setting:{}", it.key_path),
+            Self::Credential(_) => "credential".to_owned(),
+        }
+    }
+
+    /// The text that defines what the item runs or loads, without agent or
+    /// scope. `rel` turns a path into its home-relative form. See
+    /// [`ItemEntry::identity`].
+    #[must_use]
+    pub fn identity_text(&self, rel: &dyn Fn(&Path) -> String) -> String {
+        match self {
+            Self::McpServer(it) => format!("mcp_server|{}|{}", it.name, launch_text(&it.launch)),
+            Self::Hook(it) => format!(
+                "hook|{}|{}|{}",
+                it.event,
+                it.matcher.as_deref().unwrap_or_default(),
+                handler_text(&it.handler)
+            ),
+            Self::Skill(it) => format!("skill|{}|{}", it.name, rel(&it.path)),
+            Self::Plugin(it) => format!(
+                "plugin|{}|{}",
+                it.id,
+                it.version.as_deref().unwrap_or_default()
+            ),
+            Self::Instruction(it) => format!("instruction|{}", rel(&it.path)),
+            Self::Setting(it) => format!("setting|{}|{}", rel(&it.source.path), it.key_path),
+            Self::Credential(it) => format!("credential|{}", rel(&it.path)),
+        }
+    }
+}
+
+/// A canonical one-line form of a launch, for identities.
+fn launch_text(launch: &Launch) -> String {
+    match launch {
+        Launch::Package {
+            runner, spec, args, ..
+        } => format!("package|{runner:?}|{spec}|{}", args.join(" ")),
+        Launch::Interpreter {
+            interpreter, args, ..
+        } => format!("interpreter|{interpreter}|{}", args.join(" ")),
+        Launch::Binary { command, args } => format!("binary|{command}|{}", args.join(" ")),
+        Launch::Remote { url, transport, .. } => format!("remote|{transport:?}|{url}"),
+        Launch::Unknown => "unknown".to_owned(),
+        #[allow(unreachable_patterns, reason = "Launch is non-exhaustive")]
+        _ => "other".to_owned(),
+    }
+}
+
+/// A canonical one-line form of a hook handler, for identities.
+fn handler_text(handler: &HookHandler) -> String {
+    match handler {
+        HookHandler::Command { command, args, .. } => {
+            format!("command|{command}|{}", args.join(" "))
+        }
+        HookHandler::Http { url, .. } => format!("http|{url}"),
+        HookHandler::McpTool { server, tool, .. } => format!("mcp_tool|{server}|{tool}"),
+        HookHandler::Prompt { model, .. } => {
+            format!("prompt|{}", model.as_deref().unwrap_or_default())
+        }
+        HookHandler::Agent { model, .. } => {
+            format!("agent|{}", model.as_deref().unwrap_or_default())
+        }
+        HookHandler::Unknown { type_name } => {
+            format!("unknown|{}", type_name.as_deref().unwrap_or_default())
+        }
+        #[allow(unreachable_patterns, reason = "HookHandler is non-exhaustive")]
+        _ => "other".to_owned(),
+    }
+}
+
+/// Why an inventory row is marked without being a finding (finding policy
+/// 5 in `docs/RULES.md`).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ItemTag {
+    /// A skill folder bundles script files.
+    BundledScripts,
+    /// A hook runs a package runner (`npx prettier …`), so the code it runs
+    /// is fetched at run time.
+    PackageRunner,
+    /// A plugin declares `monitors`: persistent background commands
+    /// (RISK-011).
+    PluginMonitors,
+    /// A plugin adds a `bin/` folder to the Bash tool's `PATH` (RISK-011).
+    PluginBin,
+}
+
+/// An inventory item with the identifiers reports and findings refer to.
+///
+/// `id` names this one occurrence (this file, this agent, this scope) and is
+/// stable across scans and machines because paths are taken relative to the
+/// home. `identity` names *what runs*: the same MCP server configured for
+/// two agents has two entries with one identity, which is how the app shows
+/// it as one row with two agent badges.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[non_exhaustive]
+pub struct ItemEntry {
+    /// Stable identifier of this occurrence (16 hex characters).
+    pub id: String,
+    /// Identifier of what the item runs or loads, shared across agents and
+    /// files (16 hex characters).
+    pub identity: String,
+    /// Why the row is marked, when it is.
+    pub tags: Vec<ItemTag>,
+    /// The item.
+    #[serde(flatten)]
+    pub item: Item,
+}
+
+impl ItemEntry {
+    /// The item's source, for convenience.
+    #[must_use]
+    pub fn source(&self) -> &ArtifactRef {
+        self.item.source()
+    }
 }
 
 /// An MCP server definition.
@@ -267,6 +404,10 @@ pub struct McpServer {
     /// Whether the configuration enables the server, when it says so
     /// (Codex `enabled`). `None` means the configuration does not say.
     pub enabled: Option<bool>,
+    /// The key path of the definition in its file (`mcpServers.github`).
+    pub key_path: String,
+    /// 1-based line of the definition, when the format records one (TOML).
+    pub line: Option<u32>,
     /// Where the definition was read from.
     pub source: ArtifactRef,
 }
@@ -406,6 +547,11 @@ pub struct Hook {
     pub matcher: Option<String>,
     /// What runs.
     pub handler: HookHandler,
+    /// The key path of the handler in its file
+    /// (`hooks.PreToolUse[0].hooks[0]`).
+    pub key_path: String,
+    /// 1-based line of the handler, when the format records one (TOML).
+    pub line: Option<u32>,
     /// Where the hook was read from.
     pub source: ArtifactRef,
 }
@@ -551,7 +697,9 @@ pub enum PluginComponent {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[non_exhaustive]
 pub struct Plugin {
-    /// The identifier as the agent writes it (`name@marketplace`).
+    /// The identifier as the agent writes it (`name@marketplace`). Serialised
+    /// as `plugin_id`: `id` is the entry's stable identifier.
+    #[serde(rename = "plugin_id")]
     pub id: String,
     /// The plugin name.
     pub name: String,
@@ -601,6 +749,9 @@ pub struct Setting {
     pub key_path: String,
     /// The value, reduced to what is safe to show.
     pub value: RedactedValue,
+    /// 1-based line of the key, when the format records one (TOML, shell
+    /// profiles, `.env`).
+    pub line: Option<u32>,
     /// Where the setting was read from.
     pub source: ArtifactRef,
 }

@@ -75,13 +75,19 @@ findings on the Findings screen, and nothing else:
 | Credentials in a plain file | RISK-005 | `.codex/config.toml` › `cli_auth_credentials_store = "file"` |
 
 The count assumes finding policy 7: the two credential stand-ins are
-`0644` in a checkout, so the M2 tests set their mode to `0600` on a
-temporary copy before scanning. Everything else in the home is inventory
-without a finding, or a look-alike that must not fire: a `${LINT_HELPER_TOKEN}` reference, a pinned playwright
+`0644` in a checkout, so the M2 tests (`crates/vigildex-core/tests/findings.rs`,
+the CLI `findings` and `scan` tests) copy the home to a temporary directory
+and set their mode to `0600` before scanning. On a checkout, `vigildex
+findings --home fixtures/homes/mockup-demo` shows the same nine plus a
+SEC-006 for each stand-in whose mode the umask left world-readable. Everything else in the home is inventory
+without a finding, or a look-alike that must not fire: a `${LINT_HELPER_TOKEN}` reference, a `Bearer ${GITHUB_TOKEN}`
+MCP header and a `Bearer $HOOK_TOKEN` hook header (a reference inside a
+header never counts as a secret, whatever its length), a pinned playwright
 server, a disabled floating `fetch` server, a localhost provider that no
-`model_provider` selects, an HTTP hook to a loopback URL, skills with
-restricted tools, and the `acme-deploy` plugin with `bin/` and a monitor
-(inventory tags). `proj/demo-repo` holds the pre-flight sheet's sample files
+`model_provider` selects, an HTTP hook to a loopback URL, hook and server
+commands under `~/.claude` and `~/.codex` (an agent's own directory is not a
+hidden folder), skills with restricted tools, and the `acme-deploy` plugin
+with `bin/` and a monitor (inventory tags). `proj/demo-repo` holds the pre-flight sheet's sample files
 and is recorded by no agent, so only `preflight` (M6) reads it. Sessions and
 usage data for the Sessions and Usage screens arrive with M3.
 
@@ -95,51 +101,74 @@ variants of RISK-004, RISK-005 and BILL-009 (adapters in M5). SEC-006 is set
 up by the test harness (policy 7): one stand-in gets `0644` as the trigger
 and the other `0600` as the look-alike.
 
-- `.zshrc`: `ANTHROPIC_AUTH_TOKEN` (BILL-002), `CLAUDE_CODE_OAUTH_TOKEN`
-  (BILL-004, with SEC-004 as a tag), `CLAUDE_CODE_USE_BEDROCK` (BILL-005),
-  `OPENAI_API_KEY` (SEC-004), `COPILOT_GITHUB_TOKEN` (BILL-009); look-alikes:
-  a switch set to `0`, two commented-out keys, and two `$(…)` values whose
-  secret lives in `op` or the Keychain. `GITHUB_TOKEN=$(op read …)` still
-  overrides the Copilot login, so it is a BILL-009 trigger by name and only
-  a SEC-004 look-alike.
-- `.claude.json`: lint-helper with a plaintext token (SEC-001) on `@latest`
+- `.zshrc`: `ANTHROPIC_AUTH_TOKEN` (BILL-002, with SEC-004 as a tag),
+  `CLAUDE_CODE_OAUTH_TOKEN` (BILL-004, with SEC-004 as a tag),
+  `CLAUDE_CODE_USE_BEDROCK` (BILL-005), `OPENAI_API_KEY` (SEC-004),
+  `COPILOT_GITHUB_TOKEN` with a `ghu_` value (SEC-004 `GitHub token in plain
+  text`, with BILL-009 as a tag: policy 1), `GITHUB_TOKEN=$(op read …)`
+  (BILL-009 by name; its value is resolved at use time, so it is a SEC-004
+  look-alike); look-alikes: a switch set to `0`, two commented-out keys, and
+  a `$(security …)` value.
+- `.claude.json`: `disabledMcpjsonServers: ["legacy"]` for `acme-api`, so the
+  `legacy` server in that project's `.mcp.json` (a token on `@latest`) is
+  skipped by every rule (policy 4); lint-helper with a plaintext token (SEC-001) on `@latest`
+  (RISK-001, one finding shared with the Codex copy), `playwright@latest`
   (RISK-001), a `--privileged --network host` Docker server on a floating tag
   (RISK-009, with RISK-001 as a tag), a digest-pinned unprivileged Docker
-  server and a pinned npm server that must not fire,
-  `enableAllProjectMcpServers` on `dotfiles-sync` (RISK-006).
+  server and a pinned npm server that must not fire, a remote server with a
+  token in its URL query (SEC-002 `Query credential in a server URL`), a
+  remote server whose `headersHelper` embeds a token (SEC-002 `GitHub token
+  in a command`), `enableAllProjectMcpServers` on `dotfiles-sync` (RISK-006).
 - `.claude/settings.json`: `bypassPermissions` at user scope (RISK-004), an
-  `env` block with `OPENAI_API_KEY` (SEC-003) and a non-vendor base URL
-  (BILL-006), `apiKeyHelper` (BILL-003), `enableAllProjectMcpServers`
-  (RISK-006), a remote HTTP hook with a token in its query (RISK-003), `wget |
-  bash` and `eval "$(curl …)"` hooks (RISK-002), a loopback HTTP hook that
-  must not fire; `settings.local.json` with a `base64 -d | sh` hook.
+  `env` block with `OPENAI_API_KEY` (SEC-003), a non-vendor base URL
+  (BILL-006) and `ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"` (a reference:
+  neither SEC-003 nor BILL-001), `apiKeyHelper` (BILL-003),
+  `enableAllProjectMcpServers` (RISK-006), a remote HTTP hook (RISK-003) with
+  a token in its query (SEC-003 `Query credential in a hook URL`, a second
+  location), `wget | bash` and `eval "$(curl …)"` hooks (RISK-002), a
+  loopback HTTP hook that must not fire; `settings.local.json` with a
+  `base64 -d /tmp/.p | sh` hook (RISK-002: the executed programs are
+  `base64` and `sh`, so RISK-008 does not fire on the data file), a remote
+  hook with a literal bearer token in its header (SEC-003 `GitHub token in a
+  hook header` beside RISK-003) and a hook command carrying a token (SEC-003
+  `Token in a hook command`).
 - Skills `yolo` (unrestricted `Bash`, RISK-007) and `tidy` (restricted, must
   not fire); the `acme-deploy` plugin with a plaintext header (SEC-001), a
   second unrestricted-`Bash` skill (RISK-007), a plain command hook that must
   not fire, `bin/` and a monitor (inventory tags).
 - `.codex/config.toml`: `approval_policy = "never"` without
   `danger-full-access` (must not fire RISK-004), `cli_auth_credentials_store =
-  "keyring"` (must not fire RISK-005), a selected custom provider and
-  `openai_base_url` on a non-vendor host (BILL-006, BILL-007), a localhost
-  provider (must not fire), a token in `shell_environment_policy.set`
-  (SEC-003), lint-helper with a plaintext token, a plaintext `Authorization`
-  header (SEC-001), floating `fetch` (RISK-001) and a pinned server; a
-  `curl | sh` hook in `hooks.json`; a ChatGPT-mode `auth.json` (must not fire
-  BILL-007).
+  "keyring"` (must not fire RISK-005), a selected custom provider on a
+  non-vendor host (BILL-007 `Uses a custom provider`, BILL-006 on
+  `model_providers.proxy.base_url`) beside an `openai_base_url` that is inert
+  once the custom provider is selected (must not fire), a localhost provider
+  (must not fire), a token in `shell_environment_policy.set` (SEC-003),
+  lint-helper with a plaintext token, a plaintext `Authorization` header and
+  an `X-Api-Key` header in the same inline table (two SEC-001 findings on one
+  line: policy 1 groups a TOML file by key, a profile by line), floating
+  `fetch` (RISK-001 `MCP server unpinned`), a pinned server and a disabled
+  server with a token (must not fire anything, policy 4); a `curl | sh` hook
+  in `hooks.json`; a ChatGPT-mode `auth.json` (must not fire BILL-007). Every
+  finding from this file carries its line number.
 - `proj/acme-api`: the postgres password in `.mcp.json` (SEC-002) beside a
   `${DATABASE_URL}` reference and a password-free URL (look-alikes), a
   plaintext bearer header beside a `${GITHUB_TOKEN}` reference (SEC-001 and
   its look-alike), `apiKeyHelper`, `DATABASE_URL` and a non-vendor
   `ANTHROPIC_BASE_URL` in project settings (BILL-003, SEC-003, BILL-006),
-  `enableAllProjectMcpServers: false` and a project-scope `bypassPermissions`
-  (both must not fire), secrets in `.env` (SEC-005, BILL-006), Cursor rules
+  `enableAllProjectMcpServers: false`, a project-scope `bypassPermissions`
+  and a hook under the repository's own `.claude/hooks/` (none must fire),
+  secrets in `.env` (SEC-005, BILL-006), Cursor rules
   with `alwaysApply` true and false (RISK-012 and its look-alike, M5), and a
   project `.codex/config.toml` with `approval_policy = "never"` plus
   `danger-full-access` (RISK-004 at project scope) and an `openai_base_url`
   that Codex ignores in a project file (must not fire).
 - `proj/dotfiles-sync`: a hidden-folder server and a `/tmp` server (RISK-008),
   project-scope `bypassPermissions` (inert since Claude Code 2.1.257, must
-  not fire), the `curl | sh` hook.
+  not fire), the `curl | sh` hook, and an `apiKeyHelper` with an Anthropic
+  key embedded in the command (SEC-003 `Anthropic API key in a helper
+  command`, High, with BILL-003 as a tag).
+- The plugin's bare-map `.mcp.json` (`{"acme-deploy": {…}}`) keeps its key
+  path as written: `acme-deploy.headers.X-Api-Key`.
 
 The two credential stand-ins (`.claude/.credentials.json`, `.codex/auth.json`)
 carry the real key names with placeholder or empty values. Git does not keep
